@@ -2,10 +2,37 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Free Events</title>
+  <title>Бесплатные события</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+    }
+    .event {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+    }
+    .event h3 {
+      margin: 0 0 10px;
+    }
+    .event small {
+      color: #666;
+    }
+  </style>
 </head>
 <body>
+
   <h1>Бесплатные события</h1>
-  <p>Сайт в разработке 🚀</p>
+
+  <div id="events">
+    Загрузка событий...
+  </div>
+
+  <!-- Supabase SDK -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
 </body>
 </html>
