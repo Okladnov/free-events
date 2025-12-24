@@ -1,38 +1,75 @@
-<h2>Добавить событие</h2>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Бесплатные события</title>
 
-<form id="add-event-form">
-  <div>
-    <input
-      type="text"
-      id="title"
-      placeholder="Название события"
-      required
-    />
-  </div>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+    }
 
-  <div>
-    <input
-      type="text"
-      id="city"
-      placeholder="Город"
-    />
-  </div>
+    h1 {
+      margin-bottom: 20px;
+    }
 
-  <div>
-    <input
-      type="date"
-      id="event_date"
-    />
-  </div>
+    form {
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 30px;
+    }
 
-  <div>
-    <textarea
-      id="description"
-      placeholder="Описание"
-    ></textarea>
-  </div>
+    input, textarea, button {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
 
-  <button type="submit">Добавить</button>
-</form>
+    button {
+      cursor: pointer;
+    }
 
-<hr />
+    .event {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+    }
+
+    .event h3 {
+      margin: 0 0 10px;
+    }
+
+    .event small {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Бесплатные события</h1>
+
+  <h2>Добавить событие</h2>
+
+  <form id="add-event-form">
+    <input id="title" placeholder="Название события" required />
+    <input id="city" placeholder="Город" />
+    <input id="event_date" type="date" />
+    <textarea id="description" placeholder="Описание"></textarea>
+    <button type="submit">Добавить</button>
+  </form>
+
+  <h2>Список событий</h2>
+
+  <div id="events">Загрузка событий...</div>
+
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>
