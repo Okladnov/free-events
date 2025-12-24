@@ -1,45 +1,38 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <title>Бесплатные события</title>
+<h2>Добавить событие</h2>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 40px auto;
-    }
-
-    .event {
-      border: 1px solid #ddd;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 6px;
-    }
-
-    .event h3 {
-      margin: 0 0 10px;
-    }
-
-    .event small {
-      color: #666;
-    }
-  </style>
-</head>
-<body>
-
-  <h1>Бесплатные события</h1>
-
-  <div id="events">
-    Загрузка событий...
+<form id="add-event-form">
+  <div>
+    <input
+      type="text"
+      id="title"
+      placeholder="Название события"
+      required
+    />
   </div>
 
-  <!-- Supabase CDN (v2) -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <div>
+    <input
+      type="text"
+      id="city"
+      placeholder="Город"
+    />
+  </div>
 
-  <!-- ТВОЙ СКРИПТ -->
-  <script src="script.js"></script>
+  <div>
+    <input
+      type="date"
+      id="event_date"
+    />
+  </div>
 
-</body>
-</html>
+  <div>
+    <textarea
+      id="description"
+      placeholder="Описание"
+    ></textarea>
+  </div>
+
+  <button type="submit">Добавить</button>
+</form>
+
+<hr />
