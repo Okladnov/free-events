@@ -1,7 +1,7 @@
 const SUPABASE_URL = "https://mdnhfgwfstsacspfieqb.supabase.co";
 const SUPABASE_KEY = "sb_publishable_9Dtu9yqI4dzNNzDzLDuqyw_znguPR9k";
 
-const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function loadEvents() {
   const { data, error } = await supabase
