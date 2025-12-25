@@ -1,78 +1,68 @@
 const SUPABASE_URL = "https://mdnhfgwfstsacspfieqb.supabase.co";
 const SUPABASE_KEY = "sb_publishable_9Dtu9yqI4dzNNzDzLDuqyw_znguPR9k";
 
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ===== ЗАГРУЗКА СОБЫТИЙ =====
+const eventsContainer = document.getElementById("events");
+const message = document.getElementById("message");
+
 async function loadEvents() {
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from("events")
     .select("*")
     .order("created_at", { ascending: false });
 
-  const container = document.getElementById("events");
-  container.innerHTML = "";
+  eventsContainer.innerHTML = "";
 
   if (error) {
-    container.textContent = "Ошибка загрузки событий";
-    console.error(error);
+    eventsContainer.textContent = "Ошибка загрузки";
     return;
   }
 
-  if (!data || data.length === 0) {
-    container.textContent = "Событий пока нет";
+  if (data.length === 0) {
+    eventsContainer.textContent = "Событий пока нет";
     return;
   }
 
-  data.forEach((event) => {
+  data.forEach(e => {
     const div = document.createElement("div");
     div.className = "event";
-
     div.innerHTML = `
-      <h3>${event.title}</h3>
-      <p>${event.description || ""}</p>
-      <small>
-        ${event.city || "Город не указан"}
-        ${event.event_date ? " | " + event.event_date : ""}
-      </small>
+      <h3>${e.title}</h3>
+      <p>${e.description || ""}</p>
+      <small>${e.city || ""} · ${e.event_date || ""}</small>
     `;
-
-    container.appendChild(div);
+    eventsContainer.appendChild(div);
   });
 }
 
-// ===== ДОБАВЛЕНИЕ СОБЫТИЯ =====
-const form = document.getElementById("add-event-form");
+document.getElementById("addBtn").onclick = async () => {
+  message.textContent = "";
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const city = document.getElementById("city").value.trim();
+  const date = document.getElementById("date").value;
 
-  const title = document.getElementById("title").value;
-  const city = document.getElementById("city").value;
-  const event_date = document.getElementById("event_date").value;
-  const description = document.getElementById("description").value;
-
-  const { error } = await supabaseClient.from("events").insert([
-    {
-      title,
-      city,
-      event_date,
-      description,
-    },
-  ]);
-
-  if (error) {
-    alert("Ошибка при добавлении события");
-    console.error(error);
+  if (!title) {
+    message.textContent = "Введите название";
     return;
   }
 
-  form.reset();
-  loadEvents();
-});
+  const { error } = await supabase.from("events").insert([{
+    title,
+    description,
+    city,
+    event_date: date
+  }]);
 
-// ===== СТАРТ =====
+  if (error) {
+    message.textContent = "Ошибка при добавлении";
+    return;
+  }
+
+  message.textContent = "✅ Событие добавлено";
+  loadEvents();
+};
+
 loadEvents();
