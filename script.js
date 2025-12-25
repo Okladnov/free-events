@@ -9,13 +9,21 @@ const message = document.getElementById("message");
 async function loadEvents() {
   const { data, error } = await supabase
     .from("events")
-    .select("*")
+    .select(`
+      id,
+      title,
+      description,
+      city,
+      event_date,
+      votes ( value )
+    `)
     .order("created_at", { ascending: false });
 
   eventsContainer.innerHTML = "";
 
   if (error) {
     eventsContainer.textContent = "Ошибка загрузки";
+    console.error(error);
     return;
   }
 
@@ -25,18 +33,30 @@ async function loadEvents() {
   }
 
   data.forEach(e => {
+    const rating = e.votes
+      ? e.votes.reduce((s, v) => s + v.value, 0)
+      : 0;
+
     const div = document.createElement("div");
     div.className = "event";
+
     div.innerHTML = `
       <h3>${e.title}</h3>
       <p>${e.description || ""}</p>
       <small>${e.city || ""} · ${e.event_date || ""}</small>
+
+      <div class="vote">
+        <button onclick="vote(${e.id}, 1)">▲</button>
+        <span class="score">${rating}</span>
+        <button onclick="vote(${e.id}, -1)">▼</button>
+      </div>
     `;
+
     eventsContainer.appendChild(div);
   });
 }
 
-document.getElementById("addBtn").onclick = async () => {
+async function addEvent() {
   message.textContent = "";
 
   const title = document.getElementById("title").value.trim();
@@ -58,11 +78,26 @@ document.getElementById("addBtn").onclick = async () => {
 
   if (error) {
     message.textContent = "Ошибка при добавлении";
+    console.error(error);
     return;
   }
 
   message.textContent = "✅ Событие добавлено";
   loadEvents();
-};
+}
+
+async function vote(eventId, value) {
+  const { error } = await supabase
+    .from("votes")
+    .insert([{ event_id: eventId, value }]);
+
+  if (error) {
+    alert("Ошибка голосования");
+    console.error(error);
+    return;
+  }
+
+  loadEvents();
+}
 
 loadEvents();
