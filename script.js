@@ -1,12 +1,14 @@
-const SUPABASE_URL = "https://mdnhfgwfstsacspfieqb.supabase.co";
-const SUPABASE_KEY = "sb_publishable_9Dtu9yqI4dzNNzDzLDuqyw_znguPR9k";
+// Подключение Supabase (только один раз)
+window.SUPABASE_URL = "https://mdnhfgwfstsacspfieqb.supabase.co";
+window.SUPABASE_KEY = "sb_publishable_9Dtu9yqI4dzNNzDzLDuqyw_znguPR9k";
+window.supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+// Элементы DOM
 const eventsContainer = document.getElementById("events");
 const message = document.getElementById("message");
 
-async function loadEvents() {
+// Загрузка всех событий
+window.loadEvents = async function() {
   const { data, error } = await supabase
     .from("events")
     .select(`
@@ -15,27 +17,25 @@ async function loadEvents() {
       description,
       city,
       event_date,
-      votes ( value )
+      votes(value)
     `)
     .order("created_at", { ascending: false });
 
   eventsContainer.innerHTML = "";
 
   if (error) {
-    eventsContainer.textContent = "Ошибка загрузки";
+    eventsContainer.textContent = "Ошибка загрузки событий";
     console.error(error);
     return;
   }
 
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     eventsContainer.textContent = "Событий пока нет";
     return;
   }
 
   data.forEach(e => {
-    const rating = e.votes
-      ? e.votes.reduce((s, v) => s + v.value, 0)
-      : 0;
+    const rating = e.votes ? e.votes.reduce((sum, v) => sum + v.value, 0) : 0;
 
     const div = document.createElement("div");
     div.className = "event";
@@ -56,7 +56,8 @@ async function loadEvents() {
   });
 }
 
-async function addEvent() {
+// Добавление нового события
+window.addEvent = async function() {
   message.textContent = "";
 
   const title = document.getElementById("title").value.trim();
@@ -65,7 +66,7 @@ async function addEvent() {
   const date = document.getElementById("date").value;
 
   if (!title) {
-    message.textContent = "Введите название";
+    message.textContent = "Введите название события";
     return;
   }
 
@@ -77,22 +78,28 @@ async function addEvent() {
   }]);
 
   if (error) {
-    message.textContent = "Ошибка при добавлении";
+    message.textContent = "Ошибка при добавлении события";
     console.error(error);
     return;
   }
 
   message.textContent = "✅ Событие добавлено";
+  
+  // Очистка формы
+  document.getElementById("title").value = "";
+  document.getElementById("description").value = "";
+  document.getElementById("city").value = "";
+  document.getElementById("date").value = "";
+
   loadEvents();
 }
 
-async function vote(eventId, value) {
-  const { error } = await supabase
-    .from("votes")
-    .insert([{ event_id: eventId, value }]);
+// Голосование
+window.vote = async function(eventId, value) {
+  const { error } = await supabase.from("votes").insert([{ event_id: eventId, value }]);
 
   if (error) {
-    alert("Ошибка голосования");
+    alert("Ошибка при голосовании");
     console.error(error);
     return;
   }
@@ -100,4 +107,5 @@ async function vote(eventId, value) {
   loadEvents();
 }
 
+// Загрузка событий при старте
 loadEvents();
