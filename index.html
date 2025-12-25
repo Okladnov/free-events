@@ -4,49 +4,50 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Бесплатные события</title>
+
+  <meta name="description" content="Бесплатные события в вашем городе">
+  <meta property="og:title" content="Бесплатные события">
+  <meta property="og:description" content="Концерты, лекции, выставки — бесплатно">
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
 <header class="header">
-  <div class="container header-inner">
+  <div class="container">
     <h1>🎉 Бесплатные события</h1>
-    <span class="subtitle">Городские события без затрат</span>
+    <p>Городские мероприятия без затрат</p>
   </div>
 </header>
 
 <main class="container">
 
   <!-- Форма -->
-  <section class="card form-card">
+  <section class="card">
     <h2>Добавить событие</h2>
 
-    <input id="title" placeholder="Название события" />
+    <input id="title" placeholder="Название события">
     <textarea id="description" placeholder="Описание"></textarea>
 
-    <div class="form-row">
-      <input id="city" placeholder="Город" />
-      <input id="date" type="date" />
+    <div class="row">
+      <input id="city" placeholder="Город">
+      <input id="date" type="date">
     </div>
 
-    <button id="addBtn">Добавить</button>
+    <button onclick="addEvent()">Добавить</button>
     <p id="message"></p>
   </section>
 
   <!-- Список -->
   <section>
-    <h2 class="section-title">Список событий</h2>
-    <div id="events" class="events-grid">
-      Загрузка событий...
-    </div>
+    <h2>События</h2>
+    <div id="events" class="grid">Загрузка событий...</div>
   </section>
 
 </main>
 
 <footer class="footer">
-  <div class="container">
-    © 2025 · Бесплатные события
-  </div>
+  © 2025 · Бесплатные события
 </footer>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
