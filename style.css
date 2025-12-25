@@ -4,61 +4,41 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: system-ui, Arial, sans-serif;
   background: #f5f6f7;
   color: #222;
 }
 
-/* Layout */
 .container {
   max-width: 1100px;
   margin: 0 auto;
   padding: 16px;
 }
 
-/* Header */
 .header {
   background: #ff6a00;
   color: #fff;
 }
 
-.header-inner {
-  display: flex;
-  flex-direction: column;
-}
-
-.subtitle {
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-/* Cards */
 .card {
   background: #fff;
-  border-radius: 10px;
   padding: 16px;
+  border-radius: 10px;
   margin-bottom: 24px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-/* Form */
-.form-card input,
-.form-card textarea {
+input, textarea {
   width: 100%;
   padding: 10px;
   margin-bottom: 12px;
   border-radius: 6px;
   border: 1px solid #ddd;
-  font-size: 14px;
 }
 
-.form-row {
+.row {
   display: flex;
   gap: 10px;
-}
-
-.form-row input {
-  flex: 1;
 }
 
 button {
@@ -68,24 +48,14 @@ button {
   padding: 12px;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: bold;
 }
 
 button:hover {
   background: #e65c00;
 }
 
-#message {
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-/* Events */
-.section-title {
-  margin-bottom: 12px;
-}
-
-.events-grid {
+.grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
@@ -93,30 +63,44 @@ button:hover {
 
 .event {
   background: #fff;
-  border-radius: 10px;
   padding: 14px;
+  border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-.event h3 {
-  margin: 0 0 8px;
+.vote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
 }
 
-.event small {
-  color: #666;
+.vote button {
+  background: #eee;
+  color: #000;
+  padding: 6px 10px;
+  border-radius: 6px;
 }
 
-/* Footer */
+.vote button:hover {
+  background: #ff6a00;
+  color: #fff;
+}
+
+.score {
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+}
+
 .footer {
   text-align: center;
   padding: 20px;
-  font-size: 13px;
   color: #777;
 }
 
-/* Mobile */
 @media (max-width: 600px) {
-  .form-row {
+  .row {
     flex-direction: column;
   }
 }
