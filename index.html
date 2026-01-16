@@ -4,51 +4,45 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Бесплатные события</title>
-
-  <meta name="description" content="Бесплатные события в вашем городе">
-  <meta property="og:title" content="Бесплатные события">
-  <meta property="og:description" content="Концерты, лекции, выставки — бесплатно">
-
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
 <header class="header">
-  <div class="container">
-    <h1>🎉 Бесплатные события</h1>
-    <p>Городские мероприятия без затрат</p>
+  <div class="container header-container">
+    <div class="header-title">
+      <h1>🎉 Бесплатные события</h1>
+      <p>Городские мероприятия без затрат</p>
+    </div>
+    <!-- БЛОК АВТОРИЗАЦИИ -->
+    <div class="auth-block">
+      <div id="user-info"></div>
+      <button id="loginBtn" onclick="loginWithGoogle()">Войти через Google</button>
+      <button id="logoutBtn" onclick="logout()" style="display: none;">Выйти</button>
+    </div>
   </div>
 </header>
 
 <main class="container">
-
-  <!-- Форма -->
   <section class="card">
     <h2>Добавить событие</h2>
-
-    <input id="title" placeholder="Название события">
-    <textarea id="description" placeholder="Описание"></textarea>
-
-    <div class="row">
-      <input id="city" placeholder="Город">
-      <input id="date" type="date">
-    </div>
-
-    <button onclick="addEvent()">Добавить</button>
-    <p id="message"></p>
+    <form id="add-event-form">
+      <input id="title" placeholder="Название события" required>
+      <textarea id="description" placeholder="Описание"></textarea>
+      <div class="form-row">
+        <input id="city" placeholder="Город">
+        <input id="date" type="date">
+      </div>
+      <button type="submit">Добавить</button>
+      <p id="message"></p>
+    </form>
   </section>
 
-  <!-- Список -->
   <section>
-    <h2>События</h2>
-    <div id="events" class="grid">Загрузка событий...</div>
+    <h2>Список событий</h2>
+    <div id="events">Загрузка событий...</div>
   </section>
-
 </main>
-
-<footer class="footer">
-  © 2025 · Бесплатные события
-</footer>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
