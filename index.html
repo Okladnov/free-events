@@ -26,6 +26,7 @@
 <main class="container">
   <section class="card">
     <h2>Добавить событие</h2>
+    <!-- ВАЖНО: У формы теперь есть ID, а у кнопки нет onclick -->
     <form id="add-event-form">
       <input id="title" placeholder="Название события" required>
       <textarea id="description" placeholder="Описание"></textarea>
@@ -40,10 +41,13 @@
 
   <section>
     <h2>Список событий</h2>
-    <div id="events">Загрузка событий...</div>
+    <div id="events" class="events-grid">Загрузка событий...</div>
   </section>
 </main>
 
+<footer class="footer">© 2026 · Бесплатные события</footer>
+
+<!-- ВАЖНО: скрипты подключаются в самом конце -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
 </body>
