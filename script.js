@@ -1,14 +1,20 @@
-// Подключение Supabase (только один раз)
-window.SUPABASE_URL = "https://mdnhfgwfstsacspfieqb.supabase.co";
-window.SUPABASE_KEY = "sb_publishable_9Dtu9yqI4dzNNzDzLDuqyw_znguPR9k";
-window.supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
+// 🔹 Подключение Supabase (ОДИН раз)
+const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
+const SUPABASE_KEY = "sb_publishable_XoQ2Gi3bMJI9Bx226mg7GQ_z0S4XPAA";
 
-// Элементы DOM
+const supabase = window.supabaseJs.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+// 🔹 Элементы DOM
 const eventsContainer = document.getElementById("events");
 const message = document.getElementById("message");
 
-// Загрузка всех событий
-window.loadEvents = async function() {
+// 🔹 Загрузка событий
+window.loadEvents = async function () {
+  eventsContainer.textContent = "Загрузка событий...";
+
   const { data, error } = await supabase
     .from("events")
     .select(`
@@ -21,11 +27,9 @@ window.loadEvents = async function() {
     `)
     .order("created_at", { ascending: false });
 
-  eventsContainer.innerHTML = "";
-
   if (error) {
-    eventsContainer.textContent = "Ошибка загрузки событий";
     console.error(error);
+    eventsContainer.textContent = "Ошибка загрузки событий";
     return;
   }
 
@@ -34,30 +38,34 @@ window.loadEvents = async function() {
     return;
   }
 
-  data.forEach(e => {
-    const rating = e.votes ? e.votes.reduce((sum, v) => sum + v.value, 0) : 0;
+  eventsContainer.innerHTML = "";
+
+  data.forEach(event => {
+    const rating = event.votes
+      ? event.votes.reduce((sum, v) => sum + v.value, 0)
+      : 0;
 
     const div = document.createElement("div");
     div.className = "event";
 
     div.innerHTML = `
-      <h3>${e.title}</h3>
-      <p>${e.description || ""}</p>
-      <small>${e.city || ""} · ${e.event_date || ""}</small>
+      <h3>${event.title}</h3>
+      <p>${event.description || ""}</p>
+      <small>${event.city || ""} · ${event.event_date || ""}</small>
 
       <div class="vote">
-        <button onclick="vote(${e.id}, 1)">▲</button>
+        <button onclick="vote(${event.id}, 1)">▲</button>
         <span class="score">${rating}</span>
-        <button onclick="vote(${e.id}, -1)">▼</button>
+        <button onclick="vote(${event.id}, -1)">▼</button>
       </div>
     `;
 
     eventsContainer.appendChild(div);
   });
-}
+};
 
-// Добавление нового события
-window.addEvent = async function() {
+// 🔹 Добавление события
+window.addEvent = async function () {
   message.textContent = "";
 
   const title = document.getElementById("title").value.trim();
@@ -70,42 +78,46 @@ window.addEvent = async function() {
     return;
   }
 
-  const { error } = await supabase.from("events").insert([{
-    title,
-    description,
-    city,
-    event_date: date
-  }]);
+  const { error } = await supabase.from("events").insert([
+    {
+      title,
+      description,
+      city,
+      event_date: date
+    }
+  ]);
 
   if (error) {
-    message.textContent = "Ошибка при добавлении события";
     console.error(error);
+    message.textContent = "Ошибка при добавлении события";
     return;
   }
 
   message.textContent = "✅ Событие добавлено";
-  
-  // Очистка формы
+
+  // очистка формы
   document.getElementById("title").value = "";
   document.getElementById("description").value = "";
   document.getElementById("city").value = "";
   document.getElementById("date").value = "";
 
   loadEvents();
-}
+};
 
-// Голосование
-window.vote = async function(eventId, value) {
-  const { error } = await supabase.from("votes").insert([{ event_id: eventId, value }]);
+// 🔹 Голосование
+window.vote = async function (eventId, value) {
+  const { error } = await supabase.from("votes").insert([
+    { event_id: eventId, value }
+  ]);
 
   if (error) {
-    alert("Ошибка при голосовании");
     console.error(error);
+    alert("Ошибка при голосовании");
     return;
   }
 
   loadEvents();
-}
+};
 
-// Загрузка событий при старте
+// 🔹 Старт
 loadEvents();
