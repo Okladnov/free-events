@@ -1,21 +1,27 @@
-// 🔹 Подключение Supabase (ОДИН раз)
+// =================================================================
+// ПОДКЛЮЧЕНИЕ К SUPABASE (ПРАВИЛЬНЫЕ КЛЮЧИ)
+// =================================================================
 const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_XoQ2Gi3bMJI9Bx226mg7GQ_z0S4XPAA";
 
-const supabase = window.supabaseJs.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+// Важно: создаем клиент из глобального объекта supabase, который дает CDN-скрипт
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// 🔹 Элементы DOM
+
+// =================================================================
+// ЭЛЕМЕНТЫ СТРАНИЦЫ
+// =================================================================
 const eventsContainer = document.getElementById("events");
 const message = document.getElementById("message");
 
-// 🔹 Загрузка событий
+
+// =================================================================
+// ЗАГРУЗКА СОБЫТИЙ
+// =================================================================
 window.loadEvents = async function () {
   eventsContainer.textContent = "Загрузка событий...";
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("events")
     .select(`
       id,
@@ -23,21 +29,24 @@ window.loadEvents = async function () {
       description,
       city,
       event_date,
-      votes(value)
+      votes ( value )
     `)
     .order("created_at", { ascending: false });
 
+  // Если ошибка
   if (error) {
-    console.error(error);
-    eventsContainer.textContent = "Ошибка загрузки событий";
+    console.error("Ошибка загрузки:", error);
+    eventsContainer.textContent = "Ошибка загрузки. Проверьте RLS-политики в Supabase.";
     return;
   }
 
+  // Если данных нет
   if (!data || data.length === 0) {
-    eventsContainer.textContent = "Событий пока нет";
+    eventsContainer.textContent = "Событий пока нет. Добавьте первое!";
     return;
   }
 
+  // Очищаем контейнер и рендерим события
   eventsContainer.innerHTML = "";
 
   data.forEach(event => {
@@ -46,25 +55,29 @@ window.loadEvents = async function () {
       : 0;
 
     const div = document.createElement("div");
-    div.className = "event";
+    div.className = "event-card"; // Используем новый класс для стилей
 
     div.innerHTML = `
       <h3>${event.title}</h3>
-      <p>${event.description || ""}</p>
-      <small>${event.city || ""} · ${event.event_date || ""}</small>
-
+      <p>${event.description || "Нет описания."}</p>
+      <div class="meta">
+        <span>${event.city || "Весь мир"}</span>
+        <span>${event.event_date || ""}</span>
+      </div>
       <div class="vote">
         <button onclick="vote(${event.id}, 1)">▲</button>
         <span class="score">${rating}</span>
         <button onclick="vote(${event.id}, -1)">▼</button>
       </div>
     `;
-
     eventsContainer.appendChild(div);
   });
 };
 
-// 🔹 Добавление события
+
+// =================================================================
+// ДОБАВЛЕНИЕ СОБЫТИЯ
+// =================================================================
 window.addEvent = async function () {
   message.textContent = "";
 
@@ -74,50 +87,50 @@ window.addEvent = async function () {
   const date = document.getElementById("date").value;
 
   if (!title) {
-    message.textContent = "Введите название события";
+    message.textContent = "Введите название события.";
     return;
   }
 
-  const { error } = await supabase.from("events").insert([
-    {
-      title,
-      description,
-      city,
-      event_date: date
-    }
+  const { error } = await supabaseClient.from("events").insert([
+    { title, description, city, event_date: date }
   ]);
 
   if (error) {
-    console.error(error);
-    message.textContent = "Ошибка при добавлении события";
+    console.error("Ошибка добавления:", error);
+    message.textContent = "Ошибка. Проверьте RLS-политику для INSERT.";
     return;
   }
 
-  message.textContent = "✅ Событие добавлено";
+  message.textContent = "✅ Событие успешно добавлено!";
 
-  // очистка формы
-  document.getElementById("title").value = "";
-  document.getElementById("description").value = "";
-  document.getElementById("city").value = "";
-  document.getElementById("date").value = "";
+  // Очистка формы
+  document.getElementById("add-event-form").reset();
 
+  // Обновляем список
   loadEvents();
 };
 
-// 🔹 Голосование
+
+// =================================================================
+// ГОЛОСОВАНИЕ
+// =================================================================
 window.vote = async function (eventId, value) {
-  const { error } = await supabase.from("votes").insert([
+  const { error } = await supabaseClient.from("votes").insert([
     { event_id: eventId, value }
   ]);
 
   if (error) {
-    console.error(error);
-    alert("Ошибка при голосовании");
+    console.error("Ошибка голосования:", error);
+    alert("Ошибка. Возможно, вы уже голосовали или проверьте RLS для 'votes'.");
     return;
   }
 
+  // Обновляем список, чтобы показать новый рейтинг
   loadEvents();
 };
 
-// 🔹 Старт
+
+// =================================================================
+// ПЕРВЫЙ ЗАПУСК
+// =================================================================
 loadEvents();
