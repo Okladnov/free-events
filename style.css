@@ -105,3 +105,24 @@ body {
   background-color: #e0e0e0;
   color: #aaa;
 }
+/* Стили для хедера и авторизации */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.auth-block {
+  text-align: right;
+}
+#user-info {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.auth-block button {
+  background-color: white;
+  color: var(--primary-color);
+  padding: 8px 12px;
+  border: 1px solid white;
+  border-radius: 6px;
+  font-weight: bold;
+}
