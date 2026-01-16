@@ -14,7 +14,7 @@ const userInfo = document.getElementById('user-info');
 const eventsContainer = document.getElementById("events");
 const message = document.getElementById("message");
 const addEventForm = document.getElementById("add-event-form");
-let currentUser = null; // Переменная для хранения данных о текущем пользователе
+let currentUser = null;
 
 // =================================================================
 // АВТОРИЗАЦИЯ
@@ -29,17 +29,17 @@ window.logout = async function() {
 
 supabaseClient.auth.onAuthStateChange((event, session) => {
   if (session) {
-    currentUser = session.user; // Сохраняем пользователя
+    currentUser = session.user;
     loginBtn.style.display = 'none';
     logoutBtn.style.display = 'block';
     userInfo.textContent = `Вы вошли как: ${currentUser.email}`;
   } else {
-    currentUser = null; // Очищаем пользователя
+    currentUser = null;
     loginBtn.style.display = 'block';
     logoutBtn.style.display = 'none';
     userInfo.textContent = '';
   }
-  loadEvents(); // Перезагружаем события, чтобы обновить кнопки голосования
+  loadEvents();
 });
 
 // =================================================================
@@ -66,7 +66,7 @@ addEventForm.addEventListener('submit', async (event) => {
       description: document.getElementById("description").value.trim(), 
       city: document.getElementById("city").value.trim(), 
       event_date: document.getElementById("date").value,
-      created_by: currentUser.id // Добавляем ID автора события
+      created_by: currentUser.id
     }
   ]);
 
@@ -82,7 +82,7 @@ addEventForm.addEventListener('submit', async (event) => {
 });
 
 // =================================================================
-// ГОЛОСОВАНИЕ (С ПРИВЯЗКОЙ К USER_ID)
+// ГОЛОСОВАНИЕ
 // =================================================================
 window.vote = async function (eventId, value) {
   if (!currentUser) {
@@ -90,31 +90,40 @@ window.vote = async function (eventId, value) {
     return;
   }
 
-  // Вставляем голос вместе с ID пользователя
   const { error } = await supabaseClient.from("votes").insert([
     { event_id: eventId, value: value, user_id: currentUser.id }
   ]);
 
-  if (error) {
-    // Ошибка 'duplicate key' означает, что пользователь уже голосовал
-    if (error.code === '23505') {
-      alert("Вы уже голосовали за это событие.");
-    } else {
-      console.error("Ошибка голосования:", error);
-    }
-    return;
+  if (error && error.code === '23505') {
+    alert("Вы уже голосовали за это событие.");
+  } else if (error) {
+    console.error("Ошибка голосования:", error);
+  } else {
+    loadEvents();
   }
-
-  loadEvents();
 };
 
 // =================================================================
-// ЗАГРУЗКА СОБЫТИЙ
+// НОВАЯ ФУНКЦИЯ ДЛЯ КРАСИВОЙ ДАТЫ
+// =================================================================
+function formatDisplayDate(dateString) {
+  if (!dateString) return ""; // Если даты нет, возвращаем пустую строку
+  
+  // Используем встроенный в JavaScript инструмент для форматирования дат
+  const date = new Date(dateString);
+  return date.toLocaleDateString('ru-RU', {
+    day: 'numeric',
+    month: 'long'
+  });
+}
+
+// =================================================================
+// ЗАГРУЗКА СОБЫТИЙ (с новой функцией для даты)
 // =================================================================
 async function loadEvents() {
   const { data, error } = await supabaseClient
     .from("events")
-    .select(`id, title, description, city, event_date, votes(user_id, value)`) // Загружаем user_id голосов
+    .select(`id, title, description, city, event_date, votes(user_id, value)`)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -131,19 +140,21 @@ async function loadEvents() {
   eventsContainer.innerHTML = "";
   data.forEach(event => {
     const rating = event.votes.reduce((sum, v) => sum + v.value, 0);
-    
-    // Проверяем, голосовал ли ТЕКУЩИЙ пользователь
     const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
+    
+    // Вызываем нашу новую функцию
+    const displayDate = formatDisplayDate(event.event_date);
 
     const div = document.createElement("div");
     div.className = "event-card";
 
+    // Используем отформатированную дату в HTML
     div.innerHTML = `
       <h3>${event.title}</h3>
       <p>${event.description || "Нет описания."}</p>
       <div class="meta">
         <span>${event.city || "Весь мир"}</span>
-        <span>${event.event_date || ""}</span>
+        <span>${displayDate}</span> 
       </div>
       <div class="vote">
         <button onclick="vote(${event.id}, 1)" ${hasVoted ? 'disabled' : ''}>▲</button>
@@ -154,3 +165,8 @@ async function loadEvents() {
     eventsContainer.appendChild(div);
   });
 };
+
+// =================================================================
+// ПЕРВЫЙ ЗАПУСК
+// =================================================================
+loadEvents();
