@@ -95,7 +95,8 @@ window.vote = async function (eventId, value) {
   ]);
 
   if (error && error.code === '23505') {
-    alert("Вы уже голосовали за это событие.");
+    // Эта ошибка уже обрабатывается визуально (кнопка неактивна),
+    // поэтому можем ничего не показывать пользователю.
   } else if (error) {
     console.error("Ошибка голосования:", error);
   } else {
@@ -104,21 +105,16 @@ window.vote = async function (eventId, value) {
 };
 
 // =================================================================
-// НОВАЯ ФУНКЦИЯ ДЛЯ КРАСИВОЙ ДАТЫ
+// ФУНКЦИЯ ДЛЯ КРАСИВОЙ ДАТЫ
 // =================================================================
 function formatDisplayDate(dateString) {
-  if (!dateString) return ""; // Если даты нет, возвращаем пустую строку
-  
-  // Используем встроенный в JavaScript инструмент для форматирования дат
+  if (!dateString) return "";
   const date = new Date(dateString);
-  return date.toLocaleDateString('ru-RU', {
-    day: 'numeric',
-    month: 'long'
-  });
+  return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
 }
 
 // =================================================================
-// ЗАГРУЗКА СОБЫТИЙ (с новой функцией для даты)
+// ЗАГРУЗКА СОБЫТИЙ (с иконками)
 // =================================================================
 async function loadEvents() {
   const { data, error } = await supabaseClient
@@ -141,20 +137,18 @@ async function loadEvents() {
   data.forEach(event => {
     const rating = event.votes.reduce((sum, v) => sum + v.value, 0);
     const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
-    
-    // Вызываем нашу новую функцию
     const displayDate = formatDisplayDate(event.event_date);
 
     const div = document.createElement("div");
     div.className = "event-card";
 
-    // Используем отформатированную дату в HTML
+    // ИСПОЛЬЗУЕМ ИКОНКИ ЗДЕСЬ
     div.innerHTML = `
       <h3>${event.title}</h3>
       <p>${event.description || "Нет описания."}</p>
       <div class="meta">
-        <span>${event.city || "Весь мир"}</span>
-        <span>${displayDate}</span> 
+        <span class="meta-item">📍 ${event.city || "Весь мир"}</span>
+        ${displayDate ? `<span class="meta-item">🗓️ ${displayDate}</span>` : ''}
       </div>
       <div class="vote">
         <button onclick="vote(${event.id}, 1)" ${hasVoted ? 'disabled' : ''}>▲</button>
