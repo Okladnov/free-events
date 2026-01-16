@@ -14,6 +14,7 @@ const userInfo = document.getElementById('user-info');
 const eventsContainer = document.getElementById("events");
 const message = document.getElementById("message");
 const addEventForm = document.getElementById("add-event-form");
+let currentUser = null; // Переменная для хранения данных о текущем пользователе
 
 // =================================================================
 // АВТОРИЗАЦИЯ
@@ -28,21 +29,29 @@ window.logout = async function() {
 
 supabaseClient.auth.onAuthStateChange((event, session) => {
   if (session) {
+    currentUser = session.user; // Сохраняем пользователя
     loginBtn.style.display = 'none';
     logoutBtn.style.display = 'block';
-    userInfo.textContent = `Вы вошли как: ${session.user.email}`;
+    userInfo.textContent = `Вы вошли как: ${currentUser.email}`;
   } else {
+    currentUser = null; // Очищаем пользователя
     loginBtn.style.display = 'block';
     logoutBtn.style.display = 'none';
     userInfo.textContent = '';
   }
+  loadEvents(); // Перезагружаем события, чтобы обновить кнопки голосования
 });
 
 // =================================================================
 // ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ
 // =================================================================
 addEventForm.addEventListener('submit', async (event) => {
-  event.preventDefault(); // Предотвращаем стандартную отправку формы
+  event.preventDefault();
+  
+  if (!currentUser) {
+    alert("Пожалуйста, войдите в аккаунт, чтобы добавить событие.");
+    return;
+  }
   
   message.textContent = "";
   const title = document.getElementById("title").value.trim();
@@ -56,13 +65,14 @@ addEventForm.addEventListener('submit', async (event) => {
       title: title, 
       description: document.getElementById("description").value.trim(), 
       city: document.getElementById("city").value.trim(), 
-      event_date: document.getElementById("date").value 
+      event_date: document.getElementById("date").value,
+      created_by: currentUser.id // Добавляем ID автора события
     }
   ]);
 
   if (error) {
     console.error("Ошибка добавления:", error);
-    message.textContent = "Ошибка. Проверьте RLS-политику для INSERT.";
+    message.textContent = "Произошла ошибка при добавлении.";
     return;
   }
 
@@ -72,34 +82,39 @@ addEventForm.addEventListener('submit', async (event) => {
 });
 
 // =================================================================
-// ГОЛОСОВАНИЕ (С ЗАЩИТОЙ ОТ НАКРУТКИ)
+// ГОЛОСОВАНИЕ (С ПРИВЯЗКОЙ К USER_ID)
 // =================================================================
 window.vote = async function (eventId, value) {
-  const votedEvents = JSON.parse(localStorage.getItem('voted_events')) || [];
-  if (votedEvents.includes(eventId)) {
-    return; 
-  }
-
-  const { error } = await supabaseClient.from("votes").insert([{ event_id: eventId, value }]);
-  if (error) {
-    console.error("Ошибка голосования:", error);
+  if (!currentUser) {
+    alert("Пожалуйста, войдите в аккаунт, чтобы проголосовать.");
     return;
   }
 
-  votedEvents.push(eventId);
-  localStorage.setItem('voted_events', JSON.stringify(votedEvents));
+  // Вставляем голос вместе с ID пользователя
+  const { error } = await supabaseClient.from("votes").insert([
+    { event_id: eventId, value: value, user_id: currentUser.id }
+  ]);
+
+  if (error) {
+    // Ошибка 'duplicate key' означает, что пользователь уже голосовал
+    if (error.code === '23505') {
+      alert("Вы уже голосовали за это событие.");
+    } else {
+      console.error("Ошибка голосования:", error);
+    }
+    return;
+  }
+
   loadEvents();
 };
-
 
 // =================================================================
 // ЗАГРУЗКА СОБЫТИЙ
 // =================================================================
 async function loadEvents() {
-  const votedEvents = JSON.parse(localStorage.getItem('voted_events')) || [];
   const { data, error } = await supabaseClient
     .from("events")
-    .select(`id, title, description, city, event_date, votes(value)`)
+    .select(`id, title, description, city, event_date, votes(user_id, value)`) // Загружаем user_id голосов
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -108,15 +123,18 @@ async function loadEvents() {
     return;
   }
 
-  if (!data || data.length === 0) {
+  if (!data || !data.length) {
     eventsContainer.innerHTML = "Событий пока нет.";
     return;
   }
 
   eventsContainer.innerHTML = "";
   data.forEach(event => {
-    const rating = event.votes ? event.votes.reduce((sum, v) => sum + v.value, 0) : 0;
-    const hasVoted = votedEvents.includes(event.id);
+    const rating = event.votes.reduce((sum, v) => sum + v.value, 0);
+    
+    // Проверяем, голосовал ли ТЕКУЩИЙ пользователь
+    const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
+
     const div = document.createElement("div");
     div.className = "event-card";
 
@@ -136,8 +154,3 @@ async function loadEvents() {
     eventsContainer.appendChild(div);
   });
 };
-
-// =================================================================
-// ПЕРВЫЙ ЗАПУСК
-// =================================================================
-loadEvents();
