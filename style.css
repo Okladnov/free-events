@@ -19,15 +19,31 @@ body {
   padding: 20px;
 }
 
-/* --- Хедер --- */
+/* --- Хедер и авторизация --- */
 .header {
   background-color: var(--primary-color);
   color: white;
-  padding: 20px;
-  text-align: center;
+  padding: 15px 20px;
   margin-bottom: 30px;
 }
-.header h1 { margin: 0; }
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header-title h1 { margin: 0; font-size: 24px; }
+.header-title p { margin: 5px 0 0; opacity: 0.9; }
+.auth-block { text-align: right; }
+#user-info { font-size: 14px; margin-bottom: 8px; }
+.auth-block button {
+  background-color: white;
+  color: var(--primary-color);
+  padding: 8px 12px;
+  border: 1px solid white;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
 /* --- Карточки --- */
 .card {
@@ -47,6 +63,8 @@ body {
   border-radius: 6px;
   font-size: 16px;
 }
+.form-row { display: flex; gap: 10px; }
+.form-row input { flex: 1; }
 #add-event-form button {
   width: 100%;
   padding: 12px;
@@ -63,10 +81,7 @@ body {
 #message { margin-top: 10px; font-weight: bold; }
 
 /* --- Список событий --- */
-#events {
-  display: grid;
-  gap: 20px;
-}
+.events-grid { display: grid; gap: 20px; }
 .event-card {
   background-color: var(--card-background);
   border-radius: 8px;
@@ -84,7 +99,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: auto; /* Прижимает к низу карточки */
+  margin-top: auto;
 }
 .vote button {
   background-color: #f0f0f0;
@@ -98,31 +113,16 @@ body {
   transition: background-color 0.2s, color 0.2s;
 }
 .vote button:hover { background-color: var(--primary-color); color: white; }
-.score { font-size: 18px; font-weight: bold; }
-/* Стиль для неактивных кнопок голосования */
 .vote button:disabled {
   cursor: not-allowed;
   background-color: #e0e0e0;
   color: #aaa;
 }
-/* Стили для хедера и авторизации */
-.header-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.auth-block {
-  text-align: right;
-}
-#user-info {
+.score { font-size: 18px; font-weight: bold; }
+
+.footer {
+  text-align: center;
+  padding: 30px 20px;
   font-size: 14px;
-  margin-bottom: 8px;
-}
-.auth-block button {
-  background-color: white;
-  color: var(--primary-color);
-  padding: 8px 12px;
-  border: 1px solid white;
-  border-radius: 6px;
-  font-weight: bold;
+  color: #888;
 }
