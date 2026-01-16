@@ -99,3 +99,9 @@ body {
 }
 .vote button:hover { background-color: var(--primary-color); color: white; }
 .score { font-size: 18px; font-weight: bold; }
+/* Стиль для неактивных кнопок голосования */
+.vote button:disabled {
+  cursor: not-allowed;
+  background-color: #e0e0e0;
+  color: #aaa;
+}
