@@ -1,10 +1,9 @@
 // =================================================================
-// ПОДКЛЮЧЕНИЕ К SUPABASE (ПРАВИЛЬНЫЕ КЛЮЧИ)
+// ПОДКЛЮЧЕНИЕ К SUPABASE
 // =================================================================
 const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_XoQ2Gi3bMJI9Bx226mg7GQ_z0S4XPAA";
 
-// Важно: создаем клиент из глобального объекта supabase, который дает CDN-скрипт
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
@@ -19,43 +18,33 @@ const message = document.getElementById("message");
 // ЗАГРУЗКА СОБЫТИЙ
 // =================================================================
 window.loadEvents = async function () {
-  eventsContainer.textContent = "Загрузка событий...";
+  // Получаем ID событий, за которые пользователь уже голосовал
+  const votedEvents = JSON.parse(localStorage.getItem('voted_events')) || [];
 
   const { data, error } = await supabaseClient
     .from("events")
-    .select(`
-      id,
-      title,
-      description,
-      city,
-      event_date,
-      votes ( value )
-    `)
+    .select(`id, title, description, city, event_date, votes(value)`)
     .order("created_at", { ascending: false });
 
-  // Если ошибка
   if (error) {
     console.error("Ошибка загрузки:", error);
-    eventsContainer.textContent = "Ошибка загрузки. Проверьте RLS-политики в Supabase.";
+    eventsContainer.textContent = "Ошибка загрузки.";
     return;
   }
 
-  // Если данных нет
   if (!data || data.length === 0) {
-    eventsContainer.textContent = "Событий пока нет. Добавьте первое!";
+    eventsContainer.textContent = "Событий пока нет.";
     return;
   }
 
-  // Очищаем контейнер и рендерим события
   eventsContainer.innerHTML = "";
-
   data.forEach(event => {
-    const rating = event.votes
-      ? event.votes.reduce((sum, v) => sum + v.value, 0)
-      : 0;
+    const rating = event.votes ? event.votes.reduce((sum, v) => sum + v.value, 0) : 0;
+    // Проверяем, голосовал ли пользователь за это событие
+    const hasVoted = votedEvents.includes(event.id);
 
     const div = document.createElement("div");
-    div.className = "event-card"; // Используем новый класс для стилей
+    div.className = "event-card";
 
     div.innerHTML = `
       <h3>${event.title}</h3>
@@ -65,9 +54,9 @@ window.loadEvents = async function () {
         <span>${event.event_date || ""}</span>
       </div>
       <div class="vote">
-        <button onclick="vote(${event.id}, 1)">▲</button>
+        <button onclick="vote(${event.id}, 1)" ${hasVoted ? 'disabled' : ''}>▲</button>
         <span class="score">${rating}</span>
-        <button onclick="vote(${event.id}, -1)">▼</button>
+        <button onclick="vote(${event.id}, -1)" ${hasVoted ? 'disabled' : ''}>▼</button>
       </div>
     `;
     eventsContainer.appendChild(div);
@@ -80,19 +69,19 @@ window.loadEvents = async function () {
 // =================================================================
 window.addEvent = async function () {
   message.textContent = "";
-
   const title = document.getElementById("title").value.trim();
-  const description = document.getElementById("description").value.trim();
-  const city = document.getElementById("city").value.trim();
-  const date = document.getElementById("date").value;
-
   if (!title) {
     message.textContent = "Введите название события.";
     return;
   }
 
   const { error } = await supabaseClient.from("events").insert([
-    { title, description, city, event_date: date }
+    { 
+      title: title, 
+      description: document.getElementById("description").value.trim(), 
+      city: document.getElementById("city").value.trim(), 
+      event_date: document.getElementById("date").value 
+    }
   ]);
 
   if (error) {
@@ -102,30 +91,40 @@ window.addEvent = async function () {
   }
 
   message.textContent = "✅ Событие успешно добавлено!";
-
-  // Очистка формы
   document.getElementById("add-event-form").reset();
-
-  // Обновляем список
   loadEvents();
 };
 
 
 // =================================================================
-// ГОЛОСОВАНИЕ
+// ГОЛОСОВАНИЕ (С ЗАЩИТОЙ ОТ НАКРУТКИ)
 // =================================================================
 window.vote = async function (eventId, value) {
+  // 1. Получаем ID событий, за которые уже голосовали
+  const votedEvents = JSON.parse(localStorage.getItem('voted_events')) || [];
+
+  // 2. Проверяем, есть ли текущее событие в списке
+  if (votedEvents.includes(eventId)) {
+    alert("Вы уже голосовали за это событие!");
+    return; // Останавливаем выполнение
+  }
+
+  // 3. Если не голосовал, отправляем голос в Supabase
   const { error } = await supabaseClient.from("votes").insert([
     { event_id: eventId, value }
   ]);
 
   if (error) {
     console.error("Ошибка голосования:", error);
-    alert("Ошибка. Возможно, вы уже голосовали или проверьте RLS для 'votes'.");
+    alert("Произошла ошибка при голосовании.");
     return;
   }
 
-  // Обновляем список, чтобы показать новый рейтинг
+  // 4. Запоминаем, что пользователь проголосовал
+  votedEvents.push(eventId);
+  localStorage.setItem('voted_events', JSON.stringify(votedEvents));
+
+  // 5. Обновляем список событий, чтобы показать новый рейтинг
   loadEvents();
 };
 
