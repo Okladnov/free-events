@@ -92,7 +92,21 @@ body {
 }
 .event-card h3 { margin: 0 0 10px; }
 .event-card p { flex-grow: 1; margin: 0 0 15px; color: #666; }
-.event-card .meta { display: flex; justify-content: space-between; font-size: 14px; color: #888; margin-bottom: 15px; }
+
+/* ИЗМЕНЕНИЯ ЗДЕСЬ */
+.event-card .meta {
+  display: flex;
+  flex-wrap: wrap; /* Позволяет переносить на новую строку на маленьких экранах */
+  gap: 15px; /* Расстояние между элементами */
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 15px;
+}
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* Расстояние между иконкой и текстом */
+}
 
 /* --- Голосование --- */
 .vote {
