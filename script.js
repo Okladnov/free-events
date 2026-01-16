@@ -133,3 +133,56 @@ window.vote = async function (eventId, value) {
 // ПЕРВЫЙ ЗАПУСК
 // =================================================================
 loadEvents();
+// =================================================================
+// ПОДКЛЮЧЕНИЕ К SUPABASE
+// =================================================================
+const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
+const SUPABASE_KEY = "sb_publishable_XoQ2Gi3bMJI9Bx226mg7GQ_z0S4XPAA";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// =================================================================
+// ЭЛЕМЕНТЫ СТРАНИЦЫ
+// =================================================================
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const userInfo = document.getElementById('user-info');
+const eventsContainer = document.getElementById("events");
+const message = document.getElementById("message");
+const addEventForm = document.getElementById("add-event-form");
+
+// =================================================================
+// АВТОРИЗАЦИЯ
+// =================================================================
+window.loginWithGoogle = async function() {
+  await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
+};
+
+window.logout = async function() {
+  await supabaseClient.auth.signOut();
+};
+
+// Эта функция следит за состоянием пользователя (вошел, вышел) и обновляет интерфейс
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    // Пользователь вошел
+    loginBtn.style.display = 'none';
+    logoutBtn.style.display = 'block';
+    userInfo.textContent = `Вы вошли как: ${session.user.email}`;
+  } else {
+    // Пользователь вышел
+    loginBtn.style.display = 'block';
+    logoutBtn.style.display = 'none';
+    userInfo.textContent = '';
+  }
+});
+
+// ... (остальной код остается таким же) ...
+
+// =================================================================
+// ЗАГРУЗКА СОБЫТИЙ
+// =================================================================
+window.loadEvents = async function () { /* ... код без изменений ... */ };
+addEventForm.addEventListener('submit', async (e) => { e.preventDefault(); await window.addEvent(); });
+window.addEvent = async function () { /* ... код без изменений ... */ };
+window.vote = async function (eventId, value) { /* ... код без изменений ... */ };
+loadEvents();
