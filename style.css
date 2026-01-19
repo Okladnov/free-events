@@ -148,3 +148,18 @@ body {
   padding-top: 15px;
   border-top: 1px solid #f0f0f0;
 }
+/* Стили для блока фильтров */
+.filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.filters input {
+  flex-grow: 1; /* Поля занимают максимум места */
+}
+.filters button.secondary {
+  background-color: #6c757d; /* Другой цвет для вторичной кнопки */
+}
+.filters button.secondary:hover {
+  background-color: #5a6268;
+}
