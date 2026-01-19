@@ -66,7 +66,7 @@ addEventForm.addEventListener('submit', async (event) => {
       description: document.getElementById("description").value.trim(), 
       city: document.getElementById("city").value.trim(), 
       event_date: document.getElementById("date").value,
-      created_by: currentUser.id
+      created_by: currentUser.id // Теперь эта колонка существует!
     }
   ]);
 
@@ -95,7 +95,8 @@ window.vote = async function (eventId, value) {
   ]);
 
   if (error && error.code === '23505') {
-    // Ошибка дубликата, ничего не делаем
+    // Ошибка дубликата, пользователь уже голосовал.
+    // Кнопка и так неактивна, поэтому можно ничего не делать.
   } else if (error) {
     console.error("Ошибка голосования:", error);
   } else {
@@ -116,7 +117,8 @@ function formatDisplayDate(dateString) {
 // ЗАГРУЗКА СОБЫТИЙ (с профилями авторов)
 // =================================================================
 async function loadEvents() {
-  // ИЗМЕНЕНИЕ ЗДЕСЬ: мы "заглядываем" в таблицу profiles, чтобы получить full_name
+  // ИЗМЕНЕНИЕ: мы "заглядываем" в таблицу profiles, чтобы получить full_name
+  // Supabase автоматически связывает events.created_by и profiles.id
   const { data, error } = await supabaseClient
     .from("events")
     .select(`
@@ -128,7 +130,7 @@ async function loadEvents() {
 
   if (error) {
     console.error("Ошибка загрузки:", error);
-    eventsContainer.innerHTML = "Ошибка загрузки.";
+    eventsContainer.innerHTML = "Ошибка загрузки. Проверьте права доступа (RLS) для таблицы profiles.";
     return;
   }
 
@@ -143,13 +145,12 @@ async function loadEvents() {
     const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
     const displayDate = formatDisplayDate(event.event_date);
     
-    // ИЗМЕНЕНИЕ ЗДЕСЬ: получаем имя автора
+    // Получаем имя автора. Если профиля нет, пишем "Аноним".
     const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
 
     const div = document.createElement("div");
     div.className = "event-card";
 
-    // ИЗМЕНЕНИЕ ЗДЕСЬ: добавляем блок с автором
     div.innerHTML = `
       <h3>${event.title}</h3>
       <p>${event.description || "Нет описания."}</p>
