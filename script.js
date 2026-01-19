@@ -95,8 +95,7 @@ window.vote = async function (eventId, value) {
   ]);
 
   if (error && error.code === '23505') {
-    // Эта ошибка уже обрабатывается визуально (кнопка неактивна),
-    // поэтому можем ничего не показывать пользователю.
+    // Ошибка дубликата, ничего не делаем
   } else if (error) {
     console.error("Ошибка голосования:", error);
   } else {
@@ -114,12 +113,17 @@ function formatDisplayDate(dateString) {
 }
 
 // =================================================================
-// ЗАГРУЗКА СОБЫТИЙ (с иконками)
+// ЗАГРУЗКА СОБЫТИЙ (с профилями авторов)
 // =================================================================
 async function loadEvents() {
+  // ИЗМЕНЕНИЕ ЗДЕСЬ: мы "заглядываем" в таблицу profiles, чтобы получить full_name
   const { data, error } = await supabaseClient
     .from("events")
-    .select(`id, title, description, city, event_date, votes(user_id, value)`)
+    .select(`
+      id, title, description, city, event_date, created_by,
+      profiles ( full_name ),
+      votes ( user_id, value )
+    `)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -138,17 +142,23 @@ async function loadEvents() {
     const rating = event.votes.reduce((sum, v) => sum + v.value, 0);
     const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
     const displayDate = formatDisplayDate(event.event_date);
+    
+    // ИЗМЕНЕНИЕ ЗДЕСЬ: получаем имя автора
+    const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
 
     const div = document.createElement("div");
     div.className = "event-card";
 
-    // ИСПОЛЬЗУЕМ ИКОНКИ ЗДЕСЬ
+    // ИЗМЕНЕНИЕ ЗДЕСЬ: добавляем блок с автором
     div.innerHTML = `
       <h3>${event.title}</h3>
       <p>${event.description || "Нет описания."}</p>
       <div class="meta">
         <span class="meta-item">📍 ${event.city || "Весь мир"}</span>
         ${displayDate ? `<span class="meta-item">🗓️ ${displayDate}</span>` : ''}
+      </div>
+      <div class="author">
+        👤 Добавил: ${authorName}
       </div>
       <div class="vote">
         <button onclick="vote(${event.id}, 1)" ${hasVoted ? 'disabled' : ''}>▲</button>
