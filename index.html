@@ -14,7 +14,6 @@
       <h1>🎉 Бесплатные события</h1>
       <p>Городские мероприятия без затрат</p>
     </div>
-    <!-- БЛОК АВТОРИЗАЦИИ -->
     <div class="auth-block">
       <div id="user-info"></div>
       <button id="loginBtn" onclick="loginWithGoogle()">Войти через Google</button>
@@ -24,9 +23,9 @@
 </header>
 
 <main class="container">
+  <!-- Форма добавления -->
   <section class="card">
     <h2>Добавить событие</h2>
-    <!-- ВАЖНО: У формы теперь есть ID, а у кнопки нет onclick -->
     <form id="add-event-form">
       <input id="title" placeholder="Название события" required>
       <textarea id="description" placeholder="Описание"></textarea>
@@ -39,6 +38,18 @@
     </form>
   </section>
 
+  <!-- НОВАЯ СЕКЦИЯ: ПОИСК И ФИЛЬТРЫ -->
+  <section class="card">
+    <h2>🔍 Поиск и фильтры</h2>
+    <div class="filters">
+      <input id="search-input" placeholder="Поиск по названию...">
+      <input id="city-filter" placeholder="Фильтр по городу...">
+      <button onclick="loadEvents()">Найти</button>
+      <button class="secondary" onclick="resetFilters()">Сбросить</button>
+    </div>
+  </section>
+
+  <!-- Список событий -->
   <section>
     <h2>Список событий</h2>
     <div id="events" class="events-grid">Загрузка событий...</div>
@@ -47,7 +58,6 @@
 
 <footer class="footer">© 2026 · Бесплатные события</footer>
 
-<!-- ВАЖНО: скрипты подключаются в самом конце -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
 </body>
