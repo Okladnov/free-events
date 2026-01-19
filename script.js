@@ -16,34 +16,107 @@ const message = document.getElementById("message");
 const addEventForm = document.getElementById("add-event-form");
 let currentUser = null;
 
-// ИЗМЕНЕНИЕ: Добавляем элементы для фильтров
+// Элементы для фильтров
 const searchInput = document.getElementById('search-input');
 const cityFilter = document.getElementById('city-filter');
 
 // =================================================================
 // АВТОРИЗАЦИЯ
 // =================================================================
-window.loginWithGoogle = async function() { /* ... код без изменений ... */ };
-window.logout = async function() { /* ... код без изменений ... */ };
-supabaseClient.auth.onAuthStateChange((event, session) => { /* ... код без изменений ... */ });
+window.loginWithGoogle = async function() {
+  await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
+};
+
+window.logout = async function() {
+  await supabaseClient.auth.signOut();
+};
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    currentUser = session.user;
+    loginBtn.style.display = 'none';
+    logoutBtn.style.display = 'block';
+    userInfo.textContent = `Вы вошли как: ${currentUser.email}`;
+  } else {
+    currentUser = null;
+    loginBtn.style.display = 'block';
+    logoutBtn.style.display = 'none';
+    userInfo.textContent = '';
+  }
+  loadEvents();
+});
 
 // =================================================================
 // ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ
 // =================================================================
-addEventForm.addEventListener('submit', async (event) => { /* ... код без изменений ... */ });
+addEventForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  
+  if (!currentUser) {
+    alert("Пожалуйста, войдите в аккаунт, чтобы добавить событие.");
+    return;
+  }
+  
+  message.textContent = "";
+  const title = document.getElementById("title").value.trim();
+  if (!title) {
+    message.textContent = "Введите название события.";
+    return;
+  }
+
+  const { error } = await supabaseClient.from("events").insert([
+    { 
+      title: title, 
+      description: document.getElementById("description").value.trim(), 
+      city: document.getElementById("city").value.trim(), 
+      event_date: document.getElementById("date").value,
+      created_by: currentUser.id
+    }
+  ]);
+
+  if (error) {
+    console.error("Ошибка добавления:", error);
+    message.textContent = "Произошла ошибка при добавлении.";
+    return;
+  }
+
+  message.textContent = "✅ Отлично! Ваше событие отправлено на модерацию.";
+  addEventForm.reset();
+});
 
 // =================================================================
 // ГОЛОСОВАНИЕ
 // =================================================================
-window.vote = async function (eventId, value) { /* ... код без изменений ... */ };
+window.vote = async function (eventId, value) {
+  if (!currentUser) {
+    alert("Пожалуйста, войдите в аккаунт, чтобы проголосовать.");
+    return;
+  }
+
+  const { error } = await supabaseClient.from("votes").insert([
+    { event_id: eventId, value: value, user_id: currentUser.id }
+  ]);
+
+  if (error && error.code === '23505') {
+    // Пользователь уже голосовал
+  } else if (error) {
+    console.error("Ошибка голосования:", error);
+  } else {
+    loadEvents();
+  }
+};
 
 // =================================================================
 // ФУНКЦИЯ ДЛЯ КРАСИВОЙ ДАТЫ
 // =================================================================
-function formatDisplayDate(dateString) { /* ... код без изменений ... */ }
+function formatDisplayDate(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+}
 
 // =================================================================
-// ИЗМЕНЕНИЕ: НОВАЯ ФУНКЦИЯ ДЛЯ СБРОСА ФИЛЬТРОВ
+// НОВАЯ ФУНКЦИЯ ДЛЯ СБРОСА ФИЛЬТРОВ
 // =================================================================
 window.resetFilters = function() {
   searchInput.value = '';
@@ -54,11 +127,10 @@ window.resetFilters = function() {
 // =================================================================
 // ЗАГРУЗКА СОБЫТИЙ (с поиском и фильтрами)
 // =================================================================
-window.loadEvents = async function() { // Сделаем ее глобальной, чтобы кнопка "Найти" работала
+window.loadEvents = async function() {
   const searchTerm = searchInput.value.trim();
   const city = cityFilter.value.trim();
 
-  // Начинаем строить запрос
   let query = supabaseClient
     .from("events")
     .select(`
@@ -68,16 +140,13 @@ window.loadEvents = async function() { // Сделаем ее глобально
     `)
     .eq('is_approved', true);
 
-  // ИЗМЕНЕНИЕ: Добавляем фильтры, если они есть
   if (searchTerm) {
-    // ilike - это поиск без учета регистра (большие/маленькие буквы)
     query = query.ilike('title', `%${searchTerm}%`);
   }
   if (city) {
     query = query.ilike('city', `%${city}%`);
   }
 
-  // Завершаем запрос
   const { data, error } = await query.order("created_at", { ascending: false });
 
   if (error) {
@@ -93,7 +162,6 @@ window.loadEvents = async function() { // Сделаем ее глобально
 
   eventsContainer.innerHTML = "";
   data.forEach(event => {
-    // ... остальная часть кода для рендеринга карточки не изменилась ...
     const rating = event.votes.reduce((sum, v) => sum + v.value, 0);
     const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
     const displayDate = formatDisplayDate(event.event_date);
