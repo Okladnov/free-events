@@ -43,7 +43,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 });
 
 // =================================================================
-// ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ
+// ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ (с модерацией)
 // =================================================================
 addEventForm.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -60,13 +60,14 @@ addEventForm.addEventListener('submit', async (event) => {
     return;
   }
 
+  // is_approved по умолчанию будет false в базе данных
   const { error } = await supabaseClient.from("events").insert([
     { 
       title: title, 
       description: document.getElementById("description").value.trim(), 
       city: document.getElementById("city").value.trim(), 
       event_date: document.getElementById("date").value,
-      created_by: currentUser.id // Теперь эта колонка существует!
+      created_by: currentUser.id
     }
   ]);
 
@@ -76,9 +77,10 @@ addEventForm.addEventListener('submit', async (event) => {
     return;
   }
 
-  message.textContent = "✅ Событие успешно добавлено!";
+  // ИЗМЕНЕНИЕ ЗДЕСЬ: новое сообщение для пользователя
+  message.textContent = "✅ Отлично! Ваше событие отправлено на модерацию.";
   addEventForm.reset();
-  loadEvents();
+  // loadEvents() здесь не нужен, так как событие все равно не появится
 });
 
 // =================================================================
@@ -95,8 +97,7 @@ window.vote = async function (eventId, value) {
   ]);
 
   if (error && error.code === '23505') {
-    // Ошибка дубликата, пользователь уже голосовал.
-    // Кнопка и так неактивна, поэтому можно ничего не делать.
+    // Пользователь уже голосовал
   } else if (error) {
     console.error("Ошибка голосования:", error);
   } else {
@@ -114,11 +115,10 @@ function formatDisplayDate(dateString) {
 }
 
 // =================================================================
-// ЗАГРУЗКА СОБЫТИЙ (с профилями авторов)
+// ЗАГРУЗКА СОБЫТИЙ (только одобренных)
 // =================================================================
 async function loadEvents() {
-  // ИЗМЕНЕНИЕ: мы "заглядываем" в таблицу profiles, чтобы получить full_name
-  // Supabase автоматически связывает events.created_by и profiles.id
+  // ИЗМЕНЕНИЕ ЗДЕСЬ: добавлен фильтр .eq('is_approved', true)
   const { data, error } = await supabaseClient
     .from("events")
     .select(`
@@ -126,16 +126,17 @@ async function loadEvents() {
       profiles ( full_name ),
       votes ( user_id, value )
     `)
+    .eq('is_approved', true) // <-- ПОКАЗЫВАЕМ ТОЛЬКО ОДОБРЕННЫЕ
     .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Ошибка загрузки:", error);
-    eventsContainer.innerHTML = "Ошибка загрузки. Проверьте права доступа (RLS) для таблицы profiles.";
+    eventsContainer.innerHTML = "Ошибка загрузки.";
     return;
   }
 
   if (!data || !data.length) {
-    eventsContainer.innerHTML = "Событий пока нет.";
+    eventsContainer.innerHTML = "Одобренных событий пока нет.";
     return;
   }
 
@@ -144,8 +145,6 @@ async function loadEvents() {
     const rating = event.votes.reduce((sum, v) => sum + v.value, 0);
     const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
     const displayDate = formatDisplayDate(event.event_date);
-    
-    // Получаем имя автора. Если профиля нет, пишем "Аноним".
     const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
 
     const div = document.createElement("div");
