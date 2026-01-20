@@ -120,7 +120,7 @@ body {
 .vote button:disabled { cursor: not-allowed; background-color: #e0e0e0; color: #aaa; }
 .score { font-size: 18px; font-weight: bold; }
 
-/* --- СЕКЦИЯ КОММЕНТАРИЕВ (НОВЫЕ СТИЛИ) --- */
+/* --- Комментарии --- */
 .comments-section {
   margin-top: 20px;
   padding-top: 20px;
