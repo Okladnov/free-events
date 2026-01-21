@@ -22,8 +22,13 @@ const cityFilter = document.getElementById('city-filter');
 // =================================================================
 // АВТОРИЗАЦИЯ
 // =================================================================
-window.loginWithGoogle = async function() { await supabaseClient.auth.signInWithOAuth({ provider: 'google' }); };
-window.logout = async function() { await supabaseClient.auth.signOut(); };
+window.loginWithGoogle = async function() {
+  await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
+};
+
+window.logout = async function() {
+  await supabaseClient.auth.signOut();
+};
 
 supabaseClient.auth.onAuthStateChange((event, session) => {
   currentUser = session ? session.user : null;
@@ -81,6 +86,7 @@ addEventForm.addEventListener('submit', async (event) => {
 window.vote = async function (eventId, value) {
   if (!currentUser) { alert("Пожалуйста, войдите, чтобы проголосовать."); return; }
   const { error } = await supabaseClient.from("votes").insert([{ event_id: eventId, value, user_id: currentUser.id }]);
+  // Real-time обновит страницу
 };
 
 // =================================================================
@@ -94,6 +100,7 @@ window.addComment = async function(eventId) {
   const { error } = await supabaseClient.from('comments').insert([{ content, event_id: eventId, user_id: currentUser.id }]);
   if (error) { console.error('Ошибка добавления комментария:', error); }
   else { contentInput.value = ''; }
+  // Real-time обновит страницу
 };
 
 // =================================================================
@@ -130,7 +137,6 @@ async function loadEvents() {
     const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
     const displayDate = formatDisplayDate(event.event_date);
     const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
-
     const imageHtml = event.image_url ? `<img src="${event.image_url}" alt="${event.title}" class="event-card-image">` : '';
 
     let commentsHtml = '<ul class="comments-list">';
@@ -159,4 +165,31 @@ async function loadEvents() {
           <span class="score">${rating}</span>
           <button onclick="vote(${event.id}, -1)" ${hasVoted ? 'disabled' : ''}>▼</button>
         </div>
-        <div class=
+        <div class="comments-section">
+          <h4>Комментарии</h4>
+          ${commentsHtml}
+          <form class="comment-form" onsubmit="addComment(${event.id}); return false;">
+            <input id="comment-input-${event.id}" placeholder="Написать комментарий..." required>
+            <button type="submit">Отправить</button>
+          </form>
+        </div>
+      </div>
+    `;
+    eventsContainer.appendChild(div);
+  });
+}; // <-- ВОТ ЗДЕСЬ, СКОРЕЕ ВСЕГО, НЕ ХВАТАЛО СКОБКИ
+
+// =================================================================
+// REAL-TIME ПОДПИСКА
+// =================================================================
+const subscription = supabaseClient.channel('public-schema-changes')
+  .on('postgres_changes', { event: '*', schema: 'public' }, payload => {
+    console.log('Получено изменение в базе данных, перезагружаю события!', payload);
+    loadEvents();
+  })
+  .subscribe();
+
+// =================================================================
+// ПЕРВЫЙ ЗАПУСК
+// =================================================================
+loadEvents();
