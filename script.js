@@ -10,14 +10,33 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // =================================================================
 const loginBtn = document.getElementById('loginBtn');
 const logoutBtn = document.getElementById('logoutBtn');
-// ... (остальной код без изменений)
+const userInfo = document.getElementById('user-info');
+const eventsContainer = document.getElementById("events");
+const message = document.getElementById("message");
+const addEventForm = document.getElementById("add-event-form");
+let currentUser = null;
+
+const searchInput = document.getElementById('search-input');
+const cityFilter = document.getElementById('city-filter');
 
 // =================================================================
 // АВТОРИЗАЦИЯ
 // =================================================================
-window.loginWithGoogle = async function() { /* ... */ };
-window.logout = async function() { /* ... */ };
-supabaseClient.auth.onAuthStateChange((event, session) => { /* ... */ });
+window.loginWithGoogle = async function() {
+  await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
+};
+
+window.logout = async function() {
+  await supabaseClient.auth.signOut();
+};
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  currentUser = session ? session.user : null;
+  loginBtn.style.display = session ? 'none' : 'block';
+  logoutBtn.style.display = session ? 'block' : 'none';
+  userInfo.textContent = session ? `Вы вошли как: ${session.user.email}` : '';
+  loadEvents();
+});
 
 // =================================================================
 // ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ (с ИСПРАВЛЕННЫМ именем файла)
@@ -98,7 +117,6 @@ async function loadEvents() {
   const searchTerm = searchInput.value.trim();
   const city = cityFilter.value.trim();
 
-  // ИСПРАВЛЕНИЕ: Мы добавляем `image_url` в список запрашиваемых колонок.
   let query = supabaseClient.from("events").select(`
     id, title, description, city, event_date, created_by, image_url,
     profiles ( full_name ),
@@ -120,8 +138,6 @@ async function loadEvents() {
     const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
     const displayDate = formatDisplayDate(event.event_date);
     const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
-    
-    // ИСПРАВЛЕНО: Теперь `event.image_url` гарантированно будет содержать ссылку.
     const imageHtml = event.image_url ? `<img src="${event.image_url}" alt="${event.title}" class="event-card-image">` : '';
     
     let commentsHtml = '<ul class="comments-list">';
@@ -169,6 +185,7 @@ async function loadEvents() {
 // =================================================================
 const subscription = supabaseClient.channel('public-schema-changes')
   .on('postgres_changes', { event: '*', schema: 'public' }, payload => {
+    console.log('Получено изменение в базе данных, перезагружаю события!', payload);
     loadEvents();
   })
   .subscribe();
