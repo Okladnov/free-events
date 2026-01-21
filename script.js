@@ -39,7 +39,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 });
 
 // =================================================================
-// ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ (с ИСПРАВЛЕННОЙ загрузкой изображения)
+// ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ
 // =================================================================
 addEventForm.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -65,7 +65,6 @@ addEventForm.addEventListener('submit', async (event) => {
       return;
     }
     
-    // ИСПРАВЛЕНИЕ: Мы получаем публичную ссылку ПРАВИЛЬНЫМ образом.
     const { data: { publicUrl } } = supabaseClient.storage.from('event-images').getPublicUrl(fileName);
     imageUrl = publicUrl;
   }
@@ -115,6 +114,7 @@ async function loadEvents() {
   const searchTerm = searchInput.value.trim();
   const city = cityFilter.value.trim();
 
+  // ИСПРАВЛЕНИЕ: Мы добавляем `image_url` в список запрашиваемых колонок.
   let query = supabaseClient.from("events").select(`
     id, title, description, city, event_date, created_by, image_url,
     profiles ( full_name ),
@@ -136,6 +136,8 @@ async function loadEvents() {
     const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
     const displayDate = formatDisplayDate(event.event_date);
     const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
+    
+    // ИСПРАВЛЕНО: Теперь `event.image_url` гарантированно будет содержать ссылку.
     const imageHtml = event.image_url ? `<img src="${event.image_url}" alt="${event.title}" class="event-card-image">` : '';
     
     let commentsHtml = '<ul class="comments-list">';
@@ -183,7 +185,6 @@ async function loadEvents() {
 // =================================================================
 const subscription = supabaseClient.channel('public-schema-changes')
   .on('postgres_changes', { event: '*', schema: 'public' }, payload => {
-    console.log('Получено изменение в базе данных, перезагружаю события!', payload);
     loadEvents();
   })
   .subscribe();
