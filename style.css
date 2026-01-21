@@ -140,3 +140,11 @@ body {
 .comment-form button { width: auto; }
 
 .footer { text-align: center; padding: 30px 20px; font-size: 14px; color: #888; }
+/* НОВЫЕ СТИЛИ ДЛЯ ИЗОБРАЖЕНИЯ В КАРТОЧКЕ */
+.event-card-image {
+  width: 100%;
+  height: 180px; /* Фиксированная высота для единообразия */
+  object-fit: cover; /* Картинка будет красиво обрезаться, а не сжиматься */
+  border-radius: 8px 8px 0 0; /* Скругляем только верхние углы */
+  margin: -20px -20px 15px -20px; /* "Приклеиваем" к верху карточки */
+}
