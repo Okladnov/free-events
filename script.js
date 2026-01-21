@@ -10,36 +10,17 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // =================================================================
 const loginBtn = document.getElementById('loginBtn');
 const logoutBtn = document.getElementById('logoutBtn');
-const userInfo = document.getElementById('user-info');
-const eventsContainer = document.getElementById("events");
-const message = document.getElementById("message");
-const addEventForm = document.getElementById("add-event-form");
-let currentUser = null;
-
-const searchInput = document.getElementById('search-input');
-const cityFilter = document.getElementById('city-filter');
+// ... (остальной код без изменений)
 
 // =================================================================
 // АВТОРИЗАЦИЯ
 // =================================================================
-window.loginWithGoogle = async function() {
-  await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
-};
-
-window.logout = async function() {
-  await supabaseClient.auth.signOut();
-};
-
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  currentUser = session ? session.user : null;
-  loginBtn.style.display = session ? 'none' : 'block';
-  logoutBtn.style.display = session ? 'block' : 'none';
-  userInfo.textContent = session ? `Вы вошли как: ${session.user.email}` : '';
-  loadEvents();
-});
+window.loginWithGoogle = async function() { /* ... */ };
+window.logout = async function() { /* ... */ };
+supabaseClient.auth.onAuthStateChange((event, session) => { /* ... */ });
 
 // =================================================================
-// ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ
+// ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ (с ИСПРАВЛЕННЫМ именем файла)
 // =================================================================
 addEventForm.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -56,7 +37,10 @@ addEventForm.addEventListener('submit', async (event) => {
   let imageUrl = null;
 
   if (imageFile) {
-    const fileName = `${currentUser.id}/${Date.now()}_${imageFile.name}`;
+    // ИСПРАВЛЕНИЕ: Заменяем все пробелы в имени файла на дефисы
+    const cleanFileName = imageFile.name.replace(/\s/g, '-');
+    const fileName = `${currentUser.id}/${Date.now()}_${cleanFileName}`;
+    
     const { data, error } = await supabaseClient.storage.from('event-images').upload(fileName, imageFile);
     if (error) {
       console.error('Ошибка загрузки изображения:', error);
