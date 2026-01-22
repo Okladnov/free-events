@@ -65,7 +65,7 @@ body {
 }
 .form-row { display: flex; gap: 10px; align-items: center; }
 .form-row input { flex: 1; }
-.file-input-row { margin-top: 10px; } /* Небольшой отступ для поля файла */
+.file-input-row { margin-top: 10px; }
 #add-event-form button {
   width: 100%;
   margin-top: 10px;
@@ -95,7 +95,7 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Важно, чтобы скругленные углы картинки работали */
+  overflow: hidden;
 }
 .event-card-image {
   width: 100%;
@@ -106,7 +106,7 @@ body {
   padding: 15px;
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Растягивает контент, чтобы голосование было внизу */
+  flex-grow: 1;
 }
 .card-content h3 { margin: 0 0 10px; }
 .card-content p { flex-grow: 1; margin: 0 0 15px; color: #666; }
@@ -115,8 +115,6 @@ body {
   font-size: 14px; color: #555; margin-bottom: 15px;
 }
 .meta-item { display: flex; align-items: center; gap: 6px; }
-
-/* --- Автор --- */
 .author {
   font-size: 13px; color: #888; margin-top: 15px;
   padding-top: 15px; border-top: 1px solid #f0f0f0;
@@ -134,16 +132,9 @@ body {
 .score { font-size: 18px; font-weight: bold; }
 
 /* --- Комментарии --- */
-.comments-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #f0f0f0;
-}
+.comments-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f0f0; }
 .comments-list { list-style: none; padding: 0; margin: 0 0 15px 0; }
-.comment {
-  padding: 10px 0;
-  border-bottom: 1px solid #f5f5f5;
-}
+.comment { padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
 .comment:last-child { border-bottom: none; }
 .comment p { margin: 5px 0 0; }
 .comment-author { font-weight: bold; font-size: 14px; }
@@ -151,5 +142,28 @@ body {
 .comment-form { display: flex; gap: 10px; }
 .comment-form input { flex-grow: 1; margin-bottom: 0; }
 .comment-form button { width: auto; }
+
+/* --- НОВЫЕ СТИЛИ ДЛЯ ПАГИНАЦИИ --- */
+#pagination-controls {
+  text-align: center;
+  margin-top: 30px;
+}
+#load-more-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+#load-more-btn:hover {
+  background-color: #e65c00;
+}
+#load-more-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
 
 .footer { text-align: center; padding: 30px 20px; font-size: 14px; color: #888; }
