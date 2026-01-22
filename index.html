@@ -51,6 +51,11 @@
       <button onclick="loadEvents(true)">Найти</button>
       <button class="secondary" onclick="resetFilters()">Сбросить</button>
     </div>
+    <div id="sort-controls" class="sort-controls">
+    <span>Сортировать:</span>
+    <button id="sort-new" class="sort-btn active" onclick="setSortOrder('created_at')">По дате добавления</button>
+    <button id="sort-popular" class="sort-btn" onclick="setSortOrder('rating')">По популярности</button>
+  </div>
   </section>
 
   <!-- Список событий -->
