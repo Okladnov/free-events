@@ -48,7 +48,7 @@
     <div class="filters">
       <input id="search-input" placeholder="Поиск по названию...">
       <input id="city-filter" placeholder="Фильтр по городу...">
-      <button onclick="loadEvents()">Найти</button>
+      <button onclick="loadEvents(true)">Найти</button> <!-- Изменение: передаем true, чтобы сбросить пагинацию -->
       <button class="secondary" onclick="resetFilters()">Сбросить</button>
     </div>
   </section>
@@ -57,6 +57,8 @@
   <section>
     <h2>Список событий</h2>
     <div id="events" class="events-grid">Загрузка событий...</div>
+    <!-- НОВЫЙ БЛОК ДЛЯ КНОПКИ "ЗАГРУЗИТЬ ЕЩЕ" -->
+    <div id="pagination-controls"></div>
   </section>
 </main>
 
