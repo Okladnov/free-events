@@ -68,6 +68,45 @@ addEventForm.addEventListener('submit', async (event) => {
 });
 
 // =================================================================
+// УПРАВЛЕНИЕ СОБЫТИЕМ (РЕДАКТИРОВАНИЕ, УДАЛЕНИЕ)
+// =================================================================
+window.deleteEvent = async function(eventId) {
+  if (confirm("Вы уверены, что хотите удалить это событие?")) {
+    const { error } = await supabaseClient.from('events').delete().match({ id: eventId });
+    if (error) {
+      console.error('Ошибка удаления:', error);
+      alert('Не удалось удалить событие. Убедитесь, что вы являетесь автором.');
+    }
+  }
+};
+
+window.editEvent = async function(eventId) {
+  const { data: event, error: fetchError } = await supabaseClient.from('events').select().eq('id', eventId).single();
+  if (fetchError || !event) { alert('Не удалось загрузить данные для редактирования.'); return; }
+  
+  const newTitle = prompt("Редактировать название:", event.title);
+  if (newTitle === null) return;
+
+  const newDescription = prompt("Редактировать описание:", event.description);
+  const newCity = prompt("Редактировать город:", event.city);
+  const newDate = prompt("Редактировать дату (ГГГГ-ММ-ДД):", event.event_date);
+  
+  const { error: updateError } = await supabaseClient.from('events')
+    .update({ 
+      title: newTitle.trim(), 
+      description: newDescription.trim(),
+      city: newCity.trim(),
+      event_date: newDate || null
+    })
+    .match({ id: eventId });
+
+  if (updateError) {
+    console.error('Ошибка обновления:', updateError);
+    alert('Не удалось обновить событие. Убедитесь, что вы являетесь автором.');
+  }
+};
+
+// =================================================================
 // ГОЛОСОВАНИЕ и КОММЕНТАРИИ
 // =================================================================
 window.vote = async function(eventId, value) { if (!currentUser) { alert("Пожалуйста, войдите."); return; } await supabaseClient.from("votes").insert([{ event_id: eventId, value, user_id: currentUser.id }]); };
@@ -80,7 +119,7 @@ function formatDisplayDate(dateString) { if (!dateString) return ""; return new 
 window.resetFilters = function() { searchInput.value = ''; cityFilter.value = ''; loadEvents(true); }
 
 // =================================================================
-// ГЛАВНАЯ ФУНКЦИЯ: ЗАГРУЗКА СОБЫТИЙ (с "температурой")
+// ГЛАВНАЯ ФУНКЦИЯ: ЗАГРУЗКА СОБЫТИЙ
 // =================================================================
 async function loadEvents(isNewSearch = false) {
   if (isNewSearch) {
@@ -121,30 +160,56 @@ async function loadEvents(isNewSearch = false) {
 
   data.forEach(event => {
     const rating = event.votes.reduce((sum, v) => sum + v.value, 0);
-    let scoreClass = '';
-    let scoreIcon = '';
-
-    if (rating < 0) {
-      scoreClass = 'score-cold';
-      scoreIcon = '❄️';
-    } else if (rating > 20) {
-      scoreClass = 'score-fire';
-      scoreIcon = '🔥🔥';
-    } else if (rating > 5) {
-      scoreClass = 'score-hot';
-      scoreIcon = '🔥';
-    }
+    let scoreClass = ''; let scoreIcon = '';
+    if (rating < 0) { scoreClass = 'score-cold'; scoreIcon = '❄️'; } 
+    else if (rating > 20) { scoreClass = 'score-fire'; scoreIcon = '🔥🔥'; } 
+    else if (rating > 5) { scoreClass = 'score-hot'; scoreIcon = '🔥'; }
 
     const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
     const displayDate = formatDisplayDate(event.event_date);
     const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
-    const imageHtml = event.image_url ? `<img src="${event.image_url}" alt="${event.title}" class="event-card-image">` : '';
-    let commentsHtml = '<ul class="comments-list">'; event.comments.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)).forEach(comment => { const commentAuthor = comment.profiles ? comment.profiles.full_name : 'Аноним'; const commentDate = new Date(comment.created_at).toLocaleString('ru-RU'); commentsHtml += `<li class="comment"><span class="comment-author">${commentAuthor}</span><span class="comment-date">${commentDate}</span><p>${comment.content}</p></li>`; }); commentsHtml += '</ul>';
-    const div = document.createElement("div"); div.className = "event-card";
-
-    div.innerHTML = `<div class="card-content"><h3>${event.title}</h3><p>${event.description || "Нет описания."}</p><div class="meta"><span class="meta-item">📍 ${event.city || "Весь мир"}</span>${displayDate ? `<span class="meta-item">🗓️ ${displayDate}</span>` : ''}</div><div class="author">👤 Добавил: ${authorName}</div><div class="vote"><button onclick="vote(${event.id}, 1)" ${hasVoted ? 'disabled' : ''}>▲</button><span class="score ${scoreClass}">${rating} ${scoreIcon}</span><button onclick="vote(${event.id}, -1)" ${hasVoted ? 'disabled' : ''}>▼</button></div><div class="comments-section"><h4>Комментарии</h4>${commentsHtml}<form class="comment-form" onsubmit="addComment(${event.id}); return false;"><input id="comment-input-${event.id}" placeholder="Написать комментарий..." required><button type="submit">Отправить</button></form></div></div>`;
     
-    if (event.image_url) { const img = document.createElement('img'); img.src = event.image_url; img.alt = event.title; img.className = 'event-card-image'; div.prepend(img); }
+    let adminControls = '';
+    if (currentUser && currentUser.id === event.created_by) {
+      adminControls = `
+        <div class="card-admin-controls">
+          <button class="admin-btn" onclick="editEvent(${event.id})">✏️</button>
+          <button class="admin-btn" onclick="deleteEvent(${event.id})">🗑️</button>
+        </div>
+      `;
+    }
+    
+    let commentsHtml = '<ul class="comments-list">'; event.comments.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)).forEach(comment => { const commentAuthor = comment.profiles ? comment.profiles.full_name : 'Аноним'; const commentDate = new Date(comment.created_at).toLocaleString('ru-RU'); commentsHtml += `<li class="comment"><span class="comment-author">${commentAuthor}</span><span class="comment-date">${commentDate}</span><p>${comment.content}</p></li>`; }); commentsHtml += '</ul>';
+    
+    const div = document.createElement("div"); 
+    div.className = "event-card";
+    
+    div.innerHTML = `
+      ${adminControls} 
+      ${event.image_url ? `<img src="${event.image_url}" alt="${event.title}" class="event-card-image">` : ''}
+      <div class="card-content">
+        <h3>${event.title}</h3>
+        <p>${event.description || "Нет описания."}</p>
+        <div class="meta">
+          <span class="meta-item">📍 ${event.city || "Весь мир"}</span>
+          ${displayDate ? `<span class="meta-item">🗓️ ${displayDate}</span>` : ''}
+        </div>
+        <div class="author">👤 Добавил: ${authorName}</div>
+        <div class="vote">
+          <button onclick="vote(${event.id}, 1)" ${hasVoted ? 'disabled' : ''}>▲</button>
+          <span class="score ${scoreClass}">${rating} ${scoreIcon}</span>
+          <button onclick="vote(${event.id}, -1)" ${hasVoted ? 'disabled' : ''}>▼</button>
+        </div>
+        <div class="comments-section">
+          <h4>Комментарии</h4>
+          ${commentsHtml}
+          <form class="comment-form" onsubmit="addComment(${event.id}); return false;">
+            <input id="comment-input-${event.id}" placeholder="Написать комментарий..." required>
+            <button type="submit">Отправить</button>
+          </form>
+        </div>
+      </div>
+    `;
     eventsContainer.appendChild(div);
   });
 
