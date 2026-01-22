@@ -19,7 +19,6 @@ body {
   padding: 20px;
 }
 
-/* --- Хедер и авторизация --- */
 .header {
   background-color: var(--primary-color);
   color: white;
@@ -45,7 +44,6 @@ body {
   cursor: pointer;
 }
 
-/* --- Карточки --- */
 .card {
   background-color: var(--card-background);
   border-radius: 8px;
@@ -54,7 +52,6 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* --- Форма --- */
 #add-event-form input, #add-event-form textarea {
   width: 100%;
   padding: 12px;
@@ -81,13 +78,11 @@ body {
 #add-event-form button:hover { background-color: #e65c00; }
 #message { margin-top: 10px; font-weight: bold; }
 
-/* --- Фильтры --- */
 .filters { display: flex; gap: 10px; align-items: center; }
 .filters input { flex-grow: 1; }
 .filters button.secondary { background-color: #6c757d; }
 .filters button.secondary:hover { background-color: #5a6268; }
 
-/* --- Список событий --- */
 .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 .event-card {
   background-color: var(--card-background);
@@ -120,7 +115,6 @@ body {
   padding-top: 15px; border-top: 1px solid #f0f0f0;
 }
 
-/* --- Голосование --- */
 .vote { display: flex; align-items: center; gap: 10px; margin-top: auto; }
 .vote button {
   background-color: #f0f0f0; border: 1px solid var(--border-color);
@@ -131,7 +125,6 @@ body {
 .vote button:disabled { cursor: not-allowed; background-color: #e0e0e0; color: #aaa; }
 .score { font-size: 18px; font-weight: bold; }
 
-/* --- Комментарии --- */
 .comments-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f0f0; }
 .comments-list { list-style: none; padding: 0; margin: 0 0 15px 0; }
 .comment { padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
@@ -143,11 +136,7 @@ body {
 .comment-form input { flex-grow: 1; margin-bottom: 0; }
 .comment-form button { width: auto; }
 
-/* --- НОВЫЕ СТИЛИ ДЛЯ ПАГИНАЦИИ --- */
-#pagination-controls {
-  text-align: center;
-  margin-top: 30px;
-}
+#pagination-controls { text-align: center; margin-top: 30px; }
 #load-more-btn {
   background-color: var(--primary-color);
   color: white;
@@ -157,13 +146,21 @@ body {
   border-radius: 6px;
   cursor: pointer;
 }
-#load-more-btn:hover {
-  background-color: #e65c00;
-}
-#load-more-btn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
+#load-more-btn:hover { background-color: #e65c00; }
+#load-more-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
 .footer { text-align: center; padding: 30px 20px; font-size: 14px; color: #888; }
+
+/* --- Стили для "температуры" событий --- */
+.score.score-cold {
+  color: #007bff; /* Холодный синий */
+}
+
+.score.score-hot {
+  color: #ff9800; /* Теплый оранжевый */
+}
+
+.score.score-fire {
+  color: #f44336; /* Горячий красный */
+  font-weight: bold;
+}
