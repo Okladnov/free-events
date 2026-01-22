@@ -91,6 +91,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative; /* Обязательно для позиционирования кнопок внутри */
 }
 .event-card-image {
   width: 100%;
@@ -152,23 +153,11 @@ body {
 .footer { text-align: center; padding: 30px 20px; font-size: 14px; color: #888; }
 
 /* --- Стили для "температуры" событий --- */
-.score.score-cold {
-  color: #007bff; /* Холодный синий */
-}
+.score.score-cold { color: #007bff; }
+.score.score-hot { color: #ff9800; }
+.score.score-fire { color: #f44336; font-weight: bold; }
 
-.score.score-hot {
-  color: #ff9800; /* Теплый оранжевый */
-}
-
-.score.score-fire {
-  color: #f44336; /* Горячий красный */
-  font-weight: bold;
-}
 /* --- Стили для кнопок управления событием --- */
-.event-card {
-  position: relative; /* Обязательно для позиционирования кнопок внутри */
-}
-
 .card-admin-controls {
   position: absolute;
   top: 10px;
@@ -177,7 +166,6 @@ body {
   gap: 8px;
   z-index: 10; /* Чтобы кнопки были поверх картинки */
 }
-
 .admin-btn {
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid var(--border-color);
