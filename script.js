@@ -171,3 +171,6 @@ const subscription = supabaseClient.channel('public-schema-changes')
   .subscribe();
 
 // =================================================================
+// ПЕРВЫЙ ЗАПУСК
+// =================================================================
+loadEvents(true);
