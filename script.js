@@ -163,7 +163,7 @@ async function loadEvents(isNewSearch = false) {
   if (searchTerm) { query = query.ilike('title', `%${searchTerm}%`); }
   if (city) { query = query.ilike('city', `%${city}%`); }
 
-  query = query.range(from, to).order("created_at", { ascending: false });
+  query = query.range(from, to).order(currentSortOrder, { ascending: false });
 
   const { data, error, count } = await query;
 
