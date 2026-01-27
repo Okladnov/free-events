@@ -25,6 +25,7 @@ const paginationControls = document.getElementById('pagination-controls');
 // =================================================================
 const PAGE_SIZE = 9;
 let currentPage = 0;
+let currentSortOrder = 'created_at'; // По умолчанию сортируем по дате добавления
 
 // =================================================================
 // АВТОРИЗАЦИЯ
