@@ -183,3 +183,42 @@ body {
   background: white;
   transform: scale(1.1);
 }
+/* --- Стили для блока сортировки --- */
+.sort-controls {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 20px;
+}
+
+.sort-controls span {
+  font-weight: bold;
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.sort-btn {
+  background-color: #f0f0f0;
+  border: 1px solid var(--border-color);
+  border-radius: 20px; /* Делаем кнопки закругленными */
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease; /* Плавный переход */
+}
+
+.sort-btn:hover {
+  background-color: #e0e0e0;
+  border-color: #ccc;
+}
+
+/* Стиль для активной кнопки */
+.sort-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  font-weight: bold;
+}
