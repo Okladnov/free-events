@@ -119,6 +119,26 @@ window.addComment = async function(eventId) { if (!currentUser) { alert("Пож�
 function formatDisplayDate(dateString) { if (!dateString) return ""; return new Date(dateString).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }); }
 window.resetFilters = function() { searchInput.value = ''; cityFilter.value = ''; loadEvents(true); }
 
+// Новая функция для установки порядка сортировки
+window.setSortOrder = function(sortOrder) {
+  // 1. Запоминаем новый порядок
+  currentSortOrder = sortOrder;
+
+  // 2. Снимаем класс 'active' со всех кнопок
+  document.getElementById('sort-new').classList.remove('active');
+  document.getElementById('sort-popular').classList.remove('active');
+  
+  // 3. Добавляем класс 'active' только что нажатой кнопке
+  if (sortOrder === 'created_at') {
+    document.getElementById('sort-new').classList.add('active');
+  } else if (sortOrder === 'rating') {
+    document.getElementById('sort-popular').classList.add('active');
+  }
+
+  // 4. Перезагружаем все события с самого начала с новой сортировкой
+  loadEvents(true);
+}
+
 // =================================================================
 // ГЛАВНАЯ ФУНКЦИЯ: ЗАГРУЗКА СОБЫТИЙ
 // =================================================================
