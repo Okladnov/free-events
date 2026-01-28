@@ -221,4 +221,5 @@ const subscription = supabaseClient.channel('public-schema-changes').on('postgre
 // =================================================================
 // ПЕРВЫЙ ЗАПУСК
 // =================================================================
-// Мы убрали отсюда все, так как теперь onAuthStateChange является единственной точкой входа
+resetFilters();
+loadAndDisplayCategories(); // <--- Вызываем новую функцию
