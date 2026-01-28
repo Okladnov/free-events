@@ -224,10 +224,11 @@ async function loadEvents(isNewSearch = false) {
   const to = from + PAGE_SIZE - 1;
 
   let query = supabaseClient.from("events").select(`
-  id, title, description, city, event_date, created_by, image_url,
+  id, title, description, city, event_date, created_by, image_url, rating,
   profiles ( full_name ),
   votes ( user_id, value ),
-  comments ( id, content, created_at, profiles ( full_name ) )
+  comments ( id, content, created_at, profiles ( full_name ) ),
+  categories ( id, name )
 `, { count: 'exact' }).eq('is_approved', true);
 
   if (searchTerm) { query = query.ilike('title', `%${searchTerm}%`); }
