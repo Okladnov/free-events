@@ -255,6 +255,30 @@ const subscription = supabaseClient.channel('public-schema-changes')
     loadEvents(true);
   })
   .subscribe();
+// =================================================================
+// ЗАГРУЗКА КАТЕГОРИЙ ДЛЯ ФОРМЫ
+// =================================================================
+async function loadCategoriesForForm() {
+  const categoriesContainer = document.getElementById('categories-container');
+  const { data: categories, error } = await supabaseClient.from('categories').select('*');
+
+  if (error) {
+    console.error('Ошибка загрузки категорий:', error);
+    categoriesContainer.innerHTML += '<p>Не удалось загрузить категории.</p>';
+    return;
+  }
+
+  let checkboxesHtml = '';
+  categories.forEach(category => {
+    checkboxesHtml += `
+      <div class="category-checkbox">
+        <input type="checkbox" id="cat-${category.id}" name="categories" value="${category.id}">
+        <label for="cat-${category.id}">${category.name}</label>
+      </div>
+    `;
+  });
+  categoriesContainer.innerHTML += checkboxesHtml;
+}
 
 // =================================================================
 // ПЕРВЫЙ ЗАПУСК
