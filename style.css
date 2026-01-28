@@ -222,3 +222,24 @@ body {
   border-color: var(--primary-color);
   font-weight: bold;
 }
+/* --- Стили для выбора категорий --- */
+.categories-container {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+.categories-container p {
+  margin: 0 0 10px;
+  font-weight: bold;
+  font-size: 14px;
+}
+.category-checkbox {
+  display: inline-block;
+  margin-right: 15px;
+  margin-bottom: 10px;
+}
+.category-checkbox input {
+  margin-right: 6px;
+}
