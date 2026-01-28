@@ -181,7 +181,7 @@ async function loadEvents(isNewSearch = false) {
     profiles ( full_name ),
     votes ( user_id ),
     comments ( id, content, created_at, profiles ( full_name ) ),
-    categories ( id, name )
+    categories!inner ( id, name )
   `, { count: 'exact' })
   .eq('is_approved', true);
 
