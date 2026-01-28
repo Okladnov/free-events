@@ -315,5 +315,5 @@ const subscription = supabaseClient.channel('public-schema-changes')
 // =================================================================
 // ПЕРВЫЙ ЗАПУСК
 // =================================================================
-loadEvents(true);
+resetFilters();
 loadCategoriesForForm();
