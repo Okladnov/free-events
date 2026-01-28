@@ -187,15 +187,30 @@ async function loadEvents(isNewSearch = false) {
 }
 
 // =================================================================
-// ЗАГРУЗКА КАТЕГОРИЙ ДЛЯ ФОРМЫ
+// ЗАГРУЗКА И ОТОБРАЖЕНИЕ КАТЕГОРИЙ
 // =================================================================
-async function loadCategoriesForForm() {
-  const categoriesContainer = document.getElementById('categories-container');
+async function loadAndDisplayCategories() {
   const { data: categories, error } = await supabaseClient.from('categories').select('*').order('name');
-  if (error) { console.error('Ошибка загрузки категорий:', error); return; }
+  if (error) {
+    console.error('Ошибка загрузки категорий:', error);
+    return;
+  }
+
+  // --- Заполняем ленту "пилюлями" ---
+  const pillsContainer = document.getElementById('category-pills-container');
+  let pillsHtml = '<button id="cat-pill-all" class="category-pill active" onclick="setCategoryFilter(null)">Все</button>'; // Кнопка "Все"
+  categories.forEach(category => {
+    pillsHtml += `<button id="cat-pill-${category.id}" class="category-pill" onclick="setCategoryFilter(${category.id})">${category.name}</button>`;
+  });
+  pillsContainer.innerHTML = pillsHtml;
+
+  // --- Заполняем чекбоксы в форме добавления ---
+  const formContainer = document.getElementById('categories-container');
   let checkboxesHtml = '<p>Выберите категорию (одну или несколько):</p>';
-  categories.forEach(category => { checkboxesHtml += `<div class="category-checkbox"><input type="checkbox" id="cat-${category.id}" name="categories" value="${category.id}"><label for="cat-${category.id}">${category.name}</label></div>`; });
-  categoriesContainer.innerHTML = checkboxesHtml;
+  categories.forEach(category => {
+    checkboxesHtml += `<div class="category-checkbox"><input type="checkbox" id="cat-form-${category.id}" name="categories" value="${category.id}"><label for="cat-form-${category.id}">${category.name}</label></div>`;
+  });
+  formContainer.innerHTML = checkboxesHtml;
 }
 
 // =================================================================
