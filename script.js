@@ -284,3 +284,4 @@ async function loadCategoriesForForm() {
 // ПЕРВЫЙ ЗАПУСК
 // =================================================================
 loadEvents(true);
+loadCategoriesForForm(); // <-- ДОБАВЛЯЕМ ЭТУ СТРОКУ
