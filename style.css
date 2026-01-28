@@ -243,3 +243,25 @@ body {
 .category-checkbox input {
   margin-right: 6px;
 }
+/* --- Стили для тегов категорий на карточке --- */
+.category-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px; /* Отступ от описания */
+}
+
+.tag {
+  background-color: #eee;
+  color: #333;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tag:hover {
+  background-color: #ddd;
+}
