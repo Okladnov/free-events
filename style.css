@@ -83,38 +83,116 @@ body {
 .filters button.secondary { background-color: #6c757d; }
 .filters button.secondary:hover { background-color: #5a6268; }
 
-.events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+/* --- Новый дизайн карточек событий --- */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px; /* Немного увеличим разрыв */
+}
+
 .event-card {
   background-color: var(--card-background);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border-radius: 16px; /* Более скругленные углы */
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08); /* Чуть заметнее тень */
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  position: relative; /* Обязательно для позиционирования кнопок внутри */
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  cursor: pointer;
 }
-.event-card-image {
+
+.event-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.event-card-image-container {
+  position: relative;
   width: 100%;
-  height: 180px;
+  padding-top: 56.25%; /* Соотношение сторон 16:9 */
+  background-color: #f0f2f5;
+}
+
+.event-card-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
+
+.event-card-date {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  backdrop-filter: blur(5px); /* Эффект размытия */
+}
+.event-card-date span {
+  display: block;
+  line-height: 1.2;
+}
+.event-card-date .month {
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.card-save-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+}
+
 .card-content {
-  padding: 15px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
-.card-content h3 { margin: 0 0 10px; }
-.card-content p { flex-grow: 1; margin: 0 0 15px; color: #666; }
+
+.card-content h3 {
+  margin: 0 0 8px;
+  font-size: 18px; /* Крупнее заголовок */
+  font-weight: 700;
+  line-height: 1.3;
+}
+
 .card-content .meta {
-  display: flex; flex-wrap: wrap; gap: 15px;
-  font-size: 14px; color: #555; margin-bottom: 15px;
+  display: flex;
+  flex-direction: column; /* Вертикальное расположение */
+  gap: 8px;
+  font-size: 14px;
+  color: #555;
+  margin-top: auto; /* Прижимаем мета-информацию вниз */
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
 }
-.meta-item { display: flex; align-items: center; gap: 6px; }
-.author {
-  font-size: 13px; color: #888; margin-top: 15px;
-  padding-top: 15px; border-top: 1px solid #f0f0f0;
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+
+/* Мы больше не используем .author, так как он теперь часть .meta */
 
 .vote { display: flex; align-items: center; gap: 10px; margin-top: auto; }
 .vote button {
