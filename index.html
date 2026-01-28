@@ -53,19 +53,21 @@
 
   <!-- Поиск и фильтры -->
   <section class="card">
-    <h2>🔍 Поиск и фильтры</h2>
-    <div class="filters">
-      <input id="search-input" placeholder="Поиск по названию...">
-      <input id="city-filter" placeholder="Фильтр по городу...">
-      <button onclick="loadEvents(true)">Найти</button>
-      <button class="secondary" onclick="resetFilters()">Сбросить</button>
-    </div>
-    <div id="sort-controls" class="sort-controls">
-    <span>Сортировать:</span>
-    <button id="sort-new" class="sort-btn active" onclick="setSortOrder('created_at')">По дате добавления</button>
-    <button id="sort-popular" class="sort-btn" onclick="setSortOrder('rating')">По популярности</button>
+  <h2>🔍 Поиск и фильтры</h2>
+  
+  <!-- НАША НОВАЯ ЛЕНТА БУДЕТ ЗДЕСЬ -->
+  <div id="category-pills-container" class="pills-container">
+    <!-- JavaScript будет заполнять это место -->
   </div>
-  </section>
+
+  <div class="filters">
+    <input id="search-input" placeholder="Поиск по названию...">
+    <input id="city-filter" placeholder="Фильтр по городу...">
+    <button onclick="loadEvents(true)">Найти</button>
+    <button class="secondary" onclick="resetFilters()">Сбросить</button>
+  </div>
+</section>
+
 
   <!-- Список событий -->
   <section>
