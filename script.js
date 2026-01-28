@@ -205,29 +205,7 @@ const div = document.createElement("div");
 div.className = "event-card";
 // div.onclick = () => { window.location.href = `event.html?id=${event.id}`; }; // <-- Это для будущего, когда сделаем отдельную страницу
 
-div.innerHTML = `
-  <div class="event-card-image-container">
-    <img src="${event.image_url || 'placeholder.jpg'}" alt="${event.title}" class="event-card-image">
-    ${dateHtml}
-    <button class="card-save-btn" onclick="event.stopPropagation(); alert('Добавим в избранное в будущем!')">🤍</button>
-    ${adminControls}
-  </div>
-  <div class="card-content">
-    <h3>${event.title}</h3>
-    <div class="meta">
-        <div class="meta-item">
-            <span>📍</span>
-            <span>${event.city || 'Онлайн'}</span>
-        </div>
-        <div class="meta-item">
-            <span>👤</span>
-            <span>Добавил: ${authorName} <span class="${scoreClass}">${scoreIcon}</span></span>
-        </div>
-    </div>
-  </div>
-`;
-eventsContainer.appendChild(div);
-);
+div.innerHTML
 
   paginationControls.innerHTML = "";
   const totalLoaded = document.querySelectorAll('.event-card').length;
