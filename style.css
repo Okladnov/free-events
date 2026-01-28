@@ -183,36 +183,43 @@ body {
   background: white;
   transform: scale(1.1);
 }
-/* --- Стили для блока сортировки --- */
-.sort-controls {
-  margin-top: 20px;
+/* --- Стили для ленты категорий --- */
+.pills-container {
   display: flex;
-  align-items: center;
+  overflow-x: auto; /* Включаем горизонтальный скролл */
   gap: 10px;
-  border-top: 1px solid var(--border-color);
-  padding-top: 20px;
+  padding: 10px 0 20px 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+  -ms-overflow-style: none;  /* IE и Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
-.sort-controls span {
-  font-weight: bold;
+/* Прячем скроллбар в Chrome, Safari и Opera */
+.pills-container::-webkit-scrollbar {
+  display: none;
+}
+
+.category-pill {
+  flex-shrink: 0; /* Запрещаем кнопкам сжиматься */
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--text-color);
-  font-size: 14px;
-}
-
-.sort-btn {
-  background-color: #f0f0f0;
-  border: 1px solid var(--border-color);
-  border-radius: 20px; /* Делаем кнопки закругленными */
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 500;
+  background-color: #f0f2f5;
+  border: none;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s ease; /* Плавный переход */
+  transition: all 0.2s ease-in-out;
 }
 
-.sort-btn:hover {
-  background-color: #e0e0e0;
-  border-color: #ccc;
+.category-pill:hover {
+  background-color: #e4e6eb;
+}
+
+.category-pill.active {
+  background-color: var(--primary-color);
+  color: white;
 }
 
 /* Стиль для активной кнопки */
