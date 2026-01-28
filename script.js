@@ -25,7 +25,7 @@ const paginationControls = document.getElementById('pagination-controls');
 // =================================================================
 const PAGE_SIZE = 9;
 let currentPage = 0;
-let currentSortOrder = 'created_at'; // 'created_at' или 'rating'
+let currentSortOrder = 'created_at';
 let currentCategoryId = null; // ID выбранной категории для фильтрации
 
 // =================================================================
@@ -141,7 +141,8 @@ function formatDisplayDate(dateString) { if (!dateString) return ""; return new 
 window.resetFilters = function() {
   searchInput.value = '';
   cityFilter.value = '';
-  currentCategoryId = null; // Сбрасываем и фильтр по категории
+  currentCategoryId = null; // Сбрасываем фильтр по категории
+  document.querySelectorAll('.tag.active').forEach(tag => tag.classList.remove('active'));
   loadEvents(true);
 }
 
@@ -153,14 +154,11 @@ window.setSortOrder = function(sortOrder) {
 }
 
 window.setCategoryFilter = function(categoryId) {
-  currentCategoryId = categoryId;
-  loadEvents(true); // Перезагружаем с фильтром
-}
-
-window.setCategoryFilter = function(categoryId) {
-  // 1. Запоминаем, какой ID категории мы выбрали
-  currentCategoryId = categoryId;
-  // 2. Сбрасываем пагинацию и перезагружаем события с учетом фильтра
+  if (currentCategoryId === categoryId) {
+    currentCategoryId = null; // Повторное нажатие снимает фильтр
+  } else {
+    currentCategoryId = categoryId;
+  }
   loadEvents(true);
 }
 
@@ -184,34 +182,40 @@ async function loadEvents(isNewSearch = false) {
     votes ( user_id ),
     comments ( id, content, created_at, profiles ( full_name ) ),
     categories ( id, name )
-  `, { count: 'exact' }).eq('is_approved', true);
+  `, { count: 'exact' })
+  .eq('is_approved', true);
 
+  // Фильтрация
   if (searchTerm) { query = query.ilike('title', `%${searchTerm}%`); }
   if (city) { query = query.ilike('city', `%${city}%`); }
   if (currentCategoryId) {
+    // !inner гарантирует, что мы получим только события, имеющие эту категорию
     query = query.eq('categories.id', currentCategoryId);
   }
 
+  // Сортировка и пагинация
   query = query.order(currentSortOrder, { ascending: false }).range(from, to);
 
   const { data, error, count } = await query;
 
   if (error) { console.error("Ошибка загрузки:", error); eventsContainer.innerHTML = "Ошибка загрузки."; return; }
   
-  if (isNewSearch && (!data || data.length === 0)) {
-    let message = "Событий по вашему запросу не найдено.";
-    if (currentCategoryId) {
-      message += ' <a href="#" onclick="resetFilters(); return false;">Сбросить фильтр по категории</a>';
-    }
-    eventsContainer.innerHTML = message;
-    paginationControls.innerHTML = "";
-    return;
-  }
-
   if (isNewSearch) {
-    eventsContainer.innerHTML = "";
+    eventsContainer.innerHTML = ""; // Очищаем перед новой отрисовкой
+    if (!data || data.length === 0) {
+      let message = "Событий по вашему запросу не найдено.";
+      if (currentCategoryId) {
+        message += ' <a href="#" onclick="resetFilters(); return false;">Сбросить фильтр</a>';
+      }
+      eventsContainer.innerHTML = message;
+      paginationControls.innerHTML = "";
+      return;
+    }
   }
   
+  // Визуально подсвечиваем активный тег-фильтр
+  document.querySelectorAll('.tag.active').forEach(tag => tag.classList.remove('active'));
+
   data.forEach(event => {
     const rating = event.rating;
     let scoreClass = '', scoreIcon = '';
@@ -232,7 +236,8 @@ async function loadEvents(isNewSearch = false) {
     if (event.categories && event.categories.length > 0) {
       categoriesHtml = '<div class="category-tags">';
       event.categories.forEach(cat => {
-        categoriesHtml += `<span class="tag" onclick="setCategoryFilter(${cat.id})">${cat.name}</span>`;
+        const isActive = cat.id === currentCategoryId ? 'active' : '';
+        categoriesHtml += `<span class="tag ${isActive}" onclick="setCategoryFilter(${cat.id})">${cat.name}</span>`;
       });
       categoriesHtml += '</div>';
     }
@@ -271,7 +276,7 @@ async function loadEvents(isNewSearch = false) {
   });
 
   paginationControls.innerHTML = "";
-  const totalLoaded = (currentPage + 1) * PAGE_SIZE;
+  const totalLoaded = isNewSearch ? data.length : eventsContainer.children.length;
   
   if (count > totalLoaded) {
     const loadMoreBtn = document.createElement('button');
@@ -290,11 +295,11 @@ async function loadCategoriesForForm() {
   const { data: categories, error } = await supabaseClient.from('categories').select('*').order('name');
   if (error) { console.error('Ошибка загрузки категорий:', error); return; }
   
-  let checkboxesHtml = '';
+  let checkboxesHtml = '<p>Выберите категорию (одну или несколько):</p>';
   categories.forEach(category => {
     checkboxesHtml += `<div class="category-checkbox"><input type="checkbox" id="cat-${category.id}" name="categories" value="${category.id}"><label for="cat-${category.id}">${category.name}</label></div>`;
   });
-  categoriesContainer.insertAdjacentHTML('beforeend', checkboxesHtml);
+  categoriesContainer.innerHTML = checkboxesHtml;
 }
 
 // =================================================================
@@ -303,7 +308,6 @@ async function loadCategoriesForForm() {
 const subscription = supabaseClient.channel('public-schema-changes')
   .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => {
     console.log('Получено изменение в базе данных, перезагружаю события!', payload);
-    // Для простоты пока будем перезагружать все с самого начала
     loadEvents(true);
   })
   .subscribe();
