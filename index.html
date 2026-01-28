@@ -27,19 +27,28 @@
   <section class="card">
     <h2>Добавить событие</h2>
     <form id="add-event-form">
-      <input id="title" placeholder="Название события" required>
-      <textarea id="description" placeholder="Описание"></textarea>
-      <div class="form-row">
-        <input id="city" placeholder="Город">
-        <input id="date" type="date">
-      </div>
-      <div class="form-row file-input-row">
-        <label for="image-input">Изображение (постер, афиша):</label>
-        <input id="image-input" type="file" accept="image/*">
-      </div>
-      <button type="submit">Добавить</button>
-      <p id="message"></p>
-    </form>
+  <input id="title" placeholder="Название события" required>
+  <textarea id="description" placeholder="Описание"></textarea>
+  <div class="form-row">
+    <input id="city" placeholder="Город">
+    <input id="date" type="date">
+  </div>
+  <div class="form-row file-input-row">
+    <label for="image-input">Изображение (постер, афиша):</label>
+    <input id="image-input" type="file" accept="image/*">
+  </div>
+
+  <!-- ВОТ СЮДА ВСТАВЛЯЕМ НАШ НОВЫЙ БЛОК -->
+  <div class="form-row">
+    <div id="categories-container" class="categories-container">
+      <p>Выберите категорию (одну или несколько):</p>
+      <!-- Сюда будут загружены чекбоксы категорий -->
+    </div>
+  </div>
+
+  <button type="submit">Добавить</button>
+  <p id="message"></p>
+</form>
   </section>
 
   <!-- Поиск и фильтры -->
