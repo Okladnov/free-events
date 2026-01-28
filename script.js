@@ -46,26 +46,96 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 // =================================================================
 addEventForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  if (!currentUser) { alert("Пожалуйста, войдите, чтобы добавить событие."); return; }
-  const submitButton = addEventForm.querySelector('button[type="submit"]');
-  submitButton.disabled = true; message.textContent = "Загрузка...";
-  const title = document.getElementById("title").value.trim();
-  if (!title) { message.textContent = "Введите название."; submitButton.disabled = false; return; }
-  const imageFile = document.getElementById('image-input').files[0];
-  let imageUrl = null;
-  if (imageFile) {
-    const cleanFileName = imageFile.name.replace(/\s/g, '-');
-    const fileName = `${currentUser.id}/${Date.now()}_${cleanFileName}`;
-    const { data, error } = await supabaseClient.storage.from('event-images').upload(fileName, imageFile);
-    if (error) { console.error('Ошибка загрузки изображения:', error); message.textContent = "Ошибка при загрузке изображения."; submitButton.disabled = false; return; }
-    const { data: { publicUrl } } = supabaseClient.storage.from('event-images').getPublicUrl(fileName);
-    imageUrl = publicUrl;
+  if (!currentUser) {
+    alert("Пожалуйста, войдите, чтобы добавить событие.");
+    return;
   }
-  const { error: insertError } = await supabaseClient.from("events").insert([{ title, description: document.getElementById("description").value.trim(), city: document.getElementById("city").value.trim(), event_date: document.getElementById("date").value, created_by: currentUser.id, image_url: imageUrl }]);
-  submitButton.disabled = false;
-  if (insertError) { console.error("Ошибка добавления:", insertError); message.textContent = "Ошибка."; return; }
-  message.textContent = "✅ Отправлено на модерацию!";
-  addEventForm.reset();
+
+  const submitButton = addEventForm.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+  message.textContent = "Загрузка...";
+
+  const title = document.getElementById("title").value.trim();
+  if (!title) {
+    message.textContent = "Введите название.";
+    submitButton.disabled = false;
+    return;
+  }
+
+  try {
+    // 1. Сначала создаем событие и получаем его ID
+    const { data: eventData, error: insertError } = await supabaseClient
+      .from("events")
+      .insert({
+        title: title,
+        description: document.getElementById("description").value.trim(),
+        city: document.getElementById("city").value.trim(),
+        event_date: document.getElementById("date").value,
+        created_by: currentUser.id,
+        // image_url пока не добавляем, сделаем это позже
+      })
+      .select() // <-- Очень важно! Говорит Supabase вернуть созданную запись
+      .single();
+
+    if (insertError) throw insertError;
+    if (!eventData) throw new Error('Не удалось получить ID созданного события.');
+
+    const newEventId = eventData.id;
+
+    // 2. Загружаем изображение (если есть) и обновляем событие
+    const imageFile = document.getElementById('image-input').files[0];
+    if (imageFile) {
+      const cleanFileName = imageFile.name.replace(/\s/g, '-');
+      const fileName = `${currentUser.id}/${newEventId}_${cleanFileName}`;
+      const { data: uploadData, error: uploadError } = await supabaseClient.storage
+        .from('event-images')
+        .upload(fileName, imageFile);
+
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabaseClient.storage
+        .from('event-images')
+        .getPublicUrl(fileName);
+
+      const { error: updateImageError } = await supabaseClient
+        .from('events')
+        .update({ image_url: publicUrl })
+        .match({ id: newEventId });
+      
+      if (updateImageError) throw updateImageError;
+    }
+
+    // 3. Собираем ID выбранных категорий
+    const selectedCategories = [];
+    const categoryCheckboxes = document.querySelectorAll('#categories-container input[type="checkbox"]:checked');
+    categoryCheckboxes.forEach(checkbox => {
+      selectedCategories.push(Number(checkbox.value));
+    });
+
+    // 4. Создаем связи в таблице event_categories
+    if (selectedCategories.length > 0) {
+      const linksToInsert = selectedCategories.map(categoryId => ({
+        event_id: newEventId,
+        category_id: categoryId,
+      }));
+      const { error: linkError } = await supabaseClient
+        .from('event_categories')
+        .insert(linksToInsert);
+
+      if (linkError) throw linkError;
+    }
+
+    message.textContent = "✅ Отправлено на модерацию!";
+    addEventForm.reset();
+    // Снимаем выделение с чекбоксов
+    categoryCheckboxes.forEach(checkbox => checkbox.checked = false);
+
+  } catch (error) {
+    console.error("Ошибка при добавлении события:", error);
+    message.textContent = `Ошибка: ${error.message}`;
+  } finally {
+    submitButton.disabled = false;
+  }
 });
 
 // =================================================================
