@@ -174,28 +174,60 @@ async function loadEvents(isNewSearch = false) {
   
   document.querySelectorAll('.tag.active').forEach(tag => tag.classList.remove('active'));
   data.forEach(event => {
-    const rating = event.rating;
-    let scoreClass = '', scoreIcon = '';
-    if (rating < 0) { scoreClass = 'score-cold'; scoreIcon = '❄️'; } else if (rating > 20) { scoreClass = 'score-fire'; scoreIcon = '🔥🔥'; } else if (rating > 5) { scoreClass = 'score-hot'; scoreIcon = '🔥'; }
-    const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
-    const displayDate = formatDisplayDate(event.event_date);
-    const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
-    let adminControls = '';
-    if (currentUser && currentUser.id === event.created_by) { adminControls = `<div class="card-admin-controls"><button class="admin-btn" onclick="editEvent(${event.id})">✏️</button><button class="admin-btn" onclick="deleteEvent(${event.id})">🗑️</button></div>`; }
-    let categoriesHtml = '';
-    if (event.categories && event.categories.length > 0) {
-      categoriesHtml = '<div class="category-tags">';
-      event.categories.forEach(cat => {
-        const isActive = cat.id === currentCategoryId ? 'active' : '';
-        categoriesHtml += `<span class="tag ${isActive}" onclick="setCategoryFilter(${cat.id})">${cat.name}</span>`;
-      });
-      categoriesHtml += '</div>';
-    }
-    const commentsHtml = '<ul class="comments-list">' + event.comments.sort((a,b) => new Date(a.created_at) - new Date(b.created_at)).map(comment => { const commentAuthor = comment.profiles ? comment.profiles.full_name : 'Аноним'; const commentDate = new Date(comment.created_at).toLocaleString('ru-RU'); return `<li class="comment"><span class="comment-author">${commentAuthor}</span><span class="comment-date">${commentDate}</span><p>${comment.content}</p></li>`; }).join('') + '</ul>';
-    const div = document.createElement("div"); div.className = "event-card";
-    div.innerHTML = `${adminControls}${event.image_url ? `<img src="${event.image_url}" alt="${event.title}" class="event-card-image">` : ''}<div class="card-content"><h3>${event.title}</h3>${categoriesHtml}<p>${event.description || "Нет описания."}</p><div class="meta"><span class="meta-item">📍 ${event.city || "Весь мир"}</span>${displayDate ? `<span class="meta-item">🗓️ ${displayDate}</span>` : ''}</div><div class="author">👤 Добавил: ${authorName}</div><div class="vote"><button onclick="vote(${event.id}, 1)" ${hasVoted ? 'disabled' : ''}>▲</button><span class="score ${scoreClass}">${rating} ${scoreIcon}</span><button onclick="vote(${event.id}, -1)" ${hasVoted ? 'disabled' : ''}>▼</button></div><div class="comments-section"><h4>Комментарии</h4>${commentsHtml}<form class="comment-form" onsubmit="addComment(${event.id}); return false;"><input id="comment-input-${event.id}" placeholder="Написать комментарий..." required><button type="submit">Отправить</button></form></div></div>`;
-    eventsContainer.appendChild(div);
-  });
+const rating = event.rating;
+let scoreClass = '', scoreIcon = '';
+if (rating < 0) { scoreClass = 'score-cold'; scoreIcon = '❄️'; }
+else if (rating > 20) { scoreClass = 'score-fire'; scoreIcon = '🔥🔥'; }
+else if (rating > 5) { scoreClass = 'score-hot'; scoreIcon = '🔥'; }
+
+// --- Новая логика для форматирования даты ---
+let dateHtml = '';
+if (event.event_date) {
+    const d = new Date(event.event_date);
+    const day = d.getDate();
+    const month = d.toLocaleString('ru-RU', { month: 'short' }).replace('.', '');
+    dateHtml = `
+      <div class="event-card-date">
+        <span class="day">${day}</span>
+        <span class="month">${month}</span>
+      </div>
+    `;
+}
+
+const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
+let adminControls = '';
+if (currentUser && currentUser.id === event.created_by) {
+  adminControls = `<div class="card-admin-controls"><button class="admin-btn" onclick="event.stopPropagation(); editEvent(${event.id})">✏️</button><button class="admin-btn" onclick="event.stopPropagation(); deleteEvent(${event.id})">🗑️</button></div>`;
+}
+
+// --- Собираем новую разметку ---
+const div = document.createElement("div");
+div.className = "event-card";
+// div.onclick = () => { window.location.href = `event.html?id=${event.id}`; }; // <-- Это для будущего, когда сделаем отдельную страницу
+
+div.innerHTML = `
+  <div class="event-card-image-container">
+    <img src="${event.image_url || 'placeholder.jpg'}" alt="${event.title}" class="event-card-image">
+    ${dateHtml}
+    <button class="card-save-btn" onclick="event.stopPropagation(); alert('Добавим в избранное в будущем!')">🤍</button>
+    ${adminControls}
+  </div>
+  <div class="card-content">
+    <h3>${event.title}</h3>
+    <div class="meta">
+        <div class="meta-item">
+            <span>📍</span>
+            <span>${event.city || 'Онлайн'}</span>
+        </div>
+        <div class="meta-item">
+            <span>👤</span>
+            <span>Добавил: ${authorName} <span class="${scoreClass}">${scoreIcon}</span></span>
+        </div>
+    </div>
+  </div>
+`;
+eventsContainer.appendChild(div);
+);
 
   paginationControls.innerHTML = "";
   const totalLoaded = document.querySelectorAll('.event-card').length;
