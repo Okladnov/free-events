@@ -109,7 +109,23 @@ window.addComment = async function(eventId) { if (!currentUser) { alert("Пож�
 function formatDisplayDate(dateString) { if (!dateString) return ""; return new Date(dateString).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }); }
 window.resetFilters = function() { searchInput.value = ''; cityFilter.value = ''; currentCategoryId = null; document.querySelectorAll('.tag.active').forEach(tag => tag.classList.remove('active')); loadEvents(true); };
 window.setSortOrder = function(sortOrder) { currentSortOrder = sortOrder; document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active')); document.getElementById(sortOrder === 'rating' ? 'sort-popular' : 'sort-new').classList.add('active'); loadEvents(true); };
-window.setCategoryFilter = function(categoryId) { if (currentCategoryId === categoryId) { currentCategoryId = null; } else { currentCategoryId = categoryId; } loadEvents(true); };
+window.setCategoryFilter = function(categoryId) {
+  if (currentCategoryId === categoryId) return; // Не делать ничего, если кликнули по уже активной
+
+  currentCategoryId = categoryId;
+
+  // Убираем 'active' со всех пилюль
+  document.querySelectorAll('.category-pill').forEach(pill => pill.classList.remove('active'));
+
+  // Добавляем 'active' нужной пилюле
+  if (categoryId) {
+    document.getElementById(`cat-pill-${categoryId}`).classList.add('active');
+  } else {
+    document.getElementById('cat-pill-all').classList.add('active');
+  }
+
+  loadEvents(true);
+}
 
 // =================================================================
 // ГЛАВНАЯ ФУНКЦИЯ: ЗАГРУЗКА СОБЫТИЙ
