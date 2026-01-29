@@ -149,7 +149,16 @@ async function loadEvents(isNewSearch = false) {
     const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
     let adminControls = '';
     if (currentUser && currentUser.id === event.created_by) { adminControls = `<div class="card-admin-controls"><button class="admin-btn" onclick="event.stopPropagation(); editEvent(${event.id})">✏️</button><button class="admin-btn" onclick="event.stopPropagation(); deleteEvent(${event.id})">🗑️</button></div>`; }
-    
+    // --- Генерируем HTML для тегов категорий ---
+let categoriesHtml = '';
+if (event.categories && event.categories.length > 0) {
+  categoriesHtml = '<div class="card-categories">';
+  event.categories.forEach(cat => {
+    categoriesHtml += `<span class="tag" onclick="event.stopPropagation(); setCategoryFilter(${cat.id})">${cat.name}</span>`;
+  });
+  categoriesHtml += '</div>';
+}
+
     // ВОССТАНОВЛЕННАЯ ЛОГИКА КОММЕНТАРИЕВ
     const commentsHtml = '<ul class="comments-list">' + event.comments.sort((a,b) => new Date(a.created_at) - new Date(b.created_at)).map(comment => { const commentAuthor = comment.profiles ? comment.profiles.full_name : 'Аноним'; const commentDate = new Date(comment.created_at).toLocaleString('ru-RU'); return `<li class="comment"><span class="comment-author">${commentAuthor}</span><span class="comment-date">${commentDate}</span><p>${comment.content}</p></li>`; }).join('') + '</ul>';
 
