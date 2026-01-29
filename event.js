@@ -32,7 +32,6 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 window.vote = async function(eventId, value) { if (!currentUser) { alert("Пожалуйста, войдите."); return; } await supabaseClient.from("votes").insert([{ event_id: eventId, value, user_id: currentUser.id }]); location.reload(); };
 window.addComment = async function(eventId) { if (!currentUser) { alert("Пожалуйста, войдите."); return; } const contentInput = document.getElementById('comment-input'); const content = contentInput.value.trim(); if (!content) return; const { error } = await supabaseClient.from('comments').insert([{ content, event_id: eventId, user_id: currentUser.id }]); if (!error) { location.reload(); } };
 
-
 // =================================================================
 // ГЛАВНАЯ ФУНКЦИЯ: ЗАГРУЗКА ДЕТАЛЕЙ СОБЫТИЯ
 // =================================================================
@@ -44,18 +43,7 @@ async function loadEventDetails() {
         return;
     }
 
-    // --- ШАГ 1: Загружаем основную информацию о событии ---
-    const { data: event, error: eventError } = await supabaseClient
-        .from('events')
-        .select(`
-            id, title, description, city, event_date, created_by, image_url, rating,
-            profiles ( full_name ),
-            categories ( id, name ),
-            votes(user_id, value)
-        `)
-        .eq('id', eventId)
-        .single();
-
+    const { data: event, error: eventError } = await supabaseClient.from('events').select(`id, title, description, city, event_date, created_by, image_url, rating, profiles ( full_name ), categories ( id, name ), votes(user_id, value)`).eq('id', eventId).single();
     if (eventError || !event) {
         console.error('Ошибка загрузки события:', eventError);
         document.title = "Событие не найдено";
@@ -63,35 +51,23 @@ async function loadEventDetails() {
         return;
     }
 
-    // --- ШАГ 2: ОТДЕЛЬНО загружаем комментарии к этому событию ---
-    const { data: comments, error: commentsError } = await supabaseClient
-        .from('comments')
-        .select('id, content, created_at, profiles ( full_name )')
-        .eq('event_id', eventId)
-        .order('created_at', { ascending: true });
-        
+    const { data: comments, error: commentsError } = await supabaseClient.from('comments').select('id, content, created_at, profiles ( full_name )').eq('event_id', eventId).order('created_at', { ascending: true });
     if (commentsError) {
         console.error('Ошибка загрузки комментариев:', commentsError);
-        // Не блокируем страницу, просто покажем, что комменты не загрузились
     }
 
-    // --- ШАГ 3: Теперь собираем всю страницу ---
     document.title = event.title;
     let dateString = 'Дата не указана';
     if (event.event_date) { dateString = new Date(event.event_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }); }
-    
     let categoriesHtml = '';
     if (event.categories && event.categories.length > 0) {
         event.categories.forEach(cat => { categoriesHtml += `<a href="/?category=${cat.id}" class="tag">${cat.name}</a>`; });
     }
-
     const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
-    
     const rating = event.rating;
     let scoreClass = '', scoreIcon = '';
     if (rating < 0) { scoreClass = 'score-cold'; scoreIcon = '❄️'; } else if (rating > 20) { scoreClass = 'score-fire'; scoreIcon = '🔥🔥'; } else if (rating > 5) { scoreClass = 'score-hot'; scoreIcon = '🔥'; }
     const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
-
     const commentsHtml = '<ul class="comments-list">' + (comments || []).map(comment => {
         const commentAuthor = comment.profiles ? comment.profiles.full_name : 'Аноним';
         const commentDate = new Date(comment.created_at).toLocaleString('ru-RU');
@@ -141,3 +117,8 @@ async function loadEventDetails() {
     `;
     eventDetailContainer.innerHTML = eventHtml;
 }
+
+// =================================================================
+// ПЕРВЫЙ ЗАПУСК
+// =================================================================
+loadEventDetails();
