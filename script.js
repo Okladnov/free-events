@@ -176,6 +176,7 @@ if (event.categories && event.categories.length > 0) {
       </div>
       <div class="card-content">
         <h3>${event.title}</h3>
+        ${categoriesHtml}
         <p>${event.description || 'Нет описания.'}</p>
         <div class="meta">
             <div class="meta-item">
