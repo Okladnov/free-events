@@ -174,6 +174,19 @@ body {
   font-weight: 700;
   line-height: 1.3;
 }
+.card-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.card-categories .tag {
+  /* Мы используем тот же стиль .tag, что и на детальной странице */
+  /* но делаем его чуть меньше */
+  padding: 3px 8px;
+  font-size: 11px;
+}
 
 .card-content .meta {
   display: flex;
