@@ -39,26 +39,64 @@ window.addComment = async function(eventId) { if (!currentUser) { alert("Пож�
 async function loadEventDetails() {
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('id');
-    if (!eventId) { eventDetailContainer.innerHTML = `<p style="color: red; text-align: center;">Ошибка: ID события не найден в URL.</p>`; return; }
+    if (!eventId) {
+        eventDetailContainer.innerHTML = `<p style="color: red; text-align: center;">Ошибка: ID события не найден в URL.</p>`;
+        return;
+    }
 
-    const { data: event, error } = await supabaseClient.from('events').select(`id, title, description, city, event_date, created_by, image_url, rating, profiles ( full_name ), categories ( id, name ), comments(id, content, created_at, profiles(full_name)), votes(user_id, value)`).eq('id', eventId).single();
-    if (error || !event) { console.error('Ошибка загрузки события:', error); document.title = "Событие не найдено"; eventDetailContainer.innerHTML = `<p style="color: red; text-align: center;">Событие не найдено или произошла ошибка.</p>`; return; }
+    // --- ШАГ 1: Загружаем основную информацию о событии ---
+    const { data: event, error: eventError } = await supabaseClient
+        .from('events')
+        .select(`
+            id, title, description, city, event_date, created_by, image_url, rating,
+            profiles ( full_name ),
+            categories ( id, name ),
+            votes(user_id, value)
+        `)
+        .eq('id', eventId)
+        .single();
 
+    if (eventError || !event) {
+        console.error('Ошибка загрузки события:', eventError);
+        document.title = "Событие не найдено";
+        eventDetailContainer.innerHTML = `<p style="color: red; text-align: center;">Событие не найдено или произошла ошибка.</p>`;
+        return;
+    }
+
+    // --- ШАГ 2: ОТДЕЛЬНО загружаем комментарии к этому событию ---
+    const { data: comments, error: commentsError } = await supabaseClient
+        .from('comments')
+        .select('id, content, created_at, profiles ( full_name )')
+        .eq('event_id', eventId)
+        .order('created_at', { ascending: true });
+        
+    if (commentsError) {
+        console.error('Ошибка загрузки комментариев:', commentsError);
+        // Не блокируем страницу, просто покажем, что комменты не загрузились
+    }
+
+    // --- ШАГ 3: Теперь собираем всю страницу ---
     document.title = event.title;
     let dateString = 'Дата не указана';
     if (event.event_date) { dateString = new Date(event.event_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }); }
+    
     let categoriesHtml = '';
-    if (event.categories && event.categories.length > 0) { event.categories.forEach(cat => { categoriesHtml += `<a href="/?category=${cat.id}" class="tag">${cat.name}</a>`; }); }
+    if (event.categories && event.categories.length > 0) {
+        event.categories.forEach(cat => { categoriesHtml += `<a href="/?category=${cat.id}" class="tag">${cat.name}</a>`; });
+    }
+
     const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
     
-    // ЛОГИКА ДЛЯ ГОЛОСОВАНИЯ
     const rating = event.rating;
     let scoreClass = '', scoreIcon = '';
     if (rating < 0) { scoreClass = 'score-cold'; scoreIcon = '❄️'; } else if (rating > 20) { scoreClass = 'score-fire'; scoreIcon = '🔥🔥'; } else if (rating > 5) { scoreClass = 'score-hot'; scoreIcon = '🔥'; }
     const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
 
-    // ЛОГИКА ДЛЯ КОММЕНТАРИЕВ
-    const commentsHtml = '<ul class="comments-list">' + event.comments.sort((a,b) => new Date(a.created_at) - new Date(b.created_at)).map(comment => { const commentAuthor = comment.profiles ? comment.profiles.full_name : 'Аноним'; const commentDate = new Date(comment.created_at).toLocaleString('ru-RU'); return `<li class="comment"><span class="comment-author">${commentAuthor}</span><span class="comment-date">${commentDate}</span><p>${comment.content}</p></li>`; }).join('') + '</ul>';
+    const commentsHtml = '<ul class="comments-list">' + (comments || []).map(comment => {
+        const commentAuthor = comment.profiles ? comment.profiles.full_name : 'Аноним';
+        const commentDate = new Date(comment.created_at).toLocaleString('ru-RU');
+        return `<li class="comment"><span class="comment-author">${commentAuthor}</span><span class="comment-date">${commentDate}</span><p>${comment.content}</p></li>`;
+    }).join('') + '</ul>';
 
     const eventHtml = `
         <div class="event-detail-header">
@@ -101,3 +139,5 @@ async function loadEventDetails() {
             </div>
         </div>
     `;
+    eventDetailContainer.innerHTML = eventHtml;
+}
