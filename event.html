@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Title будет меняться с помощью JavaScript -->
+  <title>Загрузка события...</title>
+  <!-- Мы будем использовать те же стили, что и на главной -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Шапка будет такой же, как на главной, но без фильтров -->
+<header class="header">
+  <div class="container header-container">
+    <div class="header-title">
+      <a href="/" style="color: white; text-decoration: none;">
+        <h1>🎉 Бесплатные события</h1>
+        <p>Городские мероприятия без затрат</p>
+      </a>
+    </div>
+    <div class="auth-block">
+      <div id="user-info"></div>
+      <button id="loginBtn" onclick="loginWithGoogle()">Войти через Google</button>
+      <button id="logoutBtn" onclick="logout()" style="display: none;">Выйти</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <!-- Это главный контейнер для нашего события -->
+  <div id="event-detail-container">
+    <!-- Сюда JavaScript будет вставлять всю информацию о событии -->
+    <p style="text-align: center; font-size: 18px;">Загрузка данных о событии...</p>
+  </div>
+</main>
+
+<footer class="footer">© 2026 · Бесплатные события</footer>
+
+<!-- Подключаем Supabase и наш новый скрипт -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="event.js"></script> <!-- Обрати внимание, скрипт называется event.js! -->
+</body>
+</html>
