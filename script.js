@@ -153,7 +153,9 @@ async function loadEvents(isNewSearch = false) {
     // ВОССТАНОВЛЕННАЯ ЛОГИКА КОММЕНТАРИЕВ
     const commentsHtml = '<ul class="comments-list">' + event.comments.sort((a,b) => new Date(a.created_at) - new Date(b.created_at)).map(comment => { const commentAuthor = comment.profiles ? comment.profiles.full_name : 'Аноним'; const commentDate = new Date(comment.created_at).toLocaleString('ru-RU'); return `<li class="comment"><span class="comment-author">${commentAuthor}</span><span class="comment-date">${commentDate}</span><p>${comment.content}</p></li>`; }).join('') + '</ul>';
 
-    const div = document.createElement("div"); div.className = "event-card";
+    const div = document.createElement("div"); 
+    div.onclick = () => { window.location.href = `event.html?id=${event.id}`; };
+    div.className = "event-card";
     
     // ФИНАЛЬНАЯ ВЕРСТКА КАРТОЧКИ + ВОССТАНОВЛЕННЫЕ КОММЕНТАРИИ
     div.innerHTML = `
