@@ -6,17 +6,16 @@ const SUPABASE_KEY = "sb_publishable_XoQ2Gi3bMJI9Bx226mg7GQ_z0S4XPAA";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // =================================================================
-// ЭЛЕМЕНТЫ СТРАНИЦЫ И ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+// ЭЛЕМЕНТЫ СТРАНИЦЫ
 // =================================================================
 const eventDetailContainer = document.getElementById('event-detail-container');
 let currentUser = null;
 
 // =================================================================
-// ЛОГИКА АВТОРИЗАЦИИ (такая же, как на главной)
+// АВТОРИЗАЦИЯ
 // =================================================================
 window.loginWithGoogle = async function() { await supabaseClient.auth.signInWithOAuth({ provider: 'google' }); };
 window.logout = async function() { await supabaseClient.auth.signOut(); };
-
 supabaseClient.auth.onAuthStateChange((event, session) => {
     currentUser = session ? session.user : null;
     const loginBtn = document.getElementById('loginBtn');
@@ -27,57 +26,39 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
     userInfo.textContent = session ? `Вы вошли как: ${session.user.email}` : '';
 });
 
+// =================================================================
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// =================================================================
+window.vote = async function(eventId, value) { if (!currentUser) { alert("Пожалуйста, войдите."); return; } await supabaseClient.from("votes").insert([{ event_id: eventId, value, user_id: currentUser.id }]); location.reload(); };
+window.addComment = async function(eventId) { if (!currentUser) { alert("Пожалуйста, войдите."); return; } const contentInput = document.getElementById('comment-input'); const content = contentInput.value.trim(); if (!content) return; const { error } = await supabaseClient.from('comments').insert([{ content, event_id: eventId, user_id: currentUser.id }]); if (!error) { location.reload(); } };
+
 
 // =================================================================
 // ГЛАВНАЯ ФУНКЦИЯ: ЗАГРУЗКА ДЕТАЛЕЙ СОБЫТИЯ
 // =================================================================
 async function loadEventDetails() {
-    // 1. "Вытаскиваем" ID из URL
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('id');
+    if (!eventId) { eventDetailContainer.innerHTML = `<p style="color: red; text-align: center;">Ошибка: ID события не найден в URL.</p>`; return; }
 
-    if (!eventId) {
-        eventDetailContainer.innerHTML = `<p style="color: red; text-align: center;">Ошибка: ID события не найден в URL.</p>`;
-        return;
-    }
+    const { data: event, error } = await supabaseClient.from('events').select(`id, title, description, city, event_date, created_by, image_url, rating, profiles ( full_name ), categories ( id, name ), comments(id, content, created_at, profiles(full_name)), votes(user_id, value)`).eq('id', eventId).single();
+    if (error || !event) { console.error('Ошибка загрузки события:', error); document.title = "Событие не найдено"; eventDetailContainer.innerHTML = `<p style="color: red; text-align: center;">Событие не найдено или произошла ошибка.</p>`; return; }
 
-    // 2. Делаем запрос к Supabase, чтобы получить ОДНО событие
-    const { data: event, error } = await supabaseClient
-        .from('events')
-        .select(`
-            id, title, description, city, event_date, created_by, image_url, rating,
-            profiles ( full_name ),
-            categories ( id, name )
-        `)
-        .eq('id', eventId)
-        .single(); // .single() говорит, что мы ожидаем только одну запись
-
-    if (error || !event) {
-        console.error('Ошибка загрузки события:', error);
-        document.title = "Событие не найдено";
-        eventDetailContainer.innerHTML = `<p style="color: red; text-align: center;">Событие не найдено или произошла ошибка.</p>`;
-        return;
-    }
-
-    // 3. Генерируем HTML и "рисуем" страницу
-    document.title = event.title; // Меняем заголовок вкладки
-
+    document.title = event.title;
     let dateString = 'Дата не указана';
-    if (event.event_date) {
-        dateString = new Date(event.event_date).toLocaleDateString('ru-RU', {
-            day: 'numeric', month: 'long', year: 'numeric'
-        });
-    }
-    
+    if (event.event_date) { dateString = new Date(event.event_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }); }
     let categoriesHtml = '';
-    if (event.categories && event.categories.length > 0) {
-        event.categories.forEach(cat => {
-            // Ссылка ведет на главную страницу с уже примененным фильтром
-            categoriesHtml += `<a href="/?category=${cat.id}" class="tag">${cat.name}</a>`;
-        });
-    }
-
+    if (event.categories && event.categories.length > 0) { event.categories.forEach(cat => { categoriesHtml += `<a href="/?category=${cat.id}" class="tag">${cat.name}</a>`; }); }
     const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
+    
+    // ЛОГИКА ДЛЯ ГОЛОСОВАНИЯ
+    const rating = event.rating;
+    let scoreClass = '', scoreIcon = '';
+    if (rating < 0) { scoreClass = 'score-cold'; scoreIcon = '❄️'; } else if (rating > 20) { scoreClass = 'score-fire'; scoreIcon = '🔥🔥'; } else if (rating > 5) { scoreClass = 'score-hot'; scoreIcon = '🔥'; }
+    const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
+
+    // ЛОГИКА ДЛЯ КОММЕНТАРИЕВ
+    const commentsHtml = '<ul class="comments-list">' + event.comments.sort((a,b) => new Date(a.created_at) - new Date(b.created_at)).map(comment => { const commentAuthor = comment.profiles ? comment.profiles.full_name : 'Аноним'; const commentDate = new Date(comment.created_at).toLocaleString('ru-RU'); return `<li class="comment"><span class="comment-author">${commentAuthor}</span><span class="comment-date">${commentDate}</span><p>${comment.content}</p></li>`; }).join('') + '</ul>';
 
     const eventHtml = `
         <div class="event-detail-header">
@@ -88,38 +69,35 @@ async function loadEventDetails() {
                 <p>Добавил: ${authorName}</p>
             </div>
         </div>
-        
         <div class="event-detail-body">
             <div class="event-detail-info">
                 <h2>Детали события</h2>
                 <div class="info-grid">
+                    <div class="info-item"><strong>📍 Город:</strong><span>${event.city || 'Онлайн'}</span></div>
+                    <div class="info-item"><strong>🗓️ Дата:</strong><span>${dateString}</span></div>
                     <div class="info-item">
-                        <strong>📍 Город:</strong>
-                        <span>${event.city || 'Онлайн'}</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>🗓️ Дата:</strong>
-                        <span>${dateString}</span>
+                        <strong>⭐ Рейтинг:</strong>
+                        <div class="vote" style="margin-top: 5px;">
+                            <button onclick="vote(${event.id}, 1)" ${hasVoted ? 'disabled' : ''}>▲</button>
+                            <span class="score ${scoreClass}">${rating} ${scoreIcon}</span>
+                            <button onclick="vote(${event.id}, -1)" ${hasVoted ? 'disabled' : ''}>▼</button>
+                        </div>
                     </div>
                 </div>
                 <h2>Описание</h2>
                 <p>${event.description || 'Описание отсутствует.'}</p>
+                <div class="comments-section">
+                    <h2>Комментарии</h2>
+                    ${commentsHtml}
+                    <form class="comment-form" onsubmit="addComment(${event.id}); return false;">
+                        <input id="comment-input" placeholder="Написать комментарий..." required>
+                        <button type="submit">Отправить</button>
+                    </form>
+                </div>
             </div>
             <div class="event-detail-sidebar">
-                <!-- Здесь в будущем будет карта -->
                 <h3>Место на карте</h3>
-                <div id="map-placeholder" style="width: 100%; height: 250px; background-color: #f0f2f5; border-radius: 8px; display:flex; align-items:center; justify-content:center; text-align:center; color:#888;">
-                    Интерактивная карта появится здесь
-                </div>
+                <div id="map-placeholder" style="width: 100%; height: 250px; background-color: #f0f2f5; border-radius: 8px; display:flex; align-items:center; justify-content:center; text-align:center; color:#888;">Интерактивная карта появится здесь</div>
             </div>
         </div>
     `;
-    
-    eventDetailContainer.innerHTML = eventHtml;
-}
-
-// =================================================================
-// ПЕРВЫЙ ЗАПУСК
-// =================================================================
-loadEventDetails();
-
