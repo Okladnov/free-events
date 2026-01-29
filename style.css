@@ -5,219 +5,72 @@
   --text-color: #333;
   --border-color: #e0e0e0;
 }
-
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: var(--background-color);
-  color: var(--text-color);
-}
-
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.header {
-  background-color: var(--primary-color);
-  color: white;
-  padding: 15px 20px;
-  margin-bottom: 30px;
-}
-.header-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--background-color); color: var(--text-color); }
+.container { max-width: 900px; margin: 0 auto; padding: 20px; }
+.header { background-color: var(--primary-color); color: white; padding: 15px 20px; margin-bottom: 30px; }
+.header-container { display: flex; justify-content: space-between; align-items: center; }
 .header-title h1 { margin: 0; font-size: 24px; }
 .header-title p { margin: 5px 0 0; opacity: 0.9; }
 .auth-block { text-align: right; }
 #user-info { font-size: 14px; margin-bottom: 8px; }
-.auth-block button {
-  background-color: white;
-  color: var(--primary-color);
-  padding: 8px 12px;
-  border: 1px solid white;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.card {
-  background-color: var(--card-background);
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-#add-event-form input, #add-event-form textarea {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  font-size: 16px;
-}
+.auth-block button { background-color: white; color: var(--primary-color); padding: 8px 12px; border: 1px solid white; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.card { background-color: var(--card-background); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+#add-event-form input, #add-event-form textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; }
 .form-row { display: flex; gap: 10px; align-items: center; }
 .form-row input { flex: 1; }
 .file-input-row { margin-top: 10px; }
-#add-event-form button {
-  width: 100%;
-  margin-top: 10px;
-  padding: 12px;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-}
+#add-event-form button { width: 100%; margin-top: 10px; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
 #add-event-form button:hover { background-color: #e65c00; }
 #message { margin-top: 10px; font-weight: bold; }
-
-.filters { display: flex; gap: 10px; align-items: center; }
+.filters { display: flex; gap: 10px; align-items: center; margin-top: 20px; }
 .filters input { flex-grow: 1; }
 .filters button.secondary { background-color: #6c757d; }
 .filters button.secondary:hover { background-color: #5a6268; }
-
-/* --- Новый дизайн карточек событий --- */
-.events-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px; /* Немного увеличим разрыв */
-}
-
-.event-card {
-  background-color: var(--card-background);
-  border-radius: 16px; /* Более скругленные углы */
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08); /* Чуть заметнее тень */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  cursor: pointer;
-}
-
-.event-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
-
-.event-card-image-container {
-  position: relative;
-  width: 100%;
-  padding-top: 56.25%; /* Соотношение сторон 16:9 */
-  background-color: #f0f2f5;
-}
-
-.event-card-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.event-card-date {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 8px 10px;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 14px;
-  text-align: center;
-  backdrop-filter: blur(5px); /* Эффект размытия */
-}
-.event-card-date span {
-  display: block;
-  line-height: 1.2;
-}
-.event-card-date .month {
-  font-size: 12px;
-  text-transform: uppercase;
-}
-
-.card-save-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.8);
-  border: none;
-  border-radius: 50%;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  backdrop-filter: blur(5px);
-}
-
-.card-content {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.card-content h3 {
-  margin: 0 0 8px;
-  font-size: 18px; /* Крупнее заголовок */
-  font-weight: 700;
-  line-height: 1.3;
-}
-.card-categories {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.card-categories .tag {
-  /* Мы используем тот же стиль .tag, что и на детальной странице */
-  /* но делаем его чуть меньше */
-  padding: 3px 8px;
-  font-size: 11px;
-}
-
-.card-content .meta {
-  display: flex;
-  flex-direction: column; /* Вертикальное расположение */
-  gap: 8px;
-  font-size: 14px;
-  color: #555;
-  margin-top: auto; /* Прижимаем мета-информацию вниз */
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Мы больше не используем .author, так как он теперь часть .meta */
-
-.vote { display: flex; align-items: center; gap: 10px; margin-top: auto; }
-.vote button {
-  background-color: #f0f0f0; border: 1px solid var(--border-color);
-  color: var(--text-color); border-radius: 50%;
-  width: 36px; height: 36px; font-size: 18px; cursor: pointer;
-}
-.vote button:hover { background-color: var(--primary-color); color: white; }
-.vote button:disabled { cursor: not-allowed; background-color: #e0e0e0; color: #aaa; }
-.score { font-size: 18px; font-weight: bold; }
-
-.comments-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f0f0; }
+.pills-container { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; -ms-overflow-style: none; scrollbar-width: none; }
+.pills-container::-webkit-scrollbar { display: none; }
+.category-pill { flex-shrink: 0; padding: 10px 20px; font-size: 15px; font-weight: 600; color: var(--text-color); background-color: #f0f2f5; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s ease-in-out; }
+.category-pill:hover { background-color: #e4e6eb; }
+.category-pill.active { background-color: var(--primary-color); color: white; }
+.categories-container { width: 100%; margin-top: 10px; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; }
+.categories-container p { margin: 0 0 10px; font-weight: bold; font-size: 14px; }
+.category-checkbox { display: inline-block; margin-right: 15px; margin-bottom: 10px; }
+.category-checkbox input { margin-right: 6px; }
+.events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+.event-card { background-color: var(--card-background); border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden; transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; cursor: pointer; }
+.event-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.event-card-image-container { position: relative; width: 100%; padding-top: 56.25%; background-color: #f0f2f5; }
+.event-card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+.event-card-date { position: absolute; top: 12px; left: 12px; background: rgba(0, 0, 0, 0.5); color: white; padding: 8px 10px; border-radius: 8px; font-weight: bold; font-size: 14px; text-align: center; backdrop-filter: blur(5px); }
+.event-card-date span { display: block; line-height: 1.2; }
+.event-card-date .month { font-size: 12px; text-transform: uppercase; }
+.card-save-btn { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; background: rgba(255, 255, 255, 0.8); border: none; border-radius: 50%; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(5px); }
+.card-admin-controls { position: absolute; top: 12px; right: 55px; display: flex; gap: 8px; z-index: 10;}
+.admin-btn { background: rgba(255, 255, 255, 0.9); border: 1px solid var(--border-color); border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.admin-btn:hover { background: white; transform: scale(1.1); }
+.card-content { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; }
+.card-content h3 { margin: 0 0 8px; font-size: 18px; font-weight: 700; line-height: 1.3; }
+.card-categories { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.card-categories .tag { padding: 3px 8px; font-size: 11px; }
+.card-content .meta { display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: #555; margin-top: auto; padding-top: 12px; border-top: 1px solid #f0f0f0; }
+.meta-item { display: flex; align-items: center; gap: 8px; }
+#pagination-controls { text-align: center; margin-top: 30px; }
+#load-more-btn { background-color: var(--primary-color); color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 6px; cursor: pointer; }
+#load-more-btn:hover { background-color: #e65c00; }
+#load-more-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+.footer { text-align: center; padding: 30px 20px; font-size: 14px; color: #888; }
+.event-detail-header { position: relative; margin-bottom: 30px; }
+.event-detail-image { width: 100%; height: 400px; object-fit: cover; border-radius: 16px; }
+.event-detail-title-card { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); width: 80%; max-width: 700px; background-color: white; border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); text-align: center; }
+.event-detail-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 10px; }
+.event-detail-tags .tag { text-decoration: none; }
+.event-detail-title-card h1 { margin: 0 0 5px; font-size: 28px; }
+.event-detail-title-card p { margin: 0; color: #666; font-size: 14px; }
+.event-detail-body { display: grid; grid-template-columns: 2fr 1fr; gap: 40px; margin-top: 50px; padding: 0 20px; }
+.event-detail-info h2 { font-size: 22px; border-bottom: 2px solid var(--primary-color); padding-bottom: 8px; margin-bottom: 15px; }
+.event-detail-info p { line-height: 1.7; white-space: pre-wrap; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+.info-item strong { display: block; margin-bottom: 5px; color: #555; }
+.comments-section { margin-top: 30px; }
 .comments-list { list-style: none; padding: 0; margin: 0 0 15px 0; }
 .comment { padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
 .comment:last-child { border-bottom: none; }
@@ -227,240 +80,7 @@ body {
 .comment-form { display: flex; gap: 10px; }
 .comment-form input { flex-grow: 1; margin-bottom: 0; }
 .comment-form button { width: auto; }
-
-#pagination-controls { text-align: center; margin-top: 30px; }
-#load-more-btn {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  font-size: 16px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-#load-more-btn:hover { background-color: #e65c00; }
-#load-more-btn:disabled { background-color: #ccc; cursor: not-allowed; }
-
-.footer { text-align: center; padding: 30px 20px; font-size: 14px; color: #888; }
-
-/* --- Стили для "температуры" событий --- */
-.score.score-cold { color: #007bff; }
-.score.score-hot { color: #ff9800; }
-.score.score-fire { color: #f44336; font-weight: bold; }
-
-/* --- Стили для кнопок управления событием --- */
-.card-admin-controls {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  display: flex;
-  gap: 8px;
-  z-index: 10; /* Чтобы кнопки были поверх картинки */
-}
-.admin-btn {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid var(--border-color);
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-}
-.admin-btn:hover {
-  background: white;
-  transform: scale(1.1);
-}
-/* --- Стили для ленты категорий --- */
-.pills-container {
-  display: flex;
-  overflow-x: auto; /* Включаем горизонтальный скролл */
-  gap: 10px;
-  padding: 10px 0 20px 0;
-  margin-bottom: 20px;
-  border-bottom: 1px solid var(--border-color);
-  -ms-overflow-style: none;  /* IE и Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-
-/* Прячем скроллбар в Chrome, Safari и Opera */
-.pills-container::-webkit-scrollbar {
-  display: none;
-}
-
-.category-pill {
-  flex-shrink: 0; /* Запрещаем кнопкам сжиматься */
-  padding: 10px 20px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-color);
-  background-color: #f0f2f5;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-
-.category-pill:hover {
-  background-color: #e4e6eb;
-}
-
-.category-pill.active {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-/* Стиль для активной кнопки */
-.sort-btn.active {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-  font-weight: bold;
-}
-/* --- Стили для выбора категорий --- */
-.categories-container {
-  width: 100%;
-  margin-top: 10px;
-  padding: 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-}
-.categories-container p {
-  margin: 0 0 10px;
-  font-weight: bold;
-  font-size: 14px;
-}
-.category-checkbox {
-  display: inline-block;
-  margin-right: 15px;
-  margin-bottom: 10px;
-}
-.category-checkbox input {
-  margin-right: 6px;
-}
-/* --- Стили для тегов категорий на карточке --- */
-.category-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 15px; /* Отступ от описания */
-}
-
-.tag {
-  background-color: #eee;
-  color: #333;
-  padding: 4px 10px;
-  border-radius: 15px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.tag:hover {
-  background-color: #ddd;
-}
-/* --- Стили для детальной страницы события (event.html) --- */
-
-.event-detail-header {
-  position: relative;
-  margin-bottom: 30px;
-}
-
-.event-detail-image {
-  width: 100%;
-  height: 400px; /* Фиксированная высота для большой картинки */
-  object-fit: cover;
-  border-radius: 16px;
-}
-
-.event-detail-title-card {
-  position: absolute;
-  bottom: -20px; /* "Вылезает" вниз */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  max-width: 700px;
-  background-color: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  text-align: center;
-}
-
-.event-detail-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 10px;
-}
-.event-detail-tags .tag { /* Используем уже существующий стиль .tag */
-  text-decoration: none;
-}
-
-.event-detail-title-card h1 {
-  margin: 0 0 5px;
-  font-size: 28px;
-}
-
-.event-detail-title-card p {
-  margin: 0;
-  color: #666;
-  font-size: 14px;
-}
-
-.event-detail-body {
-  display: grid;
-  grid-template-columns: 2fr 1fr; /* 2/3 под контент, 1/3 под сайдбар */
-  gap: 40px;
-  margin-top: 50px; /* Отступ от "вылезающей" карточки */
-  padding: 0 20px;
-}
-
-.event-detail-info h2 {
-  font-size: 22px;
-  border-bottom: 2px solid var(--primary-color);
-  padding-bottom: 8px;
-  margin-bottom: 15px;
-}
-
-.event-detail-info p {
-  line-height: 1.7;
-  white-space: pre-wrap; /* Сохраняем переносы строк из описания */
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-}
-.info-item strong {
-  display: block;
-  margin-bottom: 5px;
-  color: #555;
-}
-
-/* Адаптация для мобильных */
-@media (max-width: 768px) {
-  .event-detail-body {
-    grid-template-columns: 1fr; /* Одна колонка на мобильных */
-  }
-  .event-detail-title-card {
-    width: 90%;
-    bottom: -15px;
-  }
-  .event-detail-title-card h1 {
-    font-size: 22px;
-  }
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-}
+.tag { background-color: #eee; color: #333; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: 500; cursor: pointer; transition: background-color 0.2s; }
+.tag:hover { background-color: #ddd; }
+.tag.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+@media (max-width: 768px) { .event-detail-body { grid-template-columns: 1fr; } .event-detail-title-card { width: 90%; bottom: -15px; } .event-detail-title-card h1 { font-size: 22px; } .info-grid { grid-template-columns: 1fr; } }
