@@ -3,14 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Title будет меняться с помощью JavaScript -->
   <title>Загрузка события...</title>
-  <!-- Мы будем использовать те же стили, что и на главной -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<!-- Шапка будет такой же, как на главной, но без фильтров -->
 <header class="header">
   <div class="container header-container">
     <div class="header-title">
@@ -28,17 +25,14 @@
 </header>
 
 <main class="container">
-  <!-- Это главный контейнер для нашего события -->
   <div id="event-detail-container">
-    <!-- Сюда JavaScript будет вставлять всю информацию о событии -->
     <p style="text-align: center; font-size: 18px;">Загрузка данных о событии...</p>
   </div>
 </main>
 
 <footer class="footer">© 2026 · Бесплатные события</footer>
 
-<!-- Подключаем Supabase и наш новый скрипт -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="event.js"></script> <!-- Обрати внимание, скрипт называется event.js! -->
+<script src="event.js"></script>
 </body>
 </html>
