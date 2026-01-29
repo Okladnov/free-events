@@ -23,53 +23,42 @@
 </header>
 
 <main class="container">
-  <!-- Форма добавления -->
   <section class="card">
     <h2>Добавить событие</h2>
     <form id="add-event-form">
-  <input id="title" placeholder="Название события" required>
-  <textarea id="description" placeholder="Описание"></textarea>
-  <div class="form-row">
-    <input id="city" placeholder="Город">
-    <input id="date" type="date">
-  </div>
-  <div class="form-row file-input-row">
-    <label for="image-input">Изображение (постер, афиша):</label>
-    <input id="image-input" type="file" accept="image/*">
-  </div>
-
-  <!-- ВОТ СЮДА ВСТАВЛЯЕМ НАШ НОВЫЙ БЛОК -->
-  <div class="form-row">
-    <div id="categories-container" class="categories-container">
-      <p>Выберите категорию (одну или несколько):</p>
-      <!-- Сюда будут загружены чекбоксы категорий -->
-    </div>
-  </div>
-
-  <button type="submit">Добавить</button>
-  <p id="message"></p>
-</form>
+      <input id="title" placeholder="Название события" required>
+      <textarea id="description" placeholder="Описание"></textarea>
+      <div class="form-row">
+        <input id="city" placeholder="Город">
+        <input id="date" type="date">
+      </div>
+      <div class="form-row file-input-row">
+        <label for="image-input">Изображение (постер, афиша):</label>
+        <input id="image-input" type="file" accept="image/*">
+      </div>
+      <div class="form-row">
+        <div id="categories-container" class="categories-container">
+          <!-- Сюда будут загружены чекбоксы категорий -->
+        </div>
+      </div>
+      <button type="submit">Добавить</button>
+      <p id="message"></p>
+    </form>
   </section>
 
-  <!-- Поиск и фильтры -->
   <section class="card">
-  <h2>🔍 Поиск и фильтры</h2>
-  
-  <!-- НАША НОВАЯ ЛЕНТА БУДЕТ ЗДЕСЬ -->
-  <div id="category-pills-container" class="pills-container">
-    <!-- JavaScript будет заполнять это место -->
-  </div>
+    <h2>🔍 Поиск и фильтры</h2>
+    <div id="category-pills-container" class="pills-container">
+      <!-- JavaScript будет заполнять это место -->
+    </div>
+    <div class="filters">
+      <input id="search-input" placeholder="Поиск по названию...">
+      <input id="city-filter" placeholder="Фильтр по городу...">
+      <button onclick="loadEvents(true)">Найти</button>
+      <button class="secondary" onclick="resetFilters()">Сбросить</button>
+    </div>
+  </section>
 
-  <div class="filters">
-    <input id="search-input" placeholder="Поиск по названию...">
-    <input id="city-filter" placeholder="Фильтр по городу...">
-    <button onclick="loadEvents(true)">Найти</button>
-    <button class="secondary" onclick="resetFilters()">Сбросить</button>
-  </div>
-</section>
-
-
-  <!-- Список событий -->
   <section>
     <h2>Список событий</h2>
     <div id="events" class="events-grid">Загрузка событий...</div>
