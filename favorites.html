@@ -29,7 +29,8 @@ async function removeFromFavorites(eventId, buttonElement) {
         alert('Не удалось удалить событие из избранного.');
         buttonElement.disabled = false;
     } else {
-        const card = buttonElement.closest('.event-card');
+        // ИСПРАВЛЕНИЕ ЗДЕСЬ
+        const card = buttonElement.parentElement.parentElement;
         if (card) {
             card.style.transition = 'opacity 0.5s ease';
             card.style.opacity = '0';
