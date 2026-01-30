@@ -29,6 +29,38 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 // =================================================================
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // =================================================================
+window.toggleFavorite = async function(eventId, isCurrentlyFavorited, buttonElement) {
+    if (!currentUser) {
+        alert('Пожалуйста, войдите, чтобы добавлять в избранное.');
+        return;
+    }
+    buttonElement.disabled = true;
+
+    if (isCurrentlyFavorited) {
+        const { error } = await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id });
+        if (error) {
+            console.error('Ошибка удаления из избранного:', error);
+            buttonElement.disabled = false;
+        } else {
+            buttonElement.innerHTML = '🤍';
+            buttonElement.classList.remove('active');
+            buttonElement.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, false, this)`);
+            buttonElement.disabled = false;
+        }
+    } else {
+        const { error } = await supabaseClient.from('favorites').insert({ event_id: eventId, user_id: currentUser.id });
+        if (error) {
+            console.error('Ошибка добавления в избранное:', error);
+            buttonElement.disabled = false;
+        } else {
+            buttonElement.innerHTML = '❤️';
+            buttonElement.classList.add('active');
+            buttonElement.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, true, this)`);
+            buttonElement.disabled = false;
+        }
+    }
+}
+
 window.vote = async function(eventId, value) { if (!currentUser) { alert("Пожалуйста, войдите."); return; } await supabaseClient.from("votes").insert([{ event_id: eventId, value, user_id: currentUser.id }]); location.reload(); };
 window.addComment = async function(eventId) { if (!currentUser) { alert("Пожалуйста, войдите."); return; } const contentInput = document.getElementById('comment-input'); const content = contentInput.value.trim(); if (!content) return; const { error } = await supabaseClient.from('comments').insert([{ content, event_id: eventId, user_id: currentUser.id }]); if (!error) { location.reload(); } };
 
