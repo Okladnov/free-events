@@ -105,6 +105,12 @@ async function loadEventDetails() {
         const commentDate = new Date(comment.created_at).toLocaleString('ru-RU');
         return `<li class="comment"><span class="comment-author">${commentAuthor}</span><span class="comment-date">${commentDate}</span><p>${comment.content}</p></li>`;
     }).join('') + '</ul>';
+let isFavorited = false;
+if (currentUser && event.favorites) {
+    isFavorited = event.favorites.some(fav => fav.user_id === currentUser.id);
+}
+const favoriteIcon = isFavorited ? '❤️' : '🤍';
+const favoriteClass = isFavorited ? 'active' : '';
 
     const eventHtml = `
         <div class="event-detail-header">
