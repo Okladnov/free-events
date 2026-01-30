@@ -93,17 +93,39 @@ window.editEvent = async function(eventId) { const { data: event, error: fetchEr
 window.resetFilters = function() { searchInput.value = ''; cityFilter.value = ''; setCategoryFilter(null); };
 window.setCategoryFilter = function(categoryId) { if (currentCategoryId === categoryId) return; currentCategoryId = categoryId; document.querySelectorAll('.category-pill').forEach(pill => pill.classList.remove('active')); if (categoryId) { document.getElementById(`cat-pill-${categoryId}`).classList.add('active'); } else { document.getElementById('cat-pill-all').classList.add('active'); } loadEvents(true); };
 
+// --- НОВАЯ ФУНКЦИЯ ДЛЯ "ИЗБРАННОГО" ---
 window.toggleFavorite = async function(eventId, isCurrentlyFavorited) {
     if (!currentUser) {
         alert('Пожалуйста, войдите, чтобы добавлять в избранное.');
         return;
     }
+    const button = document.querySelector(`[onclick*="toggleFavorite(${eventId},"]`);
+    button.disabled = true; // Блокируем кнопку на время запроса
+
     if (isCurrentlyFavorited) {
         const { error } = await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id });
-        if (error) console.error('Ошибка удаления из избранного:', error); else loadEvents(true);
+        if (error) {
+            console.error('Ошибка удаления из избранного:', error);
+            button.disabled = false;
+        } else {
+            // Обновляем иконку "на лету" без перезагрузки
+            button.innerHTML = '🤍';
+            button.classList.remove('active');
+            button.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, false)`);
+            button.disabled = false;
+        }
     } else {
         const { error } = await supabaseClient.from('favorites').insert({ event_id: eventId, user_id: currentUser.id });
-        if (error) console.error('Ошибка добавления в избранное:', error); else loadEvents(true);
+        if (error) {
+            console.error('Ошибка добавления в избранное:', error);
+            button.disabled = false;
+        } else {
+            // Обновляем иконку "на лету"
+            button.innerHTML = '❤️';
+            button.classList.add('active');
+            button.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, true)`);
+            button.disabled = false;
+        }
     }
 }
 
