@@ -32,25 +32,18 @@ let currentCategoryId = null;
 // =================================================================
 window.loginWithGoogle = async function() { await supabaseClient.auth.signInWithOAuth({ provider: 'google' }); };
 window.logout = async function() { await supabaseClient.auth.signOut(); };
-
 supabaseClient.auth.onAuthStateChange((event, session) => {
   currentUser = session ? session.user : null;
-  
-  // Находим все элементы один раз
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
   const userInfo = document.getElementById('user-info');
   const favoritesLink = document.getElementById('favorites-link');
-
-  // Управляем видимостью
   loginBtn.style.display = session ? 'none' : 'block';
   logoutBtn.style.display = session ? 'block' : 'none';
   userInfo.textContent = session ? `Вы вошли как: ${session.user.email}` : '';
-  favoritesLink.style.display = session ? 'inline' : 'none'; // 'inline' чтобы ссылка была в строке
-
+  favoritesLink.style.display = session ? 'inline' : 'none';
   loadEvents(true);
 });
-
 
 // =================================================================
 // ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ
@@ -105,38 +98,33 @@ window.editEvent = async function(eventId) { const { data: event, error: fetchEr
 window.resetFilters = function() { searchInput.value = ''; cityFilter.value = ''; setCategoryFilter(null); };
 window.setCategoryFilter = function(categoryId) { if (currentCategoryId === categoryId) return; currentCategoryId = categoryId; document.querySelectorAll('.category-pill').forEach(pill => pill.classList.remove('active')); if (categoryId) { document.getElementById(`cat-pill-${categoryId}`).classList.add('active'); } else { document.getElementById('cat-pill-all').classList.add('active'); } loadEvents(true); };
 
-// --- НОВАЯ ФУНКЦИЯ ДЛЯ "ИЗБРАННОГО" ---
-window.toggleFavorite = async function(eventId, isCurrentlyFavorited) {
+window.toggleFavorite = async function(eventId, isCurrentlyFavorited, buttonElement) {
     if (!currentUser) {
         alert('Пожалуйста, войдите, чтобы добавлять в избранное.');
         return;
     }
-    const button = document.querySelector(`[onclick*="toggleFavorite(${eventId},"]`);
-    button.disabled = true; // Блокируем кнопку на время запроса
-
+    buttonElement.disabled = true;
     if (isCurrentlyFavorited) {
         const { error } = await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id });
         if (error) {
             console.error('Ошибка удаления из избранного:', error);
-            button.disabled = false;
+            buttonElement.disabled = false;
         } else {
-            // Обновляем иконку "на лету" без перезагрузки
-            button.innerHTML = '🤍';
-            button.classList.remove('active');
-            button.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, false)`);
-            button.disabled = false;
+            buttonElement.innerHTML = '🤍';
+            buttonElement.classList.remove('active');
+            buttonElement.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, false, this)`);
+            buttonElement.disabled = false;
         }
     } else {
         const { error } = await supabaseClient.from('favorites').insert({ event_id: eventId, user_id: currentUser.id });
         if (error) {
             console.error('Ошибка добавления в избранное:', error);
-            button.disabled = false;
+            buttonElement.disabled = false;
         } else {
-            // Обновляем иконку "на лету"
-            button.innerHTML = '❤️';
-            button.classList.add('active');
-            button.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, true)`);
-            button.disabled = false;
+            buttonElement.innerHTML = '❤️';
+            buttonElement.classList.add('active');
+            buttonElement.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, true, this)`);
+            buttonElement.disabled = false;
         }
     }
 }
@@ -153,19 +141,14 @@ async function loadEvents(isNewSearch = false) {
   const city = cityFilter.value.trim();
   const from = currentPage * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
-  
   const selectString = `id, title, description, city, event_date, created_by, image_url, rating, profiles ( full_name ), favorites ( user_id ), categories${currentCategoryId ? '!inner' : ''} ( id, name )`;
   let query = supabaseClient.from("events").select(selectString, { count: 'exact' }).eq('is_approved', true);
-  
   if (searchTerm) { query = query.ilike('title', `%${searchTerm}%`); }
   if (city) { query = query.ilike('city', `%${city}%`); }
   if (currentCategoryId) { query = query.eq('categories.id', currentCategoryId); }
-  
   query = query.order('created_at', { ascending: false }).range(from, to);
-
   const { data, error, count } = await query;
   if (error) { console.error("Ошибка загрузки:", error); eventsContainer.innerHTML = "Ошибка загрузки."; return; }
-  
   if (isNewSearch) {
     eventsContainer.innerHTML = "";
     if (!data || data.length === 0) {
@@ -176,29 +159,22 @@ async function loadEvents(isNewSearch = false) {
       return;
     }
   }
-
   data.forEach(event => {
     const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
     let dateHtml = '';
     if (event.event_date) { const d = new Date(event.event_date); const day = d.getDate(); const month = d.toLocaleString('ru-RU', { month: 'short' }).replace('.', ''); dateHtml = `<div class="event-card-date"><span class="day">${day}</span><span class="month">${month}</span></div>`; }
-    
     let adminControls = '';
     if (currentUser && currentUser.id === event.created_by) { adminControls = `<div class="card-admin-controls"><button class="admin-btn" onclick="event.stopPropagation(); editEvent(${event.id})">✏️</button><button class="admin-btn" onclick="event.stopPropagation(); deleteEvent(${event.id})">🗑️</button></div>`; }
-    
     let categoriesHtml = '';
     if (event.categories && event.categories.length > 0) {
       categoriesHtml = '<div class="card-categories">';
       event.categories.forEach(cat => { categoriesHtml += `<span class="tag" onclick="event.stopPropagation(); setCategoryFilter(${cat.id})">${cat.name}</span>`; });
       categoriesHtml += '</div>';
     }
-
     let isFavorited = false;
-    if (currentUser && event.favorites) {
-      isFavorited = event.favorites.some(fav => fav.user_id === currentUser.id);
-    }
+    if (currentUser && event.favorites) { isFavorited = event.favorites.some(fav => fav.user_id === currentUser.id); }
     const favoriteIcon = isFavorited ? '❤️' : '🤍';
     const favoriteClass = isFavorited ? 'active' : '';
-
     const div = document.createElement("div");
     div.onclick = () => { window.location.href = `event.html?id=${event.id}`; };
     div.className = "event-card";
@@ -206,7 +182,7 @@ async function loadEvents(isNewSearch = false) {
       <div class="event-card-image-container">
         <img src="${event.image_url || 'https://placehold.co/600x337/f0f2f5/ff6a00?text=Нет+фото'}" alt="${event.title}" class="event-card-image">
         ${dateHtml}
-        <button class="card-save-btn ${favoriteClass}" onclick="event.stopPropagation(); toggleFavorite(${event.id}, ${isFavorited})">${favoriteIcon}</button>
+        <button class="card-save-btn ${favoriteClass}" onclick="event.stopPropagation(); toggleFavorite(${event.id}, ${isFavorited}, this)">${favoriteIcon}</button>
         ${adminControls}
       </div>
       <div class="card-content">
@@ -226,7 +202,6 @@ async function loadEvents(isNewSearch = false) {
       </div>`;
     eventsContainer.appendChild(div);
   });
-
   paginationControls.innerHTML = "";
   const totalLoaded = document.querySelectorAll('.event-card').length;
   if (count > totalLoaded) { const loadMoreBtn = document.createElement('button'); loadMoreBtn.textContent = 'Загрузить еще'; loadMoreBtn.id = 'load-more-btn'; loadMoreBtn.onclick = () => { currentPage++; loadEvents(false); }; paginationControls.appendChild(loadMoreBtn); }
