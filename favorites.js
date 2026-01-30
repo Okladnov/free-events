@@ -15,36 +15,6 @@ const eventsContainer = document.getElementById("events");
 let currentUser = null;
 
 // =================================================================
-// АВТОРИЗАЦИЯ
-// =================================================================
-window.loginWithGoogle = async function() { await supabaseClient.auth.signInWithOAuth({ provider: 'google' }); };
-window.logout = async function() { await supabaseClient.auth.signOut(); };
-
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  currentUser = session ? session.user : null;
-
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const userInfo = document.getElementById('user-info');
-  const favoritesLink = document.getElementById('favorites-link');
-
-  loginBtn.style.display = session ? 'none' : 'block';
-  logoutBtn.style.display = session ? 'block' : 'none';
-  userInfo.textContent = session ? `Вы вошли как: ${session.user.email}` : '';
-  favoritesLink.style.display = session ? 'inline' : 'none';
-
-  // Загружаем избранное только если пользователь вошел в систему
-  if (currentUser) {
-    loadFavoriteEvents();
-  } else {
-    // Прячем старые события, если пользователь вышел, и показываем сообщение
-    const eventsContainer = document.getElementById("events");
-    eventsContainer.innerHTML = '<p>Пожалуйста, <a href="#" onclick="loginWithGoogle(); return false;">войдите в свой аккаунт</a>, чтобы увидеть избранные события.</p>';
-  }
-});
-
-
-// =================================================================
 // ГЛАВНАЯ ФУНКЦИЯ: ЗАГРУЗКА ИЗБРАННЫХ СОБЫТИЙ
 // =================================================================
 async function loadFavoriteEvents() {
@@ -67,7 +37,6 @@ async function loadFavoriteEvents() {
         return;
     }
 
-    // "Вытаскиваем" только сами ID в чистый массив: [12, 42, 55]
     const ids = favoriteIds.map(item => item.event_id);
 
     // 2. Теперь загружаем события, ID которых есть в нашем массиве
@@ -79,7 +48,7 @@ async function loadFavoriteEvents() {
             favorites ( user_id ),
             categories ( id, name )
         `)
-        .in('id', ids) // .in() - это команда "где id находится в этом массиве"
+        .in('id', ids)
         .order('created_at', { ascending: false });
 
     if (eventsError) {
@@ -88,9 +57,8 @@ async function loadFavoriteEvents() {
         return;
     }
 
-    eventsContainer.innerHTML = ""; // Очищаем контейнер
+    eventsContainer.innerHTML = "";
 
-    // 3. Используем ТОТ ЖЕ КОД ОТРИСОВКИ, что и на главной (но без лишних функций)
     events.forEach(event => {
         let dateHtml = '';
         if (event.event_date) { const d = new Date(event.event_date); const day = d.getDate(); const month = d.toLocaleString('ru-RU', { month: 'short' }).replace('.', ''); dateHtml = `<div class="event-card-date"><span class="day">${day}</span><span class="month">${month}</span></div>`; }
@@ -104,7 +72,7 @@ async function loadFavoriteEvents() {
             categoriesHtml += '</div>';
         }
 
-        const isFavorited = true; // Все события на этой странице - избранные
+        const isFavorited = true;
         const favoriteIcon = '❤️';
         const favoriteClass = 'active';
 
@@ -135,3 +103,24 @@ async function loadFavoriteEvents() {
         eventsContainer.appendChild(div);
     });
 }
+
+// =================================================================
+// АВТОРИЗАЦИЯ
+// =================================================================
+window.loginWithGoogle = async function() { await supabaseClient.auth.signInWithOAuth({ provider: 'google' }); };
+window.logout = async function() { await supabaseClient.auth.signOut(); };
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  currentUser = session ? session.user : null;
+
+  loginBtn.style.display = session ? 'none' : 'block';
+  logoutBtn.style.display = session ? 'block' : 'none';
+  userInfo.textContent = session ? `Вы вошли как: ${session.user.email}` : '';
+  document.getElementById('favorites-link').style.display = session ? 'inline' : 'none';
+
+  if (currentUser) {
+    loadFavoriteEvents();
+  } else {
+    eventsContainer.innerHTML = '<p>Пожалуйста, <a href="#" onclick="loginWithGoogle(); return false;">войдите в свой аккаунт</a>, чтобы увидеть избранные события.</p>';
+  }
+});
