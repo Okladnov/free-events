@@ -145,6 +145,7 @@ async function loadEvents(isNewSearch = false) {
   const to = from + PAGE_SIZE - 1;
   const selectString = `id, title, description, city, event_date, created_by, image_url, rating, profiles ( full_name ), favorites ( user_id ), categories${currentCategoryId ? '!inner' : ''} ( id, name )`;
   let query = supabaseClient.from("events").select(selectString, { count: 'exact' }).eq('is_approved', true);
+  query = query.eq('is_approved', true);
   if (searchTerm) { query = query.ilike('title', `%${searchTerm}%`); }
   if (city) { query = query.ilike('city', `%${city}%`); }
   if (currentCategoryId) { query = query.eq('categories.id', currentCategoryId); }
