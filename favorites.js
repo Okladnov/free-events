@@ -22,17 +22,27 @@ window.logout = async function() { await supabaseClient.auth.signOut(); };
 
 supabaseClient.auth.onAuthStateChange((event, session) => {
   currentUser = session ? session.user : null;
+
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const userInfo = document.getElementById('user-info');
+  const favoritesLink = document.getElementById('favorites-link');
+
   loginBtn.style.display = session ? 'none' : 'block';
   logoutBtn.style.display = session ? 'block' : 'none';
   userInfo.textContent = session ? `Вы вошли как: ${session.user.email}` : '';
-  
+  favoritesLink.style.display = session ? 'inline' : 'none';
+
   // Загружаем избранное только если пользователь вошел в систему
   if (currentUser) {
     loadFavoriteEvents();
   } else {
+    // Прячем старые события, если пользователь вышел, и показываем сообщение
+    const eventsContainer = document.getElementById("events");
     eventsContainer.innerHTML = '<p>Пожалуйста, <a href="#" onclick="loginWithGoogle(); return false;">войдите в свой аккаунт</a>, чтобы увидеть избранные события.</p>';
   }
 });
+
 
 // =================================================================
 // ГЛАВНАЯ ФУНКЦИЯ: ЗАГРУЗКА ИЗБРАННЫХ СОБЫТИЙ
