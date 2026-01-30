@@ -87,3 +87,7 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Ro
 .card-save-btn.active {
   color: #e74c3c; /* Красный цвет для "лайка" */
 }
+/* Стиль для активной кнопки "В избранное" */
+.card-save-btn.active {
+  color: #e74c3c; /* Красный цвет для "лайка" */
+}
