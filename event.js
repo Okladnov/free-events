@@ -115,6 +115,7 @@ const favoriteClass = isFavorited ? 'active' : '';
     const eventHtml = `
         <div class="event-detail-header">
             <img src="${event.image_url || 'https://placehold.co/1200x600/f0f2f5/ff6a00?text=Нет+фото'}" alt="${event.title}" class="event-detail-image">
+            <button class="card-save-btn ${favoriteClass}" onclick="event.stopPropagation(); toggleFavorite(${event.id}, ${isFavorited}, this)">${favoriteIcon}</button>
             <div class="event-detail-title-card">
                 <div class="event-detail-tags">${categoriesHtml}</div>
                 <h1>${event.title}</h1>
