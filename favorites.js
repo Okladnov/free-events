@@ -13,6 +13,29 @@ const logoutBtn = document.getElementById('logoutBtn');
 const userInfo = document.getElementById('user-info');
 const eventsContainer = document.getElementById("events");
 let currentUser = null;
+// =================================================================
+// УДАЛЕНИЕ ИЗ ИЗБРАННОГО
+// =================================================================
+async function removeFromFavorites(eventId, buttonElement) {
+    if (!currentUser) {
+        alert('Вы не авторизованы.');
+        return;
+    }
+    buttonElement.disabled = true;
+    const { error } = await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id });
+    if (error) {
+        console.error('Ошибка удаления из избранного:', error);
+        alert('Не удалось удалить событие из избранного.');
+        buttonElement.disabled = false;
+    } else {
+        const card = buttonElement.closest('.event-card');
+        if (card) {
+            card.style.transition = 'opacity 0.5s ease';
+            card.style.opacity = '0';
+            setTimeout(() => card.remove(), 500);
+        }
+    }
+}
 
 // =================================================================
 // ГЛАВНАЯ ФУНКЦИЯ: ЗАГРУЗКА ИЗБРАННЫХ СОБЫТИЙ
