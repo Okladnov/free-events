@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Мое избранное</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-container">
+    <div class="header-title">
+      <a href="/" style="color: white; text-decoration: none;">
+        <h1>🎉 Бесплатные события</h1>
+        <p>Городские мероприятия без затрат</p>
+      </a>
+    </div>
+    <div class="auth-block">
+      <div id="user-info"></div>
+      <!-- Ссылку на "Избранное" добавим сюда позже -->
+      <button id="loginBtn" onclick="loginWithGoogle()">Войти через Google</button>
+      <button id="logoutBtn" onclick="logout()" style="display: none;">Выйти</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section>
+    <!-- Заголовок страницы -->
+    <h2 style="font-size: 28px; margin-bottom: 30px;">❤️ Мое избранное</h2>
+    
+    <!-- Сюда будем выводить карточки избранных событий -->
+    <div id="events" class="events-grid">Загрузка ваших избранных событий...</div>
+    
+    <!-- Пагинация нам здесь, скорее всего, не понадобится, но оставим контейнер на всякий случай -->
+    <div id="pagination-controls"></div>
+  </section>
+</main>
+
+<footer class="footer">© 2026 · Бесплатные события</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Обрати внимание, скрипт называется favorites.js! -->
+<script src="favorites.js"></script> 
+</body>
+</html>
