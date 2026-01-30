@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Админка: Модерация событий</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="/favicon.ico" sizes="any">
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-container">
+    <div class="header-title">
+      <a href="/" style="color: white; text-decoration: none;">
+        <h1>🛡️ Панель Модерации</h1>
+        <p>Только для админов</p>
+      </a>
+    </div>
+    <div class="auth-block">
+      <div id="user-info"></div>
+      <button id="logoutBtn" onclick="logout()" style="display: none;">Выйти</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="card">
+    <h2>События, ожидающие одобрения</h2>
+    <div id="unapproved-events">
+      <p>Загрузка списка событий для модерации...</p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">© 2026 · Админка</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin.js"></script> 
+
+</body>
+</html>
