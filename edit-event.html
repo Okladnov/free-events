@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Редактирование события...</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-container">
+    <div class="header-title">
+      <a href="/" style="color: white; text-decoration: none;">
+        <h1>🎉 Бесплатные события</h1>
+        <p>Городские мероприятия без затрат</p>
+      </a>
+    </div>
+    <div class="auth-block">
+      <div id="user-info"></div>
+      <button id="loginBtn" onclick="loginWithGoogle()">Войти через Google</button>
+      <button id="logoutBtn" onclick="logout()" style="display: none;">Выйти</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section id="edit-form-container" class="card">
+    <h2>✏️ Редактирование события</h2>
+    <p id="message">Загрузка данных для редактирования...</p>
+    <!-- Форма редактирования будет вставлена сюда с помощью JavaScript -->
+  </section>
+</main>
+
+<footer class="footer">© 2026 · Бесплатные события</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="edit-event.js"></script> 
+
+</body>
+</html>
