@@ -32,13 +32,25 @@ let currentCategoryId = null;
 // =================================================================
 window.loginWithGoogle = async function() { await supabaseClient.auth.signInWithOAuth({ provider: 'google' }); };
 window.logout = async function() { await supabaseClient.auth.signOut(); };
+
 supabaseClient.auth.onAuthStateChange((event, session) => {
   currentUser = session ? session.user : null;
+  
+  // Находим все элементы один раз
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const userInfo = document.getElementById('user-info');
+  const favoritesLink = document.getElementById('favorites-link');
+
+  // Управляем видимостью
   loginBtn.style.display = session ? 'none' : 'block';
   logoutBtn.style.display = session ? 'block' : 'none';
   userInfo.textContent = session ? `Вы вошли как: ${session.user.email}` : '';
+  favoritesLink.style.display = session ? 'inline' : 'none'; // 'inline' чтобы ссылка была в строке
+
   loadEvents(true);
 });
+
 
 // =================================================================
 // ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ
