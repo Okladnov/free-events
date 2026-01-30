@@ -75,7 +75,7 @@ async function loadEventDetails() {
         return;
     }
 
-    const { data: event, error: eventError } = await supabaseClient.from('events').select(`id, title, description, city, event_date, created_by, image_url, rating, profiles ( full_name ), categories ( id, name ), votes(user_id, value)`).eq('id', eventId).single();
+   const { data: event, error: eventError } = await supabaseClient.from('events').select(`id, title, description, city, event_date, created_by, image_url, rating, profiles ( full_name ), categories ( id, name ), votes(user_id, value), favorites(user_id)`).eq('id', eventId).single();
     if (eventError || !event) {
         console.error('Ошибка загрузки события:', eventError);
         document.title = "Событие не найдено";
