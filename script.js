@@ -90,7 +90,9 @@ addEventForm.addEventListener('submit', async (event) => {
 // УПРАВЛЕНИЕ СОБЫТИЕМ (РЕДАКТИРОВАНИЕ, УДАЛЕНИЕ)
 // =================================================================
 window.deleteEvent = async function(eventId) { if (confirm("Вы уверены, что хотите удалить это событие?")) { const { error } = await supabaseClient.from('events').delete().match({ id: eventId }); if (error) { console.error('Ошибка удаления:', error); alert('Не удалось удалить событие.'); } } };
-window.editEvent = async function(eventId) { const { data: event, error: fetchError } = await supabaseClient.from('events').select().eq('id', eventId).single(); if (fetchError || !event) { alert('Не удалось загрузить данные для редактирования.'); return; } const newTitle = prompt("Редактировать название:", event.title); if (newTitle === null) return; const newDescription = prompt("Редактировать описание:", event.description); const newCity = prompt("Редактировать город:", event.city); const newDate = prompt("Редактировать дату (ГГГГ-ММ-ДД):", event.event_date); const { error: updateError } = await supabaseClient.from('events').update({ title: newTitle.trim(), description: newDescription.trim(), city: newCity.trim(), event_date: newDate || null }).match({ id: eventId }); if (updateError) { console.error('Ошибка обновления:', updateError); alert('Не удалось обновить событие.'); } };
+window.editEvent = function(eventId) {
+    window.location.href = `edit-event.html?id=${eventId}`;
+};
 
 // =================================================================
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
