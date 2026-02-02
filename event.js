@@ -2,7 +2,7 @@
 // ПОДКЛЮЧЕНИЕ К SUPABASE
 // =================================================================
 const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
-const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
+const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D"; 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // =================================================================
