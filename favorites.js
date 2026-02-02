@@ -124,12 +124,12 @@ async function loadFavoriteEvents(isInitialLoad = false) {
             <button class="card-save-btn active" onclick="event.stopPropagation(); removeFromFavorites(${event.id}, this)">❤️</button>
           </div>
           <div class="card-content" onclick="window.location.href = 'event.html?id=${event.id}'">
-            <h3>${event.title}</h3>
+            <h3>${sanitizeHTML(event.title)}</h3>
             ${categoriesHtml}
-            <p>${event.description || 'Нет описания.'}</p>
+            <p>${sanitizeHTML(event.description) || 'Нет описания.'}</p>
             <div class="meta">
-                <div class="meta-item"><span>📍</span><span>${event.city || 'Онлайн'}</span></div>
-                <div class="meta-item"><span>👤</span><span>Добавил: ${event.profiles ? event.profiles.full_name : 'Аноним'}</span></div>
+                <div class="meta-item"><span>📍</span><span>${sanitizeHTML(event.city) || 'Онлайн'}</span>
+                <div class="meta-item"><span>👤</span><span>Добавил: ${event.profiles ? sanitizeHTML(event.profiles.full_name) : 'Аноним'}</span>
             </div>
           </div>`;
         eventsContainer.appendChild(div);
