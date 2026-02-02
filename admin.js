@@ -1,8 +1,8 @@
 // =================================================================
-// ПОДКЛЮЧЕНИЕ К SUPABASE (С ТВОИМ НОВЫМ КЛЮЧОМ)
+// ПОДКЛЮЧЕНИЕ К SUPABASE
 // =================================================================
 const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
-const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D"; // <--- ТВОЙ КЛЮЧ
+const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D"; // Твой последний рабочий ключ
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // =================================================================
@@ -39,7 +39,6 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
         const { data: isAdmin, error } = await supabaseClient.rpc('is_admin');
 
         if (error) {
-            console.error('Ошибка при вызове is_admin:', error);
             showAccessDenied('Критическая ошибка при проверке прав.');
             return;
         }
@@ -67,7 +66,6 @@ async function loadUnapprovedEvents() {
     unapprovedContainer.innerHTML = '<p>Загрузка списка событий для модерации...</p>';
     const { data: events, error } = await supabaseClient.from('events').select('*').eq('is_approved', false).order('created_at', { ascending: true });
     if (error) {
-        console.error('Ошибка загрузки событий:', error);
         unapprovedContainer.innerHTML = `<p style="color: red;">Ошибка: ${error.message}</p>`;
         return;
     }
@@ -86,7 +84,7 @@ async function loadUnapprovedEvents() {
 }
 
 // =================================================================
-// Функции, которые пока не используются, но должны быть
+// ФУНКЦИЯ ОДОБРЕНИЯ
 // =================================================================
 window.approveEvent = async function(eventId, buttonElement) {
     buttonElement.disabled = true;
@@ -104,4 +102,3 @@ window.approveEvent = async function(eventId, buttonElement) {
         }
     }
 };
-
