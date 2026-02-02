@@ -96,9 +96,9 @@ async function loadUnapprovedEvents() {
         eventCard.style.cssText = 'border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px;';
         
         eventCard.innerHTML = `
-            <h4>${event.title}</h4>
-            <p><strong>Описание:</strong> ${event.description || 'Нет'}</p>
-            <p><strong>Город:</strong> ${event.city || 'Не указан'}</p>
+            <h4>${sanitizeHTML(event.title)}</h4>
+            <p><strong>Описание:</strong> ${sanitizeHTML(event.description) || 'Нет'}</p>
+            <p><strong>Город:</strong> ${sanitizeHTML(event.city) || 'Не указан'}</p>
             <p><strong>Дата:</strong> ${event.event_date ? new Date(event.event_date).toLocaleDateString() : 'Не указана'}</p>
             <p><a href="event.html?id=${event.id}" target="_blank">Посмотреть на детальной странице →</a></p>
             <button onclick="approveEvent(${event.id}, this)">Одобрить</button>
