@@ -4,19 +4,7 @@
 const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_XoQ2Gi3bMJI9Bx226mg7GQ_z0S4XPAA";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-// =================================================================
-// ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ: ОЧИСТКА HTML
-// =================================================================
-function sanitizeHTML(text) {
-    return DOMPurify.sanitize(text, {
-        ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li'],
-    });}
 
-function sanitizeForAttribute(text) {
-    if (!text) return '';
-    // Эта функция заменяет кавычки на их безопасный HTML-эквивалент
-    return text.toString().replace(/"/g, '&quot;');
-}
 // =================================================================
 // ЭЛЕМЕНТЫ СТРАНИЦЫ
 // =================================================================
@@ -24,24 +12,57 @@ const unapprovedContainer = document.getElementById('unapproved-events');
 let currentUser = null;
 
 // =================================================================
-// АВТОРИЗАЦИЯ (ПРОСТАЯ)
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (ДЛЯ БЕЗОПАСНОСТИ)
+// =================================================================
+function sanitizeHTML(text) {
+    if (!text) return '';
+    return DOMPurify.sanitize(text, {
+        ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li'],
+    });
+}
+
+// =================================================================
+// АВТОРИЗАЦИЯ И ПРОВЕРКА РОЛИ
 // =================================================================
 window.logout = async function() { await supabaseClient.auth.signOut(); };
 
-supabaseClient.auth.onAuthStateChange((event, session) => {
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
     currentUser = session ? session.user : null;
-    document.getElementById('logoutBtn').style.display = session ? 'block' : 'none';
     const userInfo = document.getElementById('user-info');
-    
+    document.getElementById('logoutBtn').style.display = session ? 'block' : 'none';
+
     if (currentUser) {
-        userInfo.textContent = `Админ: ${currentUser.email}`;
-        loadUnapprovedEvents();
+        // [ГЛАВНОЕ ИЗМЕНЕНИЕ] Получаем профиль пользователя, чтобы проверить роль
+        const { data: profile, error } = await supabaseClient
+            .from('profiles')
+            .select('role')
+            .eq('id', currentUser.id)
+            .single();
+
+        if (error || !profile) {
+            console.error('Ошибка получения профиля:', error);
+            showAccessDenied();
+            return;
+        }
+
+        // Проверяем роль!
+        if (profile.role === 'admin') {
+            userInfo.textContent = `👑 Админ: ${currentUser.email}`;
+            loadUnapprovedEvents();
+        } else {
+            userInfo.textContent = `Пользователь: ${currentUser.email}`;
+            showAccessDenied();
+        }
+
     } else {
-        // Если пользователь не вошел, просто не показываем ему ничего.
-        unapprovedContainer.innerHTML = '<p>Доступ только для авторизованных пользователей.</p>';
         userInfo.textContent = 'Вход не выполнен';
+        showAccessDenied();
     }
 });
+
+function showAccessDenied() {
+    unapprovedContainer.innerHTML = '<h2>⛔ Доступ запрещен</h2><p>Эта страница доступна только для администраторов сайта.</p><a href="/">Перейти на главную</a>';
+}
 
 // =================================================================
 // ФУНКЦИЯ ОДОБРЕНИЯ СОБЫТИЯ
@@ -61,7 +82,6 @@ window.approveEvent = async function(eventId, buttonElement) {
         buttonElement.disabled = false;
         buttonElement.textContent = 'Одобрить';
     } else {
-        // Успех! Убираем карточку из списка модерации
         const card = buttonElement.closest('.admin-event-card');
         if (card) {
             card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
@@ -98,7 +118,7 @@ async function loadUnapprovedEvents() {
     unapprovedContainer.innerHTML = '';
     events.forEach(event => {
         const eventCard = document.createElement('div');
-        eventCard.className = 'admin-event-card'; // Используем свой класс для стилизации, если понадобится
+        eventCard.className = 'admin-event-card';
         eventCard.style.cssText = 'border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px;';
         
         eventCard.innerHTML = `
