@@ -99,11 +99,12 @@ async function loadUnapprovedEvents() {
     unapprovedContainer.innerHTML = '<p>Загрузка списка событий для модерации...</p>';
 
     const { data: events, error } = await supabaseClient
-        .from('events')
-        .select('*')
-        .eq('is_approved', false)
-        .order('created_at', { ascending: true });
-
+    .from('events')
+    .select('*')
+    // .eq('is_approved', false) // <--- СТРОКА ВРЕМЕННО ОТКЛЮЧЕНА
+    .order('created_at', { ascending: true });
+// СРАЗУ ПОСЛЕ ЗАПРОСА ДОБАВЬ ЭТУ СТРОКУ ДЛЯ ДИАГНОСТИКИ
+console.log('События, которые пришли с Supabase:', events); 
     if (error) {
         console.error('Ошибка загрузки:', error);
         unapprovedContainer.innerHTML = '<p>Не удалось загрузить список.</p>';
