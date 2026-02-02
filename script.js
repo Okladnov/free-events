@@ -195,17 +195,17 @@ async function loadEvents(isNewSearch = false) {
         ${adminControls}
       </div>
       <div class="card-content">
-        <h3>${event.title}</h3>
+        <h3>${sanitizeHTML(event.title)}</h3>
         ${categoriesHtml}
-        <p>${event.description || 'Нет описания.'}</p>
+        <p>${sanitizeHTML(event.description) || 'Нет описания.'}</p>
         <div class="meta">
             <div class="meta-item">
                 <span>📍</span>
-                <span>${event.city || 'Онлайн'}</span>
+                <span>${sanitizeHTML(event.city) || 'Онлайн'}</span>
             </div>
             <div class="meta-item">
                 <span>👤</span>
-                <span>Добавил: ${authorName}</span>
+                <span>Добавил: ${sanitizeHTML(authorName)}</span>
             </div>
         </div>
       </div>`;
