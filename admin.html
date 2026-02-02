@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Админка: Модерация</title>
-    <!-- Сначала стили, чтобы страница не "прыгала" -->
     <link rel="stylesheet" href="style.css">
-    <!-- СРАЗУ ПОСЛЕ СТИЛЕЙ - SUPABASE. Это важно. -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- И DOMPurify для безопасности -->
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
 </head>
 <body>
@@ -32,7 +29,6 @@
       <section class="card">
         <h2>События, ожидающие одобрения</h2>
         <div id="unapproved-events">
-          <!-- Этот div будет заполнять наш скрипт -->
           <p>Проверка прав доступа...</p>
         </div>
       </section>
@@ -40,8 +36,114 @@
 
     <footer class="footer">© 2026 · Админка</footer>
 
-    <!-- НАШ СКРИПТ ЗАГРУЖАЕТСЯ В САМОМ КОНЦЕ. Это самая надежная практика. -->
-    <script src="admin.js"></script>
+    <!-- =============================================================== -->
+    <!-- ВЕСЬ JAVASCRIPT ТЕПЕРЬ ЖИВЕТ ПРЯМО ЗДЕСЬ -->
+    <!-- =============================================================== -->
+    <script>
+        // =================================================================
+        // ПОДКЛЮЧЕНИЕ К SUPABASE
+        // =================================================================
+        const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D"; // Твой рабочий ключ
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // =================================================================
+        // ЭЛЕМЕНТЫ СТРАНИЦЫ
+        // =================================================================
+        const unapprovedContainer = document.getElementById('unapproved-events');
+        const userInfo = document.getElementById('user-info');
+        const logoutBtn = document.getElementById('logoutBtn');
+        let currentUser = null;
+
+        // =================================================================
+        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        // =================================================================
+        function sanitizeHTML(text) {
+            if (!text) return '';
+            return DOMPurify.sanitize(text, { ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li'] });
+        }
+
+        // =================================================================
+        // АВТОРИЗАЦИЯ И ПРОВЕРКА РОЛИ
+        // =================================================================
+        logoutBtn.onclick = async function() {
+            await supabaseClient.auth.signOut();
+            window.location.reload();
+        };
+
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            currentUser = session ? session.user : null;
+            logoutBtn.style.display = session ? 'block' : 'none';
+
+            if (currentUser) {
+                const { data: isAdmin, error } = await supabaseClient.rpc('is_admin');
+
+                if (error) {
+                    showAccessDenied('Критическая ошибка при проверке прав.');
+                    return;
+                }
+
+                if (isAdmin === true) {
+                    userInfo.textContent = `👑 Админ: ${currentUser.email}`;
+                    loadUnapprovedEvents();
+                } else {
+                    userInfo.textContent = `Пользователь: ${currentUser.email}`;
+                    showAccessDenied();
+                }
+
+            } else {
+                userInfo.textContent = 'Вход не выполнен';
+                showAccessDenied();
+            }
+        });
+
+        function showAccessDenied(message = 'Эта страница доступна только для администраторов сайта.') {
+            unapprovedContainer.innerHTML = `<h2>⛔ Доступ запрещен</h2><p>${message}</p>`;
+        }
+
+        // =================================================================
+        // ГЛАВНАЯ ФУНКЦИЯ
+        // =================================================================
+        async function loadUnapprovedEvents() {
+            unapprovedContainer.innerHTML = '<p>Загрузка списка событий для модерации...</p>';
+            const { data: events, error } = await supabaseClient.from('events').select('*').eq('is_approved', false).order('created_at', { ascending: true });
+            if (error) {
+                unapprovedContainer.innerHTML = `<p style="color: red;">Ошибка: ${error.message}</p>`;
+                return;
+            }
+            if (!events || events.length === 0) {
+                unapprovedContainer.innerHTML = '<p>🎉 Все события одобрены! Новых на модерацию нет.</p>';
+                return;
+            }
+            unapprovedContainer.innerHTML = '';
+            events.forEach(event => {
+                const eventCard = document.createElement('div');
+                eventCard.className = 'admin-event-card';
+                eventCard.style.cssText = 'border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px;';
+                eventCard.innerHTML = `<h4>${sanitizeHTML(event.title)}</h4><p><strong>Описание:</strong> ${sanitizeHTML(event.description) || 'Нет'}</p><p><strong>Город:</strong> ${sanitizeHTML(event.city) || 'Не указан'}</p><p><strong>Дата:</strong> ${event.event_date ? new Date(event.event_date).toLocaleDateString() : 'Не указана'}</p><p><a href="event.html?id=${event.id}" target="_blank">Посмотреть →</a></p><button onclick="approveEvent(${event.id}, this)">Одобрить</button>`;
+                unapprovedContainer.appendChild(eventCard);
+            });
+        }
+
+        // =================================================================
+        // ФУНКЦИЯ ОДОБРЕНИЯ
+        // =================================================================
+        window.approveEvent = async function(eventId, buttonElement) {
+            buttonElement.disabled = true;
+            buttonElement.textContent = 'Одобряем...';
+            const { error } = await supabaseClient.from('events').update({ is_approved: true }).eq('id', eventId);
+            if (error) {
+                alert('Не удалось одобрить событие.');
+                buttonElement.disabled = false;
+            } else {
+                const card = buttonElement.closest('.admin-event-card');
+                if (card) {
+                    card.style.transition = 'opacity 0.5s ease';
+                    card.style.opacity = '0';
+                    setTimeout(() => card.remove(), 500);
+                }
+            }
+        };
+    </script>
 </body>
 </html>
