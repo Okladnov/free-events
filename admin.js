@@ -24,7 +24,11 @@ function sanitizeHTML(text) {
 // =================================================================
 // АВТОРИЗАЦИЯ И ПРОВЕРКА РОЛИ
 // =================================================================
-window.logout = async function() { await supabaseClient.auth.signOut(); };
+window.logout = async function() {
+    await supabaseClient.auth.signOut();
+    // Перезагружаем страницу, чтобы сбросить состояние
+    window.location.reload();
+};
 
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
     currentUser = session ? session.user : null;
@@ -32,7 +36,6 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
     document.getElementById('logoutBtn').style.display = session ? 'block' : 'none';
 
     if (currentUser) {
-        // [ГЛАВНОЕ ИЗМЕНЕНИЕ] Получаем профиль пользователя, чтобы проверить роль
         const { data: profile, error } = await supabaseClient
             .from('profiles')
             .select('role')
@@ -45,7 +48,6 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
             return;
         }
 
-        // Проверяем роль!
         if (profile.role === 'admin') {
             userInfo.textContent = `👑 Админ: ${currentUser.email}`;
             loadUnapprovedEvents();
@@ -99,17 +101,19 @@ async function loadUnapprovedEvents() {
     unapprovedContainer.innerHTML = '<p>Загрузка списка событий для модерации...</p>';
 
     const { data: events, error } = await supabaseClient
-    .from('events')
-    .select('*')
-    // .eq('is_approved', false) // <--- СТРОКА ВРЕМЕННО ОТКЛЮЧЕНА
-    .order('created_at', { ascending: true });
-// СРАЗУ ПОСЛЕ ЗАПРОСА ДОБАВЬ ЭТУ СТРОКУ ДЛЯ ДИАГНОСТИКИ
-console.log('События, которые пришли с Supabase:', events); 
+        .from('events')
+        .select('*')
+        .eq('is_approved', false)
+        .order('created_at', { ascending: true });
+
     if (error) {
         console.error('Ошибка загрузки:', error);
-        unapprovedContainer.innerHTML = '<p>Не удалось загрузить список.</p>';
+        unapprovedContainer.innerHTML = `<p style="color: red;">Не удалось загрузить список. Ошибка: ${error.message}</p>`;
         return;
     }
+    
+    // Этот console.log поможет нам увидеть, что приходит с Supabase
+    console.log('Ответ от Supabase:', events);
 
     if (!events || events.length === 0) {
         unapprovedContainer.innerHTML = '<p>🎉 Все события одобрены! Новых на модерацию нет.</p>';
