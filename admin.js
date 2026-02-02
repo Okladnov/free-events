@@ -5,7 +5,7 @@ try {
     // ПОДКЛЮЧЕНИЕ К SUPABASE
     // =================================================================
     const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_XoQ2Gi3bMJI9Bx226mg7GQ_z0S4XPAA";
+    const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     console.log('[2] admin.js: Клиент Supabase создан.');
 
