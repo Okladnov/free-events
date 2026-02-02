@@ -4,6 +4,12 @@
 const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_XoQ2Gi3bMJI9Bx226mg7GQ_z0S4XPAA";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// =================================================================
+// ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ: ОЧИСТКА HTML
+// =================================================================
+function sanitizeHTML(text) {
+    return DOMPurify.sanitize(text);
+}
 
 // =================================================================
 // ЭЛЕМЕНТЫ СТРАНИЦЫ
