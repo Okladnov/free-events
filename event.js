@@ -107,7 +107,8 @@ async function loadEventDetails() {
     if (rating < 0) { scoreClass = 'score-cold'; scoreIcon = '❄️'; } else if (rating > 20) { scoreClass = 'score-fire'; scoreIcon = '🔥🔥'; } else if (rating > 5) { scoreClass = 'score-hot'; scoreIcon = '🔥'; }
     const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
     const commentsHtml = '<ul class="comments-list">' + (comments || []).map(comment => {
-        const commentAuthor = comment.profiles ? comment.profiles.full_name : 'Аноним';
+        const commentAuthor = comment.profiles ? sanitizeHTML(comment.profiles.full_name) : 'Аноним';
+<p>${sanitizeHTML(comment.content)}</p>
         const commentDate = new Date(comment.created_at).toLocaleString('ru-RU');
         return `<li class="comment"><span class="comment-author">${commentAuthor}</span><span class="comment-date">${commentDate}</span><p>${comment.content}</p></li>`;
     }).join('') + '</ul>';
@@ -124,15 +125,15 @@ const favoriteClass = isFavorited ? 'active' : '';
             <button class="card-save-btn ${favoriteClass}" onclick="event.stopPropagation(); toggleFavorite(${event.id}, ${isFavorited}, this)">${favoriteIcon}</button>
             <div class="event-detail-title-card">
                 <div class="event-detail-tags">${categoriesHtml}</div>
-                <h1>${event.title}</h1>
-                <p>Добавил: ${authorName}</p>
+                <h1>${sanitizeHTML(event.title)}</h1>
+                <p>Добавил: ${sanitizeHTML(authorName)}</p>
             </div>
         </div>
         <div class="event-detail-body">
             <div class="event-detail-info">
                 <h2>Детали события</h2>
                 <div class="info-grid">
-                    <div class="info-item"><strong>📍 Город:</strong><span>${event.city || 'Онлайн'}</span></div>
+                    <div class="info-item"><strong>📍 Город:</strong><span>${sanitizeHTML(event.city) || 'Онлайн'}</span>
                     <div class="info-item"><strong>🗓️ Дата:</strong><span>${dateString}</span></div>
                     <div class="info-item">
                         <strong>⭐ Рейтинг:</strong>
@@ -144,7 +145,7 @@ const favoriteClass = isFavorited ? 'active' : '';
                     </div>
                 </div>
                 <h2>Описание</h2>
-                <p>${event.description || 'Описание отсутствует.'}</p>
+                <p>${sanitizeHTML(event.description) || 'Описание отсутствует.'}</p>
                 <div class="comments-section">
                     <h2>Комментарии</h2>
                     ${commentsHtml}
