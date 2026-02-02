@@ -1,11 +1,12 @@
-console.log('[1] admin.js: Скрипт запущен. Пульс есть.');
+console.log('[1] admin.js: Скрипт запущен. Версия с "Прямым звонком".');
 
 try {
     // =================================================================
     // ПОДКЛЮЧЕНИЕ К SUPABASE
     // =================================================================
     const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
+    // Убедись, что тут твой самый новый ключ
+    const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D"; 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     console.log('[2] admin.js: Клиент Supabase создан.');
 
@@ -32,29 +33,26 @@ try {
 
             if (currentUser) {
                 console.log('[6] admin.js: Пользователь найден:', currentUser.email);
-                console.log('[7] admin.js: Запрашиваю профиль...');
+                console.log('[7] admin.js: ДЕЛАЮ ПРЯМОЙ ЗВОНОК функции is_admin()...');
 
-                const { data: profiles, error } = await supabaseClient
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', currentUser.id);
+                // ========== THE HOLY GRAIL FIX ==========
+                // Мы не лезем в таблицу, а напрямую вызываем SQL-функцию
+                const { data: isAdmin, error } = await supabaseClient.rpc('is_admin');
+                // =======================================
 
                 if (error) {
-                    // Это важный блок, чтобы увидеть ошибку ЗАПРОСА
-                    console.error('[!!! ОШИБКА ЗАПРОСА ПРОФИЛЯ !!!]', error);
-                    showAccessDenied('Ошибка при проверке прав доступа.');
+                    console.error('[!!! ОШИБКА ПРИ ВЫЗОВЕ is_admin !!!]', error);
+                    showAccessDenied('Критическая ошибка при проверке прав.');
                     return;
                 }
                 
-                console.log('[8] admin.js: Запрос профиля успешен. Получено:', profiles);
+                console.log('[8] admin.js: "Прямой звонок" успешен. Результат:', isAdmin);
 
-                const profile = profiles && profiles.length > 0 ? profiles[0] : null;
-
-                if (profile && profile.role === 'admin') {
-                    console.log('[9] admin.js: Роль "admin" подтверждена. Запускаю основную функцию.');
+                if (isAdmin === true) {
+                    console.log('[9] admin.js: Права "admin" подтверждены. Запускаю основную функцию.');
                     loadUnapprovedEvents();
                 } else {
-                    console.log('[9] admin.js: Роль НЕ "admin" или профиль не найден. Доступ запрещен.');
+                    console.log('[9] admin.js: Права "admin" НЕ подтверждены. Доступ запрещен.');
                     showAccessDenied();
                 }
 
@@ -63,28 +61,42 @@ try {
                 showAccessDenied();
             }
         } catch (e) {
-            // Этот блок поймает ЛЮБУЮ другую ошибку внутри onAuthStateChange
             console.error('[!!! КРИТИЧЕСКАЯ ОШИБКА ВНУТРИ onAuthStateChange !!!]', e);
-            alert('Критическая ошибка в логике авторизации! Проверь консоль.');
         }
     });
 
     function showAccessDenied(message = 'Эта страница доступна только для администраторов сайта.') {
         console.log('Вызвана функция showAccessDenied.');
-        unapprovedContainer.innerHTML = `<h2>⛔ Доступ запрещен</h2><p>${message}</p><a href="/">Перейти на главную</a>`;
+        unapprovedContainer.innerHTML = `<h2>⛔ Доступ запрещен</h2><p>${message}</p>`;
     }
 
     // =================================================================
-    // ГЛАВНАЯ ФУНКЦИЯ (пока без изменений)
+    // ГЛАВНАЯ ФУНКЦИЯ
     // =================================================================
     async function loadUnapprovedEvents() {
-        // ... тут пока оставим все как было, мы должны дойти досюда
-        unapprovedContainer.innerHTML = '<p>🎉 Успех! Функция загрузки событий запущена. Если видишь это - мы победили.</p>';
         console.log('[10] admin.js: Ура! Мы дошли до loadUnapprovedEvents!');
+        unapprovedContainer.innerHTML = '<p>Загрузка списка событий для модерации...</p>';
+        const { data: events, error } = await supabaseClient.from('events').select('*').eq('is_approved', false).order('created_at', { ascending: true });
+        if (error) {
+            console.error('Ошибка загрузки событий:', error);
+            unapprovedContainer.innerHTML = `<p>Ошибка: ${error.message}</p>`;
+            return;
+        }
+        if (!events || events.length === 0) {
+            unapprovedContainer.innerHTML = '<p>🎉 Все события одобрены! Новых на модерацию нет.</p>';
+            return;
+        }
+        unapprovedContainer.innerHTML = '';
+        // ... тут код отрисовки, он правильный
+         events.forEach(event => {
+            const eventCard = document.createElement('div');
+            eventCard.className = 'admin-event-card';
+            eventCard.style.cssText = 'border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px;';
+            eventCard.innerHTML = `<h4>${event.title}</h4><p><strong>Описание:</strong> ${event.description || 'Нет'}</p><button onclick="approveEvent(${event.id}, this)">Одобрить</button>`;
+            unapprovedContainer.appendChild(eventCard);
+        });
     }
 
 } catch (e) {
-    // Этот блок поймает ЛЮБУЮ ошибку на верхнем уровне (если Supabase URL неправильный и т.д.)
     console.error('[!!! КРИТИЧЕСКАЯ ОШИБКА НА ВЕРХНЕМ УРОВНЕ !!!]', e);
-    alert('Критическая ошибка в admin.js! Проверь консоль.');
 }
