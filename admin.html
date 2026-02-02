@@ -1,43 +1,47 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Админка: Модерация событий</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
-  <link rel="icon" href="/favicon.ico" sizes="any">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админка: Модерация</title>
+    <!-- Сначала стили, чтобы страница не "прыгала" -->
+    <link rel="stylesheet" href="style.css">
+    <!-- СРАЗУ ПОСЛЕ СТИЛЕЙ - SUPABASE. Это важно. -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- И DOMPurify для безопасности -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
 </head>
 <body>
 
-<header class="header">
-  <div class="container header-container">
-    <div class="header-title">
-      <a href="/" style="color: white; text-decoration: none;">
-        <h1>🛡️ Панель Модерации</h1>
-        <p>Только для админов</p>
-      </a>
-    </div>
-    <div class="auth-block">
-      <div id="user-info"></div>
-      <button id="logoutBtn" onclick="logout()" style="display: none;">Выйти</button>
-    </div>
-  </div>
-</header>
+    <header class="header">
+      <div class="container header-container">
+        <div class="header-title">
+          <a href="/" style="color: white; text-decoration: none;">
+            <h1>🛡️ Панель Модерации</h1>
+            <p>Только для админов</p>
+          </a>
+        </div>
+        <div class="auth-block">
+          <div id="user-info"></div>
+          <button id="logoutBtn" style="display: none;">Выйти</button>
+        </div>
+      </div>
+    </header>
 
-<main class="container">
-  <section class="card">
-    <h2>События, ожидающие одобрения</h2>
-    <div id="unapproved-events">
-      <p>Загрузка списка событий для модерации...</p>
-    </div>
-  </section>
-</main>
+    <main class="container">
+      <section class="card">
+        <h2>События, ожидающие одобрения</h2>
+        <div id="unapproved-events">
+          <!-- Этот div будет заполнять наш скрипт -->
+          <p>Проверка прав доступа...</p>
+        </div>
+      </section>
+    </main>
 
-<footer class="footer">© 2026 · Админка</footer>
+    <footer class="footer">© 2026 · Админка</footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="admin.js"></script> 
+    <!-- НАШ СКРИПТ ЗАГРУЖАЕТСЯ В САМОМ КОНЦЕ. Это самая надежная практика. -->
+    <script src="admin.js"></script>
 
 </body>
 </html>
