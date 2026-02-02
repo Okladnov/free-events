@@ -10,9 +10,13 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 function sanitizeHTML(text) {
     return DOMPurify.sanitize(text, {
         ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li'],
-    });
-}
+    });}
 
+function sanitizeForAttribute(text) {
+    if (!text) return '';
+    // Эта функция заменяет кавычки на их безопасный HTML-эквивалент
+    return text.toString().replace(/"/g, '&quot;');
+}
 // =================================================================
 // ЭЛЕМЕНТЫ СТРАНИЦЫ
 // =================================================================
