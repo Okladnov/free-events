@@ -33,7 +33,7 @@ let currentCategoryId = null;
 // ГЛАВНАЯ ЛОГИКА
 // =================================================================
 async function main() {
-    setupEventListeners(); // Запускаем обработчики, включая тему, в первую очередь
+    setupEventListeners(); 
     
     const { data: { session } } = await supabaseClient.auth.getSession();
     currentUser = session ? session.user : null;
@@ -68,15 +68,12 @@ async function main() {
 }
 
 function setupEventListeners() {
-    // --- Логика для переключателя темы ---
     const themeToggle = document.getElementById('theme-toggle');
     const currentTheme = localStorage.getItem('theme');
-
     if (currentTheme === 'dark') {
         document.body.classList.add('dark-theme');
         if(themeToggle) themeToggle.checked = true;
     }
-
     if(themeToggle) {
         themeToggle.addEventListener('change', function() {
             if (this.checked) {
@@ -89,10 +86,8 @@ function setupEventListeners() {
         });
     }
     
-    // --- Остальные обработчики ---
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
-    if(loginBtn) loginBtn.onclick = async () => await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
     if(logoutBtn) logoutBtn.onclick = async () => {
         await supabaseClient.auth.signOut();
         window.location.reload();
@@ -166,7 +161,7 @@ if(addEventForm) {
 // =================================================================
 window.deleteEvent = async (eventId, button) => {
     if (!confirm('Вы уверены, что хотите удалить это событие?')) return;
-    const card = button.closest('.event-card');
+    const card = button.closest('.event-card-new');
     card.style.opacity = '0.5';
     const { error } = await supabaseClient.from('events').delete().match({ id: eventId });
     if(error) {
@@ -230,7 +225,12 @@ async function loadEvents(isNewSearch = false) {
     
     query = query.order('created_at', { ascending: false }).range(from, to);
     const { data, error, count } = await query;
-    if (error) { eventsContainer.innerHTML = "Ошибка загрузки."; return; }
+
+    if (error && error.code !== 'PGRST103') { 
+        eventsContainer.innerHTML = "Ошибка загрузки."; 
+        return; 
+    }
+    
     if (isNewSearch) {
         eventsContainer.innerHTML = "";
         if (!data || data.length === 0) {
@@ -239,11 +239,16 @@ async function loadEvents(isNewSearch = false) {
             return;
         }
     }
-    data.forEach(event => {
-        const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
+    
+    (data || []).forEach(event => {
+        const div = document.createElement("div");
+        div.className = "event-card-new";
         let dateHtml = '';
         if (event.event_date) { dateHtml = new Date(event.event_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }); }
-        
+        const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
+        const isFavorited = currentUser ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
+        const favoriteIcon = isFavorited ? '❤️' : '🤍';
+        const favoriteClass = isFavorited ? 'active' : '';
         let adminControls = '';
         if (currentUser && (currentUser.id === event.created_by || isAdmin)) {
             adminControls = `<div class="card-admin-controls"><button class="admin-btn" onclick="event.stopPropagation(); editEvent(${event.id})">✏️</button><button class="admin-btn" onclick="event.stopPropagation(); deleteEvent(${event.id}, this)">🗑️</button></div>`;
@@ -254,38 +259,32 @@ async function loadEvents(isNewSearch = false) {
             event.categories.forEach(cat => { categoriesHtml += `<span class="tag" onclick="event.stopPropagation(); setCategoryFilter(${cat.id})">${sanitizeHTML(cat.name)}</span>`; });
             categoriesHtml += '</div>';
         }
-        const isFavorited = currentUser ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
-        const favoriteIcon = isFavorited ? '❤️' : '🤍';
-        const favoriteClass = isFavorited ? 'active' : '';
-        
-        const div = document.createElement("div");
-        div.onclick = () => { window.location.href = `event.html?id=${event.id}`; };
-        div.className = "event-card-new";
         
         div.innerHTML = `
-  <a href="event.html?id=${event.id}" class="event-card-new-image-link">
-    <img src="${event.image_url || 'https://placehold.co/400x400/f0f2f5/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}">
-  </a>
-  <div class="event-card-new-content">
-    ${categoriesHtml}
-    <a href="event.html?id=${event.id}" class="event-card-new-title-link">
-      <h3>${sanitizeHTML(event.title)}</h3>
-    </a>
-    <div class="meta">
-        <div class="meta-item"><span>🗓️</span><span>${dateHtml || 'Дата не указана'}</span></div>
-        <div class="meta-item"><span>📍</span><span>${sanitizeHTML(event.city) || 'Онлайн'}</span></div>
-    </div>
-  </div>
-  <div class="event-card-new-actions">
-    <button class="card-save-btn ${favoriteClass}" onclick="event.stopPropagation(); toggleFavorite(${event.id}, ${isFavorited}, this)">${favoriteIcon}</button>
-    ${adminControls}
-  </div>`;
+          <a href="event.html?id=${event.id}" class="event-card-new-image-link">
+            <img src="${event.image_url || 'https://placehold.co/400x400/f0f2f5/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}">
+          </a>
+          <div class="event-card-new-content">
+            ${categoriesHtml}
+            <a href="event.html?id=${event.id}" class="event-card-new-title-link">
+              <h3>${sanitizeHTML(event.title)}</h3>
+            </a>
+            <div class="meta">
+                <div class="meta-item"><span>🗓️</span><span>${dateHtml || 'Дата не указана'}</span></div>
+                <div class="meta-item"><span>📍</span><span>${sanitizeHTML(event.city) || 'Онлайн'}</span></div>
+            </div>
+          </div>
+          <div class="event-card-new-actions">
+            <button class="card-save-btn ${favoriteClass}" onclick="event.stopPropagation(); toggleFavorite(${event.id}, ${isFavorited}, this)">${favoriteIcon}</button>
+            ${adminControls}
+          </div>`;
         eventsContainer.appendChild(div);
     });
+
     const existingLoadMoreBtn = document.getElementById('load-more-btn');
     if (existingLoadMoreBtn) existingLoadMoreBtn.remove();
-    const totalLoaded = document.querySelectorAll('.event-card').length;
-    if (count > totalLoaded) {
+    
+    if ((currentPage + 1) * PAGE_SIZE < count) {
         const loadMoreBtn = document.createElement('button');
         loadMoreBtn.textContent = 'Загрузить еще';
         loadMoreBtn.id = 'load-more-btn';
