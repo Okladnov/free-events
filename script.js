@@ -18,7 +18,6 @@ const eventsContainer = document.getElementById("events");
 const message = document.getElementById("message");
 const addEventForm = document.getElementById("add-event-form");
 const searchInput = document.getElementById('search-input');
-const cityFilter = document.getElementById('city-filter');
 const paginationControls = document.getElementById('pagination-controls');
 let currentUser = null;
 let isAdmin = false;
@@ -34,51 +33,97 @@ let currentCategoryId = null;
 // ГЛАВНАЯ ЛОГИКА
 // =================================================================
 async function main() {
-    // [УЛУЧШЕНИЕ 1] Используем прямой, надежный способ получения сессии
     const { data: { session } } = await supabaseClient.auth.getSession();
     currentUser = session ? session.user : null;
 
+    const loginBtn = document.getElementById('loginBtn');
+    const addEventModalBtn = document.getElementById('add-event-modal-btn');
+    const profileDropdown = document.getElementById('profile-dropdown');
+
     if (currentUser) {
+        loginBtn.style.display = 'none';
+        addEventModalBtn.style.display = 'block';
+        profileDropdown.style.display = 'block';
+        
+        const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single();
+        const userName = (profile && profile.full_name) ? profile.full_name : currentUser.email.split('@')[0];
+        document.getElementById('user-name-display').textContent = userName;
+
         const { data: adminStatus } = await supabaseClient.rpc('is_admin');
         isAdmin = adminStatus;
+        if (isAdmin) {
+            document.getElementById('admin-link').style.display = 'block';
+        }
+
+    } else {
+        loginBtn.style.display = 'block';
+        addEventModalBtn.style.display = 'none';
+        profileDropdown.style.display = 'none';
     }
 
-    // Показываем информацию о пользователе
-    document.getElementById('loginBtn').style.display = session ? 'none' : 'block';
-    document.getElementById('logoutBtn').style.display = session ? 'block' : 'none';
-    document.getElementById('favorites-link').style.display = session ? 'inline' : 'none';
-    if(session) {
-        document.getElementById('user-info').textContent = `Вы вошли как: ${session.user.email}`;
-    }
-    
-    window.loginWithGoogle = async () => await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
-    document.getElementById('logoutBtn').onclick = async () => {
+    loadAndDisplayCategories();
+    loadEvents(true);
+    setupEventListeners();
+}
+
+function setupEventListeners() {
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    if(loginBtn) loginBtn.onclick = async () => await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
+    if(logoutBtn) logoutBtn.onclick = async () => {
         await supabaseClient.auth.signOut();
         window.location.reload();
     };
 
-    // Запускаем загрузку событий и категорий
-    loadAndDisplayCategories();
-    loadEvents(true);
+    const addEventModal = document.getElementById('add-event-modal');
+    const addEventModalBtn = document.getElementById('add-event-modal-btn');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    
+    if(addEventModalBtn) {
+        addEventModalBtn.onclick = () => { addEventModal.style.display = 'flex'; };
+    }
+    if(modalCloseBtn) {
+        modalCloseBtn.onclick = () => { addEventModal.style.display = 'none'; };
+    }
+    if(addEventModal) {
+        addEventModal.onclick = (event) => {
+            if (event.target === addEventModal) {
+                addEventModal.style.display = 'none';
+            }
+        };
+    }
+    
+    const profileDropdown = document.getElementById('profile-dropdown');
+    if (profileDropdown) {
+        const profileTrigger = document.getElementById('profile-trigger');
+        profileTrigger.onclick = (event) => {
+            event.stopPropagation();
+            profileDropdown.classList.toggle('open');
+        };
+    }
+    document.addEventListener('click', (event) => {
+        if (profileDropdown && !profileDropdown.contains(event.target)) {
+            profileDropdown.classList.remove('open');
+        }
+    });
 }
 
 // =================================================================
-// ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ (без изменений, код хороший)
+// ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ
 // =================================================================
 addEventForm.addEventListener('submit', async (event) => {
-    // ... (весь код формы остается без изменений)
     event.preventDefault();
     if (!currentUser) { alert("Пожалуйста, войдите."); return; }
     const submitButton = addEventForm.querySelector('button[type="submit"]');
     submitButton.disabled = true; message.textContent = "Загрузка...";
     try {
-        const { data: eventData, error: insertError } = await supabaseClient.from("events").insert({ title: document.getElementById("title").value.trim(), description: document.getElementById("description").value.trim(), city: document.getElementById("city").value.trim(), event_date: document.getElementById("date").value, created_by: currentUser.id }).select().single();
+        const { data: eventData, error: insertError } = await supabaseClient.from("events").insert({ title: document.getElementById("title").value.trim(), description: document.getElementById("description").value.trim(), city: document.getElementById("city").value.trim(), event_date: document.getElementById("date").value || null, created_by: currentUser.id }).select().single();
         if (insertError) throw insertError;
         const newEventId = eventData.id;
         const imageFile = document.getElementById('image-input').files[0];
         if (imageFile) {
-            const fileName = `${currentUser.id}/${newEventId}_${imageFile.name.replace(/\s/g, '-')}`;
-            await supabaseClient.storage.from('event-images').upload(fileName, imageFile);
+            const fileName = `${currentUser.id}/${newEventId}_${Date.now()}_${imageFile.name.replace(/\s/g, '-')}`;
+            await supabaseClient.storage.from('event-images').upload(fileName, imageFile, { upsert: true });
             const { data: { publicUrl } } = supabaseClient.storage.from('event-images').getPublicUrl(fileName);
             await supabaseClient.from('events').update({ image_url: publicUrl }).match({ id: newEventId });
         }
@@ -89,6 +134,11 @@ addEventForm.addEventListener('submit', async (event) => {
         }
         message.textContent = "✅ Отправлено на модерацию!";
         addEventForm.reset();
+        setTimeout(() => {
+            document.getElementById('add-event-modal').style.display = 'none';
+            message.textContent = "";
+            loadEvents(true); // Обновляем список событий
+        }, 1500);
     } catch (error) {
         message.textContent = `Ошибка: ${error.message}`;
     } finally {
@@ -96,18 +146,55 @@ addEventForm.addEventListener('submit', async (event) => {
     }
 });
 
-
 // =================================================================
-// УПРАВЛЕНИЕ СОБЫТИЕМ И ФИЛЬТРЫ (без изменений)
+// УПРАВЛЕНИЕ СОБЫТИЕМ И ФИЛЬТРЫ
 // =================================================================
-window.deleteEvent = async (eventId) => { /*...*/ };
+window.deleteEvent = async (eventId, button) => {
+    if (!confirm('Вы уверены, что хотите удалить это событие?')) return;
+    const card = button.closest('.event-card');
+    card.style.opacity = '0.5';
+    const { error } = await supabaseClient.from('events').delete().match({ id: eventId });
+    if(error) {
+        alert('Не удалось удалить событие.');
+        card.style.opacity = '1';
+    } else {
+        card.remove();
+    }
+};
 window.editEvent = (eventId) => { window.location.href = `edit-event.html?id=${eventId}`; };
-window.resetFilters = () => { /*...*/ };
-window.setCategoryFilter = (categoryId) => { /*...*/ };
-window.toggleFavorite = async (eventId, isFavorited, buttonElement) => { /*...*/ };
+window.resetFilters = () => {
+    searchInput.value = '';
+    const activePill = document.querySelector('.category-pill.active');
+    if(activePill) activePill.classList.remove('active');
+    currentCategoryId = null;
+    loadEvents(true);
+};
+window.setCategoryFilter = (categoryId) => {
+    document.querySelectorAll('.category-pill').forEach(pill => pill.classList.remove('active'));
+    document.querySelector(`.category-pill[onclick="setCategoryFilter(${categoryId})"]`).classList.add('active');
+    currentCategoryId = categoryId;
+    loadEvents(true);
+};
+window.toggleFavorite = async (eventId, isFavorited, buttonElement) => {
+    if (!currentUser) { alert('Пожалуйста, войдите, чтобы добавлять в избранное.'); return; }
+    buttonElement.disabled = true;
+    if (isFavorited) {
+        const { error } = await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id });
+        if (error) { buttonElement.disabled = false; } else {
+            buttonElement.innerHTML = '🤍'; buttonElement.classList.remove('active');
+            buttonElement.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, false, this)`); buttonElement.disabled = false;
+        }
+    } else {
+        const { error } = await supabaseClient.from('favorites').insert({ event_id: eventId, user_id: currentUser.id });
+        if (error) { buttonElement.disabled = false; } else {
+            buttonElement.innerHTML = '❤️'; buttonElement.classList.add('active');
+            buttonElement.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, true, this)`); buttonElement.disabled = false;
+        }
+    }
+};
 
 // =================================================================
-// ГЛАВНАЯ ФУНКЦИЯ: ЗАГРУЗКА СОБЫТИЙ
+// ЗАГРУЗКА СОБЫТИЙ
 // =================================================================
 async function loadEvents(isNewSearch = false) {
     if (isNewSearch) {
@@ -115,51 +202,43 @@ async function loadEvents(isNewSearch = false) {
         eventsContainer.innerHTML = 'Загрузка событий...';
     }
     const searchTerm = searchInput.value.trim();
-    const city = cityFilter.value.trim();
     const from = currentPage * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
-
     const selectString = `id, title, description, city, event_date, created_by, image_url, rating, profiles ( full_name ), favorites ( user_id ), categories${currentCategoryId ? '!inner' : ''} ( id, name )`;
     
-    // [УЛУЧШЕНИЕ 3] Убрали дублирующийся фильтр
     let query = supabaseClient.from("events").select(selectString, { count: 'exact' }).eq('is_approved', true);
     
     if (searchTerm) {
-  query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
-}
+        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
+    }
+    if (currentCategoryId) query = query.eq('categories.id', currentCategoryId);
     
     query = query.order('created_at', { ascending: false }).range(from, to);
-
     const { data, error, count } = await query;
     if (error) { eventsContainer.innerHTML = "Ошибка загрузки."; return; }
-
     if (isNewSearch) {
         eventsContainer.innerHTML = "";
         if (!data || data.length === 0) {
-            eventsContainer.innerHTML = 'Событий по вашему запросу не найдено. <a href="#" onclick="resetFilters(); return false;">Сбросить фильтр</a>';
+            eventsContainer.innerHTML = 'Событий по вашему запросу не найдено. <a href="#" onclick="resetFilters(); return false;">Сбросить фильтры</a>';
             paginationControls.innerHTML = "";
             return;
         }
     }
-
     data.forEach(event => {
         const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
         let dateHtml = '';
         if (event.event_date) { const d = new Date(event.event_date); const day = d.getDate(); const month = d.toLocaleString('ru-RU', { month: 'short' }).replace('.', ''); dateHtml = `<div class="event-card-date"><span class="day">${day}</span><span class="month">${month}</span></div>`; }
         
         let adminControls = '';
-        // [УЛУЧШЕНИЕ 4] Админ видит все кнопки
         if (currentUser && (currentUser.id === event.created_by || isAdmin)) {
-            adminControls = `<div class="card-admin-controls"><button class="admin-btn" onclick="event.stopPropagation(); editEvent(${event.id})">✏️</button><button class="admin-btn" onclick="event.stopPropagation(); deleteEvent(${event.id})">🗑️</button></div>`;
+            adminControls = `<div class="card-admin-controls"><button class="admin-btn" onclick="event.stopPropagation(); editEvent(${event.id})">✏️</button><button class="admin-btn" onclick="event.stopPropagation(); deleteEvent(${event.id}, this)">🗑️</button></div>`;
         }
-
         let categoriesHtml = '';
         if (event.categories && event.categories.length > 0) {
             categoriesHtml = '<div class="card-categories">';
             event.categories.forEach(cat => { categoriesHtml += `<span class="tag" onclick="event.stopPropagation(); setCategoryFilter(${cat.id})">${sanitizeHTML(cat.name)}</span>`; });
             categoriesHtml += '</div>';
         }
-
         const isFavorited = currentUser ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
         const favoriteIcon = isFavorited ? '❤️' : '🤍';
         const favoriteClass = isFavorited ? 'active' : '';
@@ -168,7 +247,6 @@ async function loadEvents(isNewSearch = false) {
         div.onclick = () => { window.location.href = `event.html?id=${event.id}`; };
         div.className = "event-card";
         
-        // [УЛУЧШЕНИЕ 2] Применяем sanitizeForAttribute
         div.innerHTML = `
           <div class="event-card-image-container">
             <img src="${event.image_url || 'https://placehold.co/600x337/f0f2f5/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}" class="event-card-image">
@@ -187,8 +265,8 @@ async function loadEvents(isNewSearch = false) {
           </div>`;
         eventsContainer.appendChild(div);
     });
-
-    paginationControls.innerHTML = "";
+    const existingLoadMoreBtn = document.getElementById('load-more-btn');
+    if (existingLoadMoreBtn) existingLoadMoreBtn.remove();
     const totalLoaded = document.querySelectorAll('.event-card').length;
     if (count > totalLoaded) {
         const loadMoreBtn = document.createElement('button');
@@ -200,13 +278,27 @@ async function loadEvents(isNewSearch = false) {
 }
 
 // =================================================================
-// ЗАГРУЗКА КАТЕГОРИЙ (без изменений)
+// ЗАГРУЗКА КАТЕГОРИЙ
 // =================================================================
-async function loadAndDisplayCategories() { /*...*/ }
-
-// =================================================================
-// REAL-TIME ПОДПИСКА (убрал, т.к. требует RLS, который мы выключили для простоты)
-// =================================================================
+async function loadAndDisplayCategories() {
+    const { data, error } = await supabaseClient.from('categories').select('*').order('name');
+    if (error) return;
+    
+    const categoriesContainer = document.getElementById('categories-container');
+    const categoryPillsContainer = document.getElementById('category-pills-container');
+    
+    let categoriesCheckboxesHtml = '<p>Выберите категорию:</p>';
+    data.forEach(category => {
+        categoriesCheckboxesHtml += `<div class="category-checkbox"><input type="checkbox" id="cat-form-${category.id}" name="categories" value="${category.id}"><label for="cat-form-${category.id}">${category.name}</label></div>`;
+    });
+    if (categoriesContainer) categoriesContainer.innerHTML = categoriesCheckboxesHtml;
+    
+    let categoryPillsHtml = '<button class="category-pill" onclick="resetFilters()">Все</button>';
+    data.forEach(category => {
+        categoryPillsHtml += `<button class="category-pill" onclick="setCategoryFilter(${category.id})">${category.name}</button>`;
+    });
+    if (categoryPillsContainer) categoryPillsContainer.innerHTML = categoryPillsHtml;
+}
 
 // =================================================================
 // ПЕРВЫЙ ЗАПУСК
