@@ -242,7 +242,7 @@ async function loadEvents(isNewSearch = false) {
     data.forEach(event => {
         const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
         let dateHtml = '';
-        if (event.event_date) { const d = new Date(event.event_date); const day = d.getDate(); const month = d.toLocaleString('ru-RU', { month: 'short' }).replace('.', ''); dateHtml = `<div class="event-card-date"><span class="day">${day}</span><span class="month">${month}</span></div>`; }
+        if (event.event_date) { dateHtml = new Date(event.event_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }); }
         
         let adminControls = '';
         if (currentUser && (currentUser.id === event.created_by || isAdmin)) {
@@ -263,21 +263,23 @@ async function loadEvents(isNewSearch = false) {
         div.className = "event-card";
         
         div.innerHTML = `
-          <div class="event-card-image-container">
-            <img src="${event.image_url || 'https://placehold.co/600x337/f0f2f5/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}" class="event-card-image">
-            ${dateHtml}
-            <button class="card-save-btn ${favoriteClass}" onclick="event.stopPropagation(); toggleFavorite(${event.id}, ${isFavorited}, this)">${favoriteIcon}</button>
-            ${adminControls}
-          </div>
-          <div class="card-content">
-            <h3>${sanitizeHTML(event.title)}</h3>
-            ${categoriesHtml}
-            <p>${sanitizeHTML(event.description) || 'Нет описания.'}</p>
-            <div class="meta">
-                <div class="meta-item"><span>📍</span><span>${sanitizeHTML(event.city) || 'Онлайн'}</span></div>
-                <div class="meta-item"><span>👤</span><span>Добавил: ${sanitizeHTML(authorName)}</span></div>
-            </div>
-          </div>`;
+  <a href="event.html?id=${event.id}" class="event-card-new-image-link">
+    <img src="${event.image_url || 'https://placehold.co/400x400/f0f2f5/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}">
+  </a>
+  <div class="event-card-new-content">
+    ${categoriesHtml}
+    <a href="event.html?id=${event.id}" class="event-card-new-title-link">
+      <h3>${sanitizeHTML(event.title)}</h3>
+    </a>
+    <div class="meta">
+        <div class="meta-item"><span>🗓️</span><span>${dateHtml || 'Дата не указана'}</span></div>
+        <div class="meta-item"><span>📍</span><span>${sanitizeHTML(event.city) || 'Онлайн'}</span></div>
+    </div>
+  </div>
+  <div class="event-card-new-actions">
+    <button class="card-save-btn ${favoriteClass}" onclick="event.stopPropagation(); toggleFavorite(${event.id}, ${isFavorited}, this)">${favoriteIcon}</button>
+    ${adminControls}
+  </div>`;
         eventsContainer.appendChild(div);
     });
     const existingLoadMoreBtn = document.getElementById('load-more-btn');
