@@ -124,7 +124,7 @@ async function loadFavoriteEvents(isInitialLoad = false) {
 
     events.forEach(event => {
         let dateHtml = '';
-        if (event.event_date) { const d = new Date(event.event_date); const day = d.getDate(); const month = d.toLocaleString('ru-RU', { month: 'short' }).replace('.', ''); dateHtml = `<div class="event-card-date"><span class="day">${day}</span><span class="month">${month}</span></div>`; }
+        if (event.event_date) { dateHtml = new Date(event.event_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }); }
 
         let categoriesHtml = '';
         if (event.categories && event.categories.length > 0) {
