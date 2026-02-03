@@ -124,3 +124,4 @@ body.dark-theme .form-subtitle { color: #aaa; }
 body.dark-theme .toggle-form-container { color: #aaa; }
 .toggle-form-container a { color: var(--primary-color); text-decoration: none; font-weight: bold; }
 .toggle-form-container a:hover { text-decoration: underline; }
+.page-title { font-size: 20px; margin-left: 20px; font-weight: bold; color: var(--text-color); }
