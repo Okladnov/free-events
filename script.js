@@ -86,7 +86,6 @@ function setupEventListeners() {
         });
     }
     
-    const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     if(logoutBtn) logoutBtn.onclick = async () => {
         await supabaseClient.auth.signOut();
@@ -204,48 +203,60 @@ window.toggleFavorite = async (eventId, isFavorited, buttonElement) => {
 };
 
 // =================================================================
-// ЗАГРУЗКА СОБЫТИЙ
+// ЗАГРУЗКА СОБЫТИЙ - ИСПРАВЛЕННАЯ ВЕРСИЯ
 // =================================================================
 async function loadEvents(isNewSearch = false) {
     if (isNewSearch) {
         currentPage = 0;
         eventsContainer.innerHTML = 'Загрузка событий...';
+        paginationControls.innerHTML = '';
     }
+
     const searchTerm = searchInput.value.trim();
     const from = currentPage * PAGE_SIZE;
-    const to = from + PAGE_SIZE - 1;
-    const selectString = `id, title, description, city, event_date, created_by, image_url, rating, profiles ( full_name ), favorites ( user_id ), categories${currentCategoryId ? '!inner' : ''} ( id, name )`;
-    
-    let query = supabaseClient.from("events").select(selectString, { count: 'exact' }).eq('is_approved', true);
+    const to = from + PAGE_SIZE; // Supabase range is inclusive on both ends, so we just need the end index
+
+    let query = supabaseClient
+        .from("events")
+        .select(`id, title, description, city, event_date, created_by, image_url, rating, profiles ( full_name ), favorites ( user_id ), categories${currentCategoryId ? '!inner' : ''} ( id, name )`, { count: 'exact' })
+        .eq('is_approved', true);
     
     if (searchTerm) {
         query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
     }
-    if (currentCategoryId) query = query.eq('categories.id', currentCategoryId);
+    if (currentCategoryId) {
+        query = query.eq('categories.id', currentCategoryId);
+    }
     
-    query = query.order('created_at', { ascending: false }).range(from, to);
+    query = query.order('created_at', { ascending: false }).range(from, to -1); // range is inclusive, so to-1
+
     const { data, error, count } = await query;
 
-    if (error && error.code !== 'PGRST103') { 
-        eventsContainer.innerHTML = "Ошибка загрузки."; 
+    if (error) {
+        console.error("Ошибка загрузки событий:", error);
+        if (isNewSearch) {
+            eventsContainer.innerHTML = "Ошибка загрузки.";
+        }
         return; 
     }
     
     if (isNewSearch) {
         eventsContainer.innerHTML = "";
-        if (!data || data.length === 0) {
+    }
+
+    if (!data || data.length === 0) {
+        if (isNewSearch) {
             eventsContainer.innerHTML = 'Событий по вашему запросу не найдено. <a href="#" onclick="resetFilters(); return false;">Сбросить фильтры</a>';
-            paginationControls.innerHTML = "";
-            return;
         }
+        paginationControls.innerHTML = ''; // Убираем кнопку, если ничего не найдено
+        return;
     }
     
-    (data || []).forEach(event => {
+    data.forEach(event => {
         const div = document.createElement("div");
         div.className = "event-card-new";
         let dateHtml = '';
         if (event.event_date) { dateHtml = new Date(event.event_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }); }
-        const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
         const isFavorited = currentUser ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
         const favoriteIcon = isFavorited ? '❤️' : '🤍';
         const favoriteClass = isFavorited ? 'active' : '';
@@ -284,11 +295,15 @@ async function loadEvents(isNewSearch = false) {
     const existingLoadMoreBtn = document.getElementById('load-more-btn');
     if (existingLoadMoreBtn) existingLoadMoreBtn.remove();
     
-    if ((currentPage + 1) * PAGE_SIZE < count) {
+    // ЖЕЛЕЗОБЕТОННАЯ ЛОГИКА
+    if (count > to) {
         const loadMoreBtn = document.createElement('button');
         loadMoreBtn.textContent = 'Загрузить еще';
         loadMoreBtn.id = 'load-more-btn';
-        loadMoreBtn.onclick = () => { currentPage++; loadEvents(false); };
+        loadMoreBtn.onclick = () => { 
+            currentPage++; 
+            loadEvents(false); 
+        };
         paginationControls.appendChild(loadMoreBtn);
     }
 }
