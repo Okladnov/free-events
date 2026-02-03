@@ -34,6 +34,14 @@
             <div class="profile-menu" id="profile-menu">
                 <a href="/favorites.html">Мое избранное</a>
                 <a href="/admin.html" id="admin-link" style="display: none;">Панель модерации</a>
+                <!-- Новый блок для переключателя темы -->
+                <div class="menu-item-with-toggle">
+                    <span>Темная тема</span>
+                    <label class="theme-switcher">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
                 <div class="menu-separator"></div>
                 <a href="#" id="logoutBtn">Выйти</a>
             </div>
@@ -45,7 +53,6 @@
 
 <main class="container">
   
-  <!-- Модальное окно для добавления события, изначально скрыто -->
   <div class="modal-overlay" id="add-event-modal" style="display: none;">
     <div class="modal-content">
       <button class="modal-close-btn" id="modal-close-btn">&times;</button>
@@ -64,7 +71,6 @@
               </div>
               <div class="form-row">
                   <div id="categories-container" class="categories-container">
-                  <!-- Сюда будут загружены чекбоксы категорий -->
                   </div>
               </div>
               <button type="submit">Добавить</button>
@@ -76,7 +82,6 @@
 
   <section class="filters-section">
       <div id="category-pills-container" class="pills-container">
-          <!-- JavaScript будет заполнять это место -->
       </div>
   </section>
 
