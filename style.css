@@ -15,7 +15,7 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Ro
 #user-info { font-size: 14px; margin-bottom: 8px; }
 .auth-block button { background-color: white; color: var(--primary-color); padding: 8px 12px; border: 1px solid white; border-radius: 6px; font-weight: bold; cursor: pointer; }
 .card { background-color: var(--card-background); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-#add-event-form input, #add-event-form textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; }
+#add-event-form input, #add-event-form textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; box-sizing: border-box; } /* Добавил box-sizing */
 .form-row { display: flex; gap: 10px; align-items: center; }
 .form-row input { flex: 1; }
 .file-input-row { margin-top: 10px; }
@@ -83,11 +83,13 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Ro
 .tag { background-color: #eee; color: #333; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: 500; cursor: pointer; transition: background-color 0.2s; }
 .tag:hover { background-color: #ddd; }
 .tag.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
-@media (max-width: 768px) { .event-detail-body { grid-template-columns: 1fr; } .event-detail-title-card { width: 90%; bottom: -15px; } .event-detail-title-card h1 { font-size: 22px; } .info-grid { grid-template-columns: 1fr; } }
-.card-save-btn.active {
-  color: #e74c3c; /* Красный цвет для "лайка" */
+@media (max-width: 768px) {
+  .event-detail-body { grid-template-columns: 1fr; }
+  .event-detail-title-card { width: 90%; bottom: -15px; }
+  .event-detail-title-card h1 { font-size: 22px; }
+  .info-grid { grid-template-columns: 1fr; }
 }
-/* Стиль для активной кнопки "В избранное" */
+/* [УЛУЧШЕНИЕ 1] Убрали дубликат */
 .card-save-btn.active {
   color: #e74c3c; /* Красный цвет для "лайка" */
 }
@@ -99,4 +101,11 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Ro
 }
 #favorites-link:hover {
   text-decoration: none;
+}
+/* [УЛУЧШЕНИЕ 2] Добавили стили для админки */
+.admin-event-card {
+  border: 1px solid var(--border-color);
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
 }
