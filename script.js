@@ -124,9 +124,9 @@ async function loadEvents(isNewSearch = false) {
     // [УЛУЧШЕНИЕ 3] Убрали дублирующийся фильтр
     let query = supabaseClient.from("events").select(selectString, { count: 'exact' }).eq('is_approved', true);
     
-    if (searchTerm) query = query.ilike('title', `%${searchTerm}%`);
-    if (city) query = query.ilike('city', `%${city}%`);
-    if (currentCategoryId) query = query.eq('categories.id', currentCategoryId);
+    if (searchTerm) {
+  query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
+}
     
     query = query.order('created_at', { ascending: false }).range(from, to);
 
