@@ -33,6 +33,8 @@ let currentCategoryId = null;
 // ГЛАВНАЯ ЛОГИКА
 // =================================================================
 async function main() {
+    setupEventListeners(); // Запускаем обработчики, включая тему, в первую очередь
+    
     const { data: { session } } = await supabaseClient.auth.getSession();
     currentUser = session ? session.user : null;
 
@@ -63,10 +65,31 @@ async function main() {
 
     loadAndDisplayCategories();
     loadEvents(true);
-    setupEventListeners();
 }
 
 function setupEventListeners() {
+    // --- Логика для переключателя темы ---
+    const themeToggle = document.getElementById('theme-toggle');
+    const currentTheme = localStorage.getItem('theme');
+
+    if (currentTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        if(themeToggle) themeToggle.checked = true;
+    }
+
+    if(themeToggle) {
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    }
+    
+    // --- Остальные обработчики ---
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     if(loginBtn) loginBtn.onclick = async () => await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
@@ -79,19 +102,9 @@ function setupEventListeners() {
     const addEventModalBtn = document.getElementById('add-event-modal-btn');
     const modalCloseBtn = document.getElementById('modal-close-btn');
     
-    if(addEventModalBtn) {
-        addEventModalBtn.onclick = () => { addEventModal.style.display = 'flex'; };
-    }
-    if(modalCloseBtn) {
-        modalCloseBtn.onclick = () => { addEventModal.style.display = 'none'; };
-    }
-    if(addEventModal) {
-        addEventModal.onclick = (event) => {
-            if (event.target === addEventModal) {
-                addEventModal.style.display = 'none';
-            }
-        };
-    }
+    if(addEventModalBtn) addEventModalBtn.onclick = () => { addEventModal.style.display = 'flex'; };
+    if(modalCloseBtn) modalCloseBtn.onclick = () => { addEventModal.style.display = 'none'; };
+    if(addEventModal) addEventModal.onclick = (event) => { if (event.target === addEventModal) { addEventModal.style.display = 'none'; } };
     
     const profileDropdown = document.getElementById('profile-dropdown');
     if (profileDropdown) {
@@ -111,40 +124,42 @@ function setupEventListeners() {
 // =================================================================
 // ОБРАБОТКА ФОРМЫ ДОБАВЛЕНИЯ
 // =================================================================
-addEventForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    if (!currentUser) { alert("Пожалуйста, войдите."); return; }
-    const submitButton = addEventForm.querySelector('button[type="submit"]');
-    submitButton.disabled = true; message.textContent = "Загрузка...";
-    try {
-        const { data: eventData, error: insertError } = await supabaseClient.from("events").insert({ title: document.getElementById("title").value.trim(), description: document.getElementById("description").value.trim(), city: document.getElementById("city").value.trim(), event_date: document.getElementById("date").value || null, created_by: currentUser.id }).select().single();
-        if (insertError) throw insertError;
-        const newEventId = eventData.id;
-        const imageFile = document.getElementById('image-input').files[0];
-        if (imageFile) {
-            const fileName = `${currentUser.id}/${newEventId}_${Date.now()}_${imageFile.name.replace(/\s/g, '-')}`;
-            await supabaseClient.storage.from('event-images').upload(fileName, imageFile, { upsert: true });
-            const { data: { publicUrl } } = supabaseClient.storage.from('event-images').getPublicUrl(fileName);
-            await supabaseClient.from('events').update({ image_url: publicUrl }).match({ id: newEventId });
+if(addEventForm) {
+    addEventForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!currentUser) { alert("Пожалуйста, войдите."); return; }
+        const submitButton = addEventForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true; message.textContent = "Загрузка...";
+        try {
+            const { data: eventData, error: insertError } = await supabaseClient.from("events").insert({ title: document.getElementById("title").value.trim(), description: document.getElementById("description").value.trim(), city: document.getElementById("city").value.trim(), event_date: document.getElementById("date").value || null, created_by: currentUser.id }).select().single();
+            if (insertError) throw insertError;
+            const newEventId = eventData.id;
+            const imageFile = document.getElementById('image-input').files[0];
+            if (imageFile) {
+                const fileName = `${currentUser.id}/${newEventId}_${Date.now()}_${imageFile.name.replace(/\s/g, '-')}`;
+                await supabaseClient.storage.from('event-images').upload(fileName, imageFile, { upsert: true });
+                const { data: { publicUrl } } = supabaseClient.storage.from('event-images').getPublicUrl(fileName);
+                await supabaseClient.from('events').update({ image_url: publicUrl }).match({ id: newEventId });
+            }
+            const selectedCategories = Array.from(document.querySelectorAll('#categories-container input:checked')).map(cb => Number(cb.value));
+            if (selectedCategories.length > 0) {
+                const linksToInsert = selectedCategories.map(categoryId => ({ event_id: newEventId, category_id: categoryId }));
+                await supabaseClient.from('event_categories').insert(linksToInsert);
+            }
+            message.textContent = "✅ Отправлено на модерацию!";
+            addEventForm.reset();
+            setTimeout(() => {
+                document.getElementById('add-event-modal').style.display = 'none';
+                message.textContent = "";
+                loadEvents(true);
+            }, 1500);
+        } catch (error) {
+            message.textContent = `Ошибка: ${error.message}`;
+        } finally {
+            submitButton.disabled = false;
         }
-        const selectedCategories = Array.from(document.querySelectorAll('#categories-container input:checked')).map(cb => Number(cb.value));
-        if (selectedCategories.length > 0) {
-            const linksToInsert = selectedCategories.map(categoryId => ({ event_id: newEventId, category_id: categoryId }));
-            await supabaseClient.from('event_categories').insert(linksToInsert);
-        }
-        message.textContent = "✅ Отправлено на модерацию!";
-        addEventForm.reset();
-        setTimeout(() => {
-            document.getElementById('add-event-modal').style.display = 'none';
-            message.textContent = "";
-            loadEvents(true); // Обновляем список событий
-        }, 1500);
-    } catch (error) {
-        message.textContent = `Ошибка: ${error.message}`;
-    } finally {
-        submitButton.disabled = false;
-    }
-});
+    });
+}
 
 // =================================================================
 // УПРАВЛЕНИЕ СОБЫТИЕМ И ФИЛЬТРЫ
