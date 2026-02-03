@@ -8,14 +8,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // =================================================================
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ БЕЗОПАСНОСТИ
 // =================================================================
-function sanitizeHTML(text) {
-    if (!text) return '';
-    return DOMPurify.sanitize(text, { ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li'] });
-}
-function sanitizeForAttribute(text) {
-    if (!text) return '';
-    return text.toString().replace(/"/g, '&quot;');
-}
+function sanitizeHTML(text) { if (!text) return ''; return DOMPurify.sanitize(text, { ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li'] }); }
+function sanitizeForAttribute(text) { if (!text) return ''; return text.toString().replace(/"/g, '&quot;'); }
 
 // =================================================================
 // ЭЛЕМЕНТЫ СТРАНИЦЫ
@@ -122,7 +116,7 @@ async function removeFromFavorites(eventId, buttonElement) {
 }
 
 // =================================================================
-// ЗАГРУЗКА ИЗБРАННЫХ СОБЫТИЙ
+// ЗАГРУЗКА ИЗБРАННЫХ СОБЫТИЙ - ИСПРАВЛЕННАЯ ВЕРСИЯ
 // =================================================================
 async function loadFavoriteEvents(isInitialLoad = false) {
     if (isInitialLoad) {
@@ -138,21 +132,26 @@ async function loadFavoriteEvents(isInitialLoad = false) {
         allFavoriteEventIds = favoriteIdsData.map(item => item.event_id);
         eventsContainer.innerHTML = "";
     }
+
     const from = currentPage * PAGE_SIZE;
-    const to = from + PAGE_SIZE - 1;
-    const idsToFetch = allFavoriteEventIds.slice(from, to + 1);
+    const to = from + PAGE_SIZE;
+    const idsToFetch = allFavoriteEventIds.slice(from, to);
 
     if (idsToFetch.length === 0) {
         return;
     }
     
     const { data: events, error: eventsError } = await supabaseClient.from('events').select(`id, title, description, city, event_date, created_by, image_url, rating, profiles ( full_name ), categories ( id, name )`).in('id', idsToFetch).order('created_at', { ascending: false });
-    if (eventsError) { eventsContainer.innerHTML += '<p>Ошибка загрузки части событий.</p>'; return; }
+    if (eventsError) { 
+        console.error("Ошибка загрузки избранного:", eventsError);
+        eventsContainer.innerHTML += '<p>Ошибка загрузки части событий.</p>'; 
+        return; 
+    }
     
     const existingLoadMoreBtn = document.getElementById('load-more-btn');
     if (existingLoadMoreBtn) existingLoadMoreBtn.remove();
     
-    events.forEach(event => {
+    (events || []).forEach(event => {
         const div = document.createElement("div");
         div.className = "event-card-new";
         let dateHtml = '';
@@ -183,7 +182,7 @@ async function loadFavoriteEvents(isInitialLoad = false) {
         eventsContainer.appendChild(div);
     });
 
-    if ((currentPage + 1) * PAGE_SIZE < allFavoriteEventIds.length) {
+    if (to < allFavoriteEventIds.length) {
         const loadMoreBtn = document.createElement('button');
         loadMoreBtn.textContent = 'Загрузить еще';
         loadMoreBtn.id = 'load-more-btn';
