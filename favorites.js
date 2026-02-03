@@ -137,26 +137,22 @@ async function loadFavoriteEvents(isInitialLoad = false) {
         div.className = "event-card";
         // [УЛУЧШЕНИЕ 1] Применяем sanitizeForAttribute
         div.innerHTML = `
-          <div class="event-card-image-container" onclick="window.location.href = 'event.html?id=${event.id}'">
-            <img src="${event.image_url || 'https://placehold.co/600x337/f0f2f5/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}" class="event-card-image">
-            ${dateHtml}
-            <button class="card-save-btn active" onclick="event.stopPropagation(); removeFromFavorites(${event.id}, this)">❤️</button>
-          </div>
-          <div class="card-content" onclick="window.location.href = 'event.html?id=${event.id}'">
-            <h3>${sanitizeHTML(event.title)}</h3>
-            ${categoriesHtml}
-            <p>${sanitizeHTML(event.description) || 'Нет описания.'}</p>
-            <div class="meta">
-                <div class="meta-item">
-                    <span>📍</span>
-                    <span>${sanitizeHTML(event.city) || 'Онлайн'}</span>
-                </div>
-                <div class="meta-item">
-                    <span>👤</span>
-                    <span>Добавил: ${event.profiles ? sanitizeHTML(event.profiles.full_name) : 'Аноним'}</span>
-                </div>
-            </div>
-          </div>`;
+  <a href="event.html?id=${event.id}" class="event-card-new-image-link">
+    <img src="${event.image_url || 'https://placehold.co/400x400/f0f2f5/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}">
+  </a>
+  <div class="event-card-new-content">
+    ${categoriesHtml}
+    <a href="event.html?id=${event.id}" class="event-card-new-title-link">
+      <h3>${sanitizeHTML(event.title)}</h3>
+    </a>
+    <div class="meta">
+        <div class="meta-item"><span>🗓️</span><span>${dateHtml || 'Дата не указана'}</span></div>
+        <div class="meta-item"><span>📍</span><span>${sanitizeHTML(event.city) || 'Онлайн'}</span></div>
+    </div>
+  </div>
+  <div class="event-card-new-actions">
+    <button class="card-save-btn active" onclick="event.stopPropagation(); removeFromFavorites(${event.id}, this)">❤️</button>
+  </div>`;
         eventsContainer.appendChild(div);
     });
 
