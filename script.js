@@ -260,7 +260,7 @@ async function loadEvents(isNewSearch = false) {
         
         const div = document.createElement("div");
         div.onclick = () => { window.location.href = `event.html?id=${event.id}`; };
-        div.className = "event-card";
+        div.className = "event-card-new";
         
         div.innerHTML = `
   <a href="event.html?id=${event.id}" class="event-card-new-image-link">
