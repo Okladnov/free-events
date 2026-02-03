@@ -1,37 +1,46 @@
 :root { --primary-color: #ff6a00; --background-color: #f4f5f7; --card-background: #ffffff; --text-color: #333; --border-color: #e0e0e0; }
 body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--background-color); color: var(--text-color); }
 .container { max-width: 900px; margin: 0 auto; padding: 20px; }
-.header { background-color: var(--card-background); color: var(--text-color); padding: 15px 20px; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); }
+.header { background-color: var(--card-background); color: var(--text-color); padding: 15px 20px; margin-bottom: 0; border-bottom: 1px solid var(--border-color); }
 .header-container { display: flex; align-items: center; gap: 20px; }
-.header-logo { height: 50px; width: auto; display: block; }
-.auth-block { text-align: right; display: flex; align-items: center; gap: 15px; white-space: nowrap; }
-#user-info { font-size: 14px; margin-bottom: 8px; }
-.auth-block button { background-color: transparent; color: var(--primary-color); padding: 8px 12px; border: 1px solid var(--primary-color); border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; }
-.auth-block button:hover { background-color: var(--primary-color); color: white; }
-#favorites-link { color: var(--primary-color); text-decoration: underline; margin-right: 0; font-size: 14px; }
-#favorites-link:hover { text-decoration: none; }
-.card { background-color: var(--card-background); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-#add-event-form input, #add-event-form textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; box-sizing: border-box; }
-.form-row { display: flex; gap: 10px; align-items: center; }
-.form-row input { flex: 1; }
-.file-input-row { margin-top: 10px; }
-#add-event-form button { width: 100%; margin-top: 10px; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
-#add-event-form button:hover { background-color: #e65c00; }
-#message { margin-top: 10px; font-weight: bold; }
+.header-logo { height: 40px; width: auto; display: block; }
 .search-wrapper { position: relative; display: flex; align-items: center; flex-grow: 1; }
 .search-wrapper input { width: 100%; height: 40px; padding: 5px 45px 5px 20px; font-size: 15px; border: none; border-radius: 20px; background-color: #f0f2f5; -webkit-appearance: none; }
 .search-wrapper input:focus { outline: none; background-color: #e9e9e9; }
 .search-button { position: absolute; right: 3px; top: 3px; bottom: 3px; width: 34px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 50%; }
 .search-button:hover { background-color: #e9e9e9; }
-.pills-container { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; -ms-overflow-style: none; scrollbar-width: none; }
+.auth-block { text-align: right; display: flex; align-items: center; gap: 15px; white-space: nowrap; margin-left: auto; }
+.add-event-btn { background-color: var(--primary-color); color: white; padding: 0 16px; height: 40px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background-color 0.2s; white-space: nowrap; }
+.add-event-btn:hover { background-color: #e65c00; }
+.profile-dropdown { position: relative; }
+.profile-trigger { display: flex; align-items: center; gap: 8px; background-color: #f0f2f5; border: none; padding: 0 16px; height: 40px; border-radius: 20px; cursor: pointer; font-weight: bold; color: var(--text-color); }
+.profile-trigger:hover { background-color: #e9e9e9; }
+.profile-trigger svg { transition: transform 0.2s; }
+.profile-dropdown.open .profile-trigger svg { transform: rotate(180deg); }
+.profile-menu { display: none; position: absolute; top: calc(100% + 10px); right: 0; background-color: var(--card-background); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); padding: 8px; min-width: 200px; z-index: 100; }
+.profile-dropdown.open .profile-menu { display: block; }
+.profile-menu a { display: block; padding: 10px 12px; color: var(--text-color); text-decoration: none; border-radius: 6px; font-size: 15px; }
+.profile-menu a:hover { background-color: #f0f2f5; }
+.menu-separator { height: 1px; background-color: var(--border-color); margin: 8px 0; }
+#loginBtn { background-color: transparent; color: var(--primary-color); padding: 0 16px; height: 40px; border: 1px solid var(--primary-color); border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; }
+#loginBtn:hover { background-color: var(--primary-color); color: white; }
+.card { background-color: var(--card-background); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: none; align-items: flex-start; justify-content: center; z-index: 200; overflow-y: auto; padding-top: 5vh; }
+.modal-content { position: relative; max-width: 700px; width: 95%; background-color: transparent; border-radius: 8px; margin-bottom: 5vh; }
+.modal-close-btn { position: absolute; top: -10px; right: -10px; background: white; border: 1px solid var(--border-color); width: 32px; height: 32px; border-radius: 50%; font-size: 24px; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; z-index: 10; }
+.filters-section { padding: 20px 0 15px 0; margin: 0 20px 20px 20px; border-bottom: 1px solid var(--border-color); }
+.pills-container { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; -ms-overflow-style: none; scrollbar-width: none; }
 .pills-container::-webkit-scrollbar { display: none; }
-.category-pill { flex-shrink: 0; padding: 10px 20px; font-size: 15px; font-weight: 600; color: var(--text-color); background-color: #f0f2f5; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s ease-in-out; }
-.category-pill:hover { background-color: #e4e6eb; }
-.category-pill.active { background-color: var(--primary-color); color: white; }
+.category-pill { flex-shrink: 0; padding: 8px 16px; font-size: 14px; font-weight: 600; color: var(--text-color); background-color: #f0f2f5; border: 1px solid #f0f2f5; border-radius: 18px; cursor: pointer; transition: all 0.2s ease-in-out; }
+.category-pill:hover { border-color: #ddd; }
+.category-pill.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
 .categories-container { width: 100%; margin-top: 10px; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; }
-.categories-container p { margin: 0 0 10px; font-weight: bold; font-size: 14px; }
 .category-checkbox { display: inline-block; margin-right: 15px; margin-bottom: 10px; }
 .category-checkbox input { margin-right: 6px; }
+#add-event-form input, #add-event-form textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+#add-event-form button { width: 100%; margin-top: 10px; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+#add-event-form button:hover { background-color: #e65c00; }
+#message { margin-top: 10px; font-weight: bold; }
 .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
 .event-card { background-color: var(--card-background); border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden; transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; cursor: pointer; }
 .event-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
@@ -83,5 +92,3 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Ro
 @media (max-width: 768px) { .event-detail-body { grid-template-columns: 1fr; } .event-detail-title-card { width: 90%; bottom: -15px; } .event-detail-title-card h1 { font-size: 22px; } .info-grid { grid-template-columns: 1fr; } }
 .card-save-btn.active { color: #e74c3c; }
 .admin-event-card { border: 1px solid var(--border-color); padding: 15px; margin-bottom: 15px; border-radius: 8px; }
-.filters-section { padding: 0 0 15px 0; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); }
-.filters-section .pills-container { padding-bottom: 0; }
