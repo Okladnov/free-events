@@ -109,3 +109,9 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Ro
   margin-bottom: 15px;
   border-radius: 8px;
 }
+/* Стили для нового логотипа в шапке */
+.header-logo {
+  height: 50px; /* Можешь поменять высоту, если нужно */
+  width: auto;
+  display: block; /* Убирает лишние отступы под картинкой */
+}
