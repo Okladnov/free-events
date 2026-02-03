@@ -15,7 +15,6 @@
             <a href="/"><img src="logo.png" alt="Логотип Free Events" class="header-logo"></a>
         </div>
 
-        <!-- Форма регистрации (видна по умолчанию) -->
         <form class="form-card" id="register-form">
             <h2>Регистрация</h2>
             <p class="form-subtitle">Создайте аккаунт, чтобы добавлять события</p>
@@ -31,22 +30,21 @@
             
             <div class="input-group">
                 <label for="register-name">Имя</label>
-                <input id="register-name" type="text" placeholder="Ваше имя" required>
+                <input id="register-name" type="text" placeholder="Ваше имя" required autocomplete="name">
             </div>
             <div class="input-group">
                 <label for="register-email">Email</label>
-                <input id="register-email" type="email" placeholder="you@example.com" required>
+                <input id="register-email" type="email" placeholder="you@example.com" required autocomplete="email">
             </div>
             <div class="input-group">
                 <label for="register-password">Пароль</label>
-                <input id="register-password" type="password" placeholder="••••••••" required>
+                <input id="register-password" type="password" placeholder="••••••••" required autocomplete="new-password">
             </div>
             
             <button type="submit" class="submit-btn">Создать аккаунт</button>
             <p id="register-message" class="form-message"></p>
         </form>
 
-        <!-- Форма входа (скрыта по умолчанию) -->
         <form class="form-card" id="login-form" style="display: none;">
             <h2>Вход</h2>
             <p class="form-subtitle">Рады видеть вас снова!</p>
@@ -62,11 +60,11 @@
 
             <div class="input-group">
                 <label for="login-email">Email</label>
-                <input id="login-email" type="email" placeholder="you@example.com" required>
+                <input id="login-email" type="email" placeholder="you@example.com" required autocomplete="email">
             </div>
             <div class="input-group">
                 <label for="login-password">Пароль</label>
-                <input id="login-password" type="password" placeholder="••••••••" required>
+                <input id="login-password" type="password" placeholder="••••••••" required autocomplete="current-password">
             </div>
             
             <button type="submit" class="submit-btn">Войти</button>
@@ -80,7 +78,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Подключаем новый скрипт для этой страницы -->
     <script src="login.js"></script>
 </body>
 </html>
