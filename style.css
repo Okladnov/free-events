@@ -2,13 +2,13 @@
 body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--background-color); color: var(--text-color); }
 .container { max-width: 900px; margin: 0 auto; padding: 20px; }
 .header { background-color: var(--card-background); color: var(--text-color); padding: 15px 20px; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); }
-.header-container { display: flex; justify-content: space-between; align-items: center; }
+.header-container { display: flex; align-items: center; gap: 20px; }
 .header-logo { height: 50px; width: auto; display: block; }
-.auth-block { text-align: right; }
+.auth-block { text-align: right; display: flex; align-items: center; gap: 15px; white-space: nowrap; }
 #user-info { font-size: 14px; margin-bottom: 8px; }
 .auth-block button { background-color: transparent; color: var(--primary-color); padding: 8px 12px; border: 1px solid var(--primary-color); border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; }
 .auth-block button:hover { background-color: var(--primary-color); color: white; }
-#favorites-link { color: var(--primary-color); text-decoration: underline; margin-right: 15px; font-size: 14px; }
+#favorites-link { color: var(--primary-color); text-decoration: underline; margin-right: 0; font-size: 14px; }
 #favorites-link:hover { text-decoration: none; }
 .card { background-color: var(--card-background); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 #add-event-form input, #add-event-form textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; box-sizing: border-box; }
@@ -18,10 +18,10 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Ro
 #add-event-form button { width: 100%; margin-top: 10px; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
 #add-event-form button:hover { background-color: #e65c00; }
 #message { margin-top: 10px; font-weight: bold; }
-.search-wrapper { position: relative; display: flex; align-items: center; width: 100%; margin-top: 20px; }
-.search-wrapper input { width: 100%; height: 52px; padding: 10px 60px 10px 25px; font-size: 16px; border: none; border-radius: 26px; background-color: #f0f2f5; -webkit-appearance: none; }
+.search-wrapper { position: relative; display: flex; align-items: center; flex-grow: 1; }
+.search-wrapper input { width: 100%; height: 40px; padding: 5px 45px 5px 20px; font-size: 15px; border: none; border-radius: 20px; background-color: #f0f2f5; -webkit-appearance: none; }
 .search-wrapper input:focus { outline: none; background-color: #e9e9e9; }
-.search-button { position: absolute; right: 5px; top: 5px; bottom: 5px; width: 42px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 50%; }
+.search-button { position: absolute; right: 3px; top: 3px; bottom: 3px; width: 34px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 50%; }
 .search-button:hover { background-color: #e9e9e9; }
 .pills-container { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; -ms-overflow-style: none; scrollbar-width: none; }
 .pills-container::-webkit-scrollbar { display: none; }
