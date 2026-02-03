@@ -134,7 +134,7 @@ async function loadFavoriteEvents(isInitialLoad = false) {
         }
 
         const div = document.createElement("div");
-        div.className = "event-card";
+        div.className = "event-card-new";
         // [УЛУЧШЕНИЕ 1] Применяем sanitizeForAttribute
         div.innerHTML = `
   <a href="event.html?id=${event.id}" class="event-card-new-image-link">
