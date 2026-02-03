@@ -11,16 +11,43 @@
 <body>
 
     <header class="header">
-      <div class="container header-container">
-        <div class="header-title">
-          <a href="/" style="color: white; text-decoration: none;"><h1>🛡️ Панель Модерации</h1></a>
+  <div class="container header-container">
+    <div class="header-title">
+        <a href="/">
+            <!-- Используем наш логотип, но обернем его в ссылку на главную -->
+            <img src="logo.png" alt="Логотип Free Events" class="header-logo">
+        </a>
+        <!-- Просто добавим текстовый заголовок рядом, если хотим -->
+        <h1 class="page-title">Панель Модерации</h1>
+    </div>
+    <!-- Поиск нам в админке не нужен, так что пропускаем -->
+    <div class="auth-block">
+        <!-- Кнопка "Добавить" в админке тоже не нужна -->
+        <!-- <button class="add-event-btn" id="add-event-modal-btn" style="display: none;">Добавить событие</button> -->
+        <div class="profile-dropdown" id="profile-dropdown" style="display: none;">
+            <button class="profile-trigger" id="profile-trigger">
+                <span id="user-name-display"></span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="profile-menu" id="profile-menu">
+                <a href="/favorites.html">Мое избранное</a>
+                <a href="/admin.html" id="admin-link" style="display: none;">Панель модерации</a>
+                <div class="menu-item-with-toggle">
+                    <span>Темная тема</span>
+                    <label class="theme-switcher">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="menu-separator"></div>
+                <a href="#" id="logoutBtn">Выйти</a>
+            </div>
         </div>
-        <div class="auth-block">
-          <div id="user-info"></div>
-          <button id="logoutBtn" style="display: none;">Выйти</button>
-        </div>
-      </div>
-    </header>
+        <a href="/login.html" id="loginBtn">Войти</a>
+    </div>
+  </div>
+</header>
+
 
     <main class="container">
       <section class="card">
