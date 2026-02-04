@@ -127,9 +127,9 @@ body.dark-theme .card-description { color: #ccc; }
     gap: 20px;
 }
 .categories-container-edit {
-    display: grid;
-    grid-template-columns: 1fr; 
-    gap: 12px;                  
+    display: flex;
+    flex-wrap: wrap; /* Разрешаем перенос на новую строку */
+    gap: 10px;       /* Расстояние между таблетками */
     background-color: var(--input-background);
     padding: 15px;
     border-radius: 8px;
