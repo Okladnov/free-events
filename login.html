@@ -9,71 +9,64 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 <body class="login-page-body">
-<main class="container">
-    <div class="login-container">
-        <div class="login-header">
-            <a href="/"><img src="logo.png" alt="Логотип Free Events" class="header-logo"></a>
-        </div>
 
-        <form class="form-card" id="register-form">
-            <h2>Регистрация</h2>
-            <p class="form-subtitle">Создайте аккаунт, чтобы добавлять события</p>
-            
-            <div class="google-btn-container">
-                <button type="button" class="google-btn" id="google-login-btn-register">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
-                    <span>Войти через Google</span>
-                </button>
-            </div>
-            
-            <div class="divider"><span>ИЛИ</span></div>
-            
-            <div class="input-group">
-                <label for="register-name">Имя</label>
-                <input id="register-name" type="text" placeholder="Ваше имя" required autocomplete="name">
-            </div>
-            <div class="input-group">
-                <label for="register-email">Email</label>
-                <input id="register-email" type="email" placeholder="you@example.com" required autocomplete="email">
-            </div>
-            <div class="input-group">
-                <label for="register-password">Пароль</label>
-                <input id="register-password" type="password" placeholder="••••••••" required autocomplete="new-password">
-            </div>
-            
-            <button type="submit" class="submit-btn">Создать аккаунт</button>
-            <p id="register-message" class="form-message"></p>
-        </form>
-
-        <form class="form-card" id="login-form" style="display: none;">
-            <h2>Вход</h2>
-            <p class="form-subtitle">Рады видеть вас снова!</p>
-
-            <div class="google-btn-container">
-                <button type="button" class="google-btn" id="google-login-btn-login">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
-                    <span>Войти через Google</span>
-                </button>
+    <!-- Главный контейнер, который центрирует все по вертикали и горизонтали -->
+    <div class="login-modal-container">
+        <!-- Карта модального окна -->
+        <div class="login-modal-card">
+            <!-- Левая колонка для имиджа (здесь будет твой логотип) -->
+            <div class="login-modal-image-side">
+                <img src="logo.png" alt="Логотип Free Events" class="login-modal-logo">
+                <h2>Добро пожаловать!</h2>
+                <p>Сообщество для поиска бесплатных событий.</p>
             </div>
 
-            <div class="divider"><span>ИЛИ</span></div>
+            <!-- Правая колонка с формой -->
+            <div class="login-modal-form-side">
+                
+                <!-- Форма входа (по умолчанию видима) -->
+                <form id="login-form">
+                    <h2>Вход</h2>
+                    <p class="form-subtitle">Рады видеть вас снова!</p>
+                    
+                    <div class="input-group">
+                        <label for="login-email">Email</label>
+                        <input id="login-email" type="email" placeholder="you@example.com" required autocomplete="email">
+                    </div>
+                    <div class="input-group">
+                        <label for="login-password">Пароль</label>
+                        <input id="login-password" type="password" placeholder="••••••••" required autocomplete="current-password">
+                    </div>
+                    
+                    <p id="login-message" class="form-message"></p>
+                    <button type="submit" class="submit-btn primary">Войти</button>
+                    <button type="button" class="submit-btn secondary" id="toggle-to-register-btn">Создать новый аккаунт</button>
+                </form>
 
-            <div class="input-group">
-                <label for="login-email">Email</label>
-                <input id="login-email" type="email" placeholder="you@example.com" required autocomplete="email">
-            </div>
-            <div class="input-group">
-                <label for="login-password">Пароль</label>
-                <input id="login-password" type="password" placeholder="••••••••" required autocomplete="current-password">
-            </div>
-            
-            <button type="submit" class="submit-btn">Войти</button>
-            <p id="login-message" class="form-message"></p>
-        </form>
+                <!-- Форма регистрации (по умолчанию скрыта) -->
+                <form id="register-form" style="display: none;">
+                    <h2>Регистрация</h2>
+                    <p class="form-subtitle">Присоединяйтесь к нашему сообществу!</p>
+                    
+                    <div class="input-group">
+                        <label for="register-name">Имя</label>
+                        <input id="register-name" type="text" placeholder="Ваше имя" required autocomplete="name">
+                    </div>
+                    <div class="input-group">
+                        <label for="register-email">Email</label>
+                        <input id="register-email" type="email" placeholder="you@example.com" required autocomplete="email">
+                    </div>
+                    <div class="input-group">
+                        <label for="register-password">Пароль</label>
+                        <input id="register-password" type="password" placeholder="••••••••" required autocomplete="new-password">
+                    </div>
+                    
+                    <p id="register-message" class="form-message"></p>
+                    <button type="submit" class="submit-btn primary">Создать аккаунт</button>
+                    <button type="button" class="submit-btn secondary" id="toggle-to-login-btn">Уже есть аккаунт? Войти</button>
+                </form>
 
-        <div class="toggle-form-container">
-            <p id="toggle-to-login">Уже есть аккаунт? <a href="#">Войти</a></p>
-            <p id="toggle-to-register" style="display: none;">Нет аккаунта? <a href="#">Зарегистрироваться</a></p>
+            </div>
         </div>
     </div>
 
