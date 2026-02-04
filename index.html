@@ -53,33 +53,6 @@
 </header>
 
 <main class="container">
-  
-  <div class="modal-overlay" id="add-event-modal" style="display: none;">
-    <div class="modal-content">
-      <button class="modal-close-btn" id="modal-close-btn">&times;</button>
-      <section class="card" style="margin-bottom: 0;">
-          <h2>Добавить событие</h2>
-          <form id="add-event-form">
-              <input id="title" placeholder="Название события" required>
-              <textarea id="description" placeholder="Описание"></textarea>
-              <div class="form-row">
-                  <input id="city" placeholder="Город">
-                  <input id="date" type="date">
-              </div>
-              <div class="form-row file-input-row">
-                  <label for="image-input">Изображение (постер, афиша):</label>
-                  <input id="image-input" type="file" accept="image/*">
-              </div>
-              <div class="form-row">
-                  <div id="categories-container" class="categories-container">
-                  </div>
-              </div>
-              <button type="submit">Добавить</button>
-              <p id="message"></p>
-          </form>
-      </section>
-    </div>
-  </div>
 
   <section class="filters-section">
       <div id="category-pills-container" class="pills-container">
