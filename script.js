@@ -101,13 +101,12 @@ function setupEventListeners() {
         window.location.reload();
     };
 
-    const addEventModal = document.getElementById('add-event-modal');
-    const addEventModalBtn = document.getElementById('add-event-modal-btn');
-    const modalCloseBtn = document.getElementById('modal-close-btn');
-    
-    if(addEventModalBtn) addEventModalBtn.onclick = () => { addEventModal.style.display = 'flex'; };
-    if(modalCloseBtn) modalCloseBtn.onclick = () => { addEventModal.style.display = 'none'; };
-    if(addEventModal) addEventModal.onclick = (event) => { if (event.target === addEventModal) { addEventModal.style.display = 'none'; } };
+    const addEventBtn = document.getElementById('add-event-modal-btn');
+if(addEventBtn) {
+    addEventBtn.onclick = () => {
+        window.location.href = '/edit-event.html';
+    };
+}
     
     const profileDropdown = document.getElementById('profile-dropdown');
     if (profileDropdown) {
