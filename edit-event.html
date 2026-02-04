@@ -11,7 +11,46 @@
 <body>
 
 <header class="header">
-  <!-- Не забудь вставить сюда актуальный код шапки из index.html -->
+  <div class="container header-container">
+    <div class="header-title">
+        <a href="/">
+            <img src="logo.png" alt="Логотип Free Events" class="header-logo">
+        </a>
+    </div>
+    <div class="search-wrapper">
+        <input id="search-input" placeholder="Поиск..." onkeyup="if(event.keyCode===13) loadEvents(true)">
+        <button class="search-button" onclick="loadEvents(true)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21L16.65 16.65" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+    </div>
+
+    <!-- ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ПЕРЕЕХАЛ СЮДА -->
+    <div class="header-theme-switcher">
+        <label class="theme-switcher">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div class="auth-block">
+        <button class="add-event-btn" id="add-event-modal-btn" style="display: none;">Добавить событие</button>
+        <div class="profile-dropdown" id="profile-dropdown" style="display: none;">
+            <button class="profile-trigger" id="profile-trigger">
+                <span id="user-name-display"></span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="profile-menu" id="profile-menu">
+                <a href="/profile.html">Мой профиль</a>
+                <a href="/favorites.html">Мое избранное</a>
+                <a href="/admin.html" id="admin-link" style="display: none;">Панель модерации</a>
+                <!-- Переключатель темы отсюда убран -->
+                <div class="menu-separator"></div>
+                <a href="#" id="logoutBtn">Выйти</a>
+            </div>
+        </div>
+        <a href="/login.html" id="loginBtn">Войти</a>
+    </div>
+  </div>
 </header>
 
 <main class="container">
