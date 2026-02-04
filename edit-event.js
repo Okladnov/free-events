@@ -33,72 +33,8 @@ let initialCategoryIds = [];
 let imageChanged = false;
 
 // =================================================================
-// ГЛАВНАЯ ЛОГИКА (ИСПРАВЛЕНА)
+// ГЛАВНАЯ ЛОГИКА
 // =================================================================
-async function main() {
-    setupEventListeners(); // Сначала настраиваем слушатели
-
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) {
-        window.location.href = '/login.html'; // Если не залогинен, на страницу входа
-        return;
-    }
-    currentUser = session.user;
-    
-    // ТЕПЕРЬ, КОГДА МЫ ЗНАЕМ КТО ПОЛЬЗОВАТЕЛЬ, ОБНОВЛЯЕМ ШАПКУ
-    document.getElementById('loginBtn').style.display = 'none';
-    document.getElementById('add-event-modal-btn').style.display = 'block';
-    document.getElementById('profile-dropdown').style.display = 'block';
-
-    const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single();
-    const userName = (profile && profile.full_name) ? profile.full_name : currentUser.email.split('@')[0];
-    document.getElementById('user-name-display').textContent = userName;
-
-    const { data: adminStatus } = await supabaseClient.rpc('is_admin');
-    isAdmin = adminStatus;
-    if(isAdmin) document.getElementById('admin-link').style.display = 'block';
-    
-    // --- Дальше логика страницы ---
-    await Promise.all([ loadCategories(), loadOrganizations() ]);
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    editingEventId = urlParams.get('id');
-
-    if (editingEventId) {
-        pageTitle.textContent = 'Редактирование события';
-        submitBtn.textContent = 'Сохранить изменения';
-        deleteBtn.style.display = 'block';
-        await loadEventForEditing();
-    } else {
-        pageTitle.textContent = 'Добавление нового события';
-        submitBtn.textContent = 'Опубликовать';
-    }
-
-    imageUploadInput.addEventListener('change', handleImagePreview);
-    removeImageBtn.addEventListener('click', handleImageRemove);
-    eventForm.addEventListener('submit', handleFormSubmit);
-    deleteBtn.addEventListener('click', handleDeleteEvent);
-}
-
-// =================================================================
-// СТАНДАРТНЫЕ СЛУШАТЕЛИ (без изменений)
-// =================================================================
-function setupEventListeners() {
-    // ... (весь код setupEventListeners без изменений)
-}
-
-// ... (все остальные функции: loadCategories, handleFormSubmit и т.д. без изменений)
-
-// --- ДЛЯ НАДЕЖНОСТИ, ПОЛНЫЙ КОД ---
-
-const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
-const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const pageTitle = document.getElementById('page-title');
-const eventForm = document.getElementById('event-form');
-// ... (остальные переменные)
-
 async function main() {
     setupEventListeners();
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -107,12 +43,15 @@ async function main() {
         return;
     }
     currentUser = session.user;
+    
     document.getElementById('loginBtn').style.display = 'none';
-    document.getElementById('add-event-modal-btn').style.display = 'block';
+    document.getElementById('add-event-modal-btn').style.display = 'none'; // Кнопка "Добавить" не нужна на этой странице
     document.getElementById('profile-dropdown').style.display = 'block';
+
     const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single();
     const userName = (profile && profile.full_name) ? profile.full_name : currentUser.email.split('@')[0];
     document.getElementById('user-name-display').textContent = userName;
+
     const { data: adminStatus } = await supabaseClient.rpc('is_admin');
     isAdmin = adminStatus;
     if(isAdmin) document.getElementById('admin-link').style.display = 'block';
@@ -136,6 +75,9 @@ async function main() {
     deleteBtn.addEventListener('click', handleDeleteEvent);
 }
 
+// =================================================================
+// СЛУШАТЕЛИ И ОБРАБОТЧИКИ
+// =================================================================
 function setupEventListeners() {
     const themeToggle = document.getElementById('theme-toggle');
     if(themeToggle) {
@@ -145,26 +87,15 @@ function setupEventListeners() {
             themeToggle.checked = true;
         }
         themeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                document.body.classList.add('dark-theme');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.body.classList.remove('dark-theme');
-                localStorage.setItem('theme', 'light');
-            }
+            document.body.classList.toggle('dark-theme', this.checked);
+            localStorage.setItem('theme', this.checked ? 'dark' : 'light');
         });
     }
     const logoutBtn = document.getElementById('logoutBtn');
     if(logoutBtn) logoutBtn.onclick = async () => {
         await supabaseClient.auth.signOut();
-        window.location.reload();
+        window.location.href = '/';
     };
-    const addEventBtn = document.getElementById('add-event-modal-btn');
-    if(addEventBtn) {
-        addEventBtn.onclick = () => {
-            window.location.href = '/edit-event.html';
-        };
-    }
     const profileDropdown = document.getElementById('profile-dropdown');
     if (profileDropdown) {
         const profileTrigger = document.getElementById('profile-trigger');
@@ -179,6 +110,7 @@ function setupEventListeners() {
         }
     });
 }
+
 async function loadCategories() {
     const { data, error } = await supabaseClient.from('categories').select('*').order('name');
     if (error) { categoriesContainer.innerHTML = '<p>Ошибка загрузки категорий</p>'; return; }
@@ -193,6 +125,7 @@ async function loadCategories() {
         });
     });
 }
+
 async function loadOrganizations() {
     const { data, error } = await supabaseClient.from('organizations').select('*').order('name');
     if (error) return;
@@ -203,6 +136,7 @@ async function loadOrganizations() {
         organizationSelect.appendChild(option);
     });
 }
+
 async function loadEventForEditing() {
     const { data: event, error } = await supabaseClient.from('events').select('*, event_categories(category_id)').eq('id', editingEventId).single();
     if (error || !event) { document.querySelector('.edit-layout-container').innerHTML = '<h2>Событие не найдено</h2>'; return; }
@@ -224,9 +158,11 @@ async function loadEventForEditing() {
         }
     });
 }
+
 function handleImagePreview() { const file = imageUploadInput.files[0]; if (file) { imageChanged = true; const reader = new FileReader(); reader.onload = (e) => { imagePreview.src = e.target.result; removeImageBtn.style.display = 'block'; }; reader.readAsDataURL(file); } }
 function handleImageRemove() { imageChanged = true; imagePreview.src = 'https://placehold.co/600x400/f0f2f5/ccc?text=Изображение'; imageUploadInput.value = ''; removeImageBtn.style.display = 'none'; }
 async function handleDeleteEvent() { if (!editingEventId) return; if (confirm('Вы уверены, что хотите удалить это событие навсегда?')) { const { error } = await supabaseClient.from('events').delete().eq('id', editingEventId); if (error) { alert(`Ошибка удаления: ${error.message}`); } else { alert('Событие удалено.'); window.location.href = '/'; } } }
+
 async function handleFormSubmit(e) {
     e.preventDefault();
     submitBtn.disabled = true;
@@ -265,7 +201,11 @@ async function handleFormSubmit(e) {
         setTimeout(() => { window.location.href = `/event.html?id=${eventId}`; }, 1500);
     } catch (error) {
         formMessage.textContent = `Ошибка: ${error.message}`;
-        submitBtn.disabled = false;
+        submitButton.disabled = false;
     }
 }
+
+// =================================================================
+// ПЕРВЫЙ ЗАПУСК
+// =================================================================
 main();
