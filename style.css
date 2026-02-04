@@ -35,7 +35,6 @@ body.dark-theme .search-button svg path { stroke: #bbb; }
 .profile-trigger { display: flex; align-items: center; gap: 8px; background-color: var(--input-background); border: none; padding: 0 16px; height: 40px; border-radius: 20px; cursor: pointer; font-weight: bold; color: var(--text-color); transition: background-color 0.3s; }
 .profile-menu { display: none; position: absolute; top: calc(100% + 10px); right: 0; background-color: var(--card-background); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); padding: 8px; min-width: 220px; z-index: 100; border: 1px solid var(--border-color); }
 .profile-dropdown.open .profile-menu { display: block; }
-.profile-menu a, .menu-item-with-toggle { display: block; padding: 10px 12px; color: var(--text-color); text-decoration: none; border-radius: 6px; font-size: 15px; }
 .profile-menu a:hover { background-color: var(--input-background); }
 .menu-separator { height: 1px; background-color: var(--border-color); margin: 8px 0; }
 #loginBtn { display: inline-block; background-color: transparent; color: var(--primary-color); padding: 0 16px; height: 40px; line-height: 38px; border: 1px solid var(--primary-color); border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; text-decoration: none; }
@@ -207,3 +206,8 @@ body.dark-theme .card-description { color: #ccc; }
     }
 }
 .category-pill.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+.header-theme-switcher {
+    display: flex;
+    align-items: center;
+    margin-left: 10px; /* Небольшой отступ от поиска */
+}
