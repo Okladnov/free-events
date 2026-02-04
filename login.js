@@ -15,8 +15,20 @@ const googleLoginBtnRegister = document.getElementById('google-login-btn-registe
 const googleLoginBtnLogin = document.getElementById('google-login-btn-login');
 const registerMessage = document.getElementById('register-message');
 const loginMessage = document.getElementById('login-message');
-const toggleToLogin = document.getElementById('toggle-to-login');
-const toggleToRegister = document.getElementById('toggle-to-register');
+const toggleToRegisterBtn = document.getElementById('toggle-to-register-btn');
+const toggleToLoginBtn = document.getElementById('toggle-to-login-btn');
+
+toggleToRegisterBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'block';
+});
+
+toggleToLoginBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    registerForm.style.display = 'none';
+    loginForm.style.display = 'block';
+});
 
 // =================================================================
 // ОСНОВНАЯ ЛОГИКА
