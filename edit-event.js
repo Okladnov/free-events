@@ -1,211 +1,110 @@
-// =================================================================
-// ПОДКЛЮЧЕНИЕ К SUPABASE
-// =================================================================
-const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
-const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+document.addEventListener('DOMContentLoaded', async () => {
+    // Инициализируем шапку и проверяем пользователя
+    await initializeHeader();
 
-// =================================================================
-// ЭЛЕМЕНТЫ СТРАНИЦЫ
-// =================================================================
-const pageTitle = document.getElementById('page-title');
-const eventForm = document.getElementById('event-form');
-const titleInput = document.getElementById('title');
-const descriptionInput = document.getElementById('description');
-const dateInput = document.getElementById('date');
-const cityInput = document.getElementById('city');
-const categoriesContainer = document.getElementById('categories-container');
-const organizationSelect = document.getElementById('organization-select');
-const imagePreview = document.getElementById('image-preview');
-const imageUploadInput = document.getElementById('image-upload');
-const removeImageBtn = document.getElementById('remove-image-btn');
-const formMessage = document.getElementById('form-message');
-const submitBtn = document.getElementById('submit-btn');
-const deleteBtn = document.getElementById('delete-btn');
-
-// =================================================================
-// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
-// =================================================================
-let currentUser = null;
-let isAdmin = false;
-let editingEventId = null;
-let initialCategoryIds = [];
-let imageChanged = false;
-
-// =================================================================
-// ГЛАВНАЯ ЛОГИКА
-// =================================================================
-async function main() {
-    setupEventListeners();
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) {
+    // Если гость - отправляем на логин
+    if (!currentUser) {
         window.location.href = '/login.html';
         return;
     }
-    currentUser = session.user;
-    
-    document.getElementById('loginBtn').style.display = 'none';
-    document.getElementById('add-event-modal-btn').style.display = 'none'; // Кнопка "Добавить" не нужна на этой странице
-    document.getElementById('profile-dropdown').style.display = 'block';
 
-    const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single();
-    const userName = (profile && profile.full_name) ? profile.full_name : currentUser.email.split('@')[0];
-    document.getElementById('user-name-display').textContent = userName;
+    // Загружаем категории в выпадающий список
+    await loadCategories();
 
-    const { data: adminStatus } = await supabaseClient.rpc('is_admin');
-    isAdmin = adminStatus;
-    if(isAdmin) document.getElementById('admin-link').style.display = 'block';
-    
-    await Promise.all([ loadCategories(), loadOrganizations() ]);
-    
+    // Проверяем, это создание или редактирование
     const urlParams = new URLSearchParams(window.location.search);
-    editingEventId = urlParams.get('id');
-    if (editingEventId) {
-        pageTitle.textContent = 'Редактирование события';
-        submitBtn.textContent = 'Сохранить изменения';
-        deleteBtn.style.display = 'block';
-        await loadEventForEditing();
-    } else {
-        pageTitle.textContent = 'Добавление нового события';
-        submitBtn.textContent = 'Опубликовать';
-    }
-    imageUploadInput.addEventListener('change', handleImagePreview);
-    removeImageBtn.addEventListener('click', handleImageRemove);
-    eventForm.addEventListener('submit', handleFormSubmit);
-    deleteBtn.addEventListener('click', handleDeleteEvent);
-}
+    const eventId = urlParams.get('id');
 
-// =================================================================
-// СЛУШАТЕЛИ И ОБРАБОТЧИКИ
-// =================================================================
-function setupEventListeners() {
-    const themeToggle = document.getElementById('theme-toggle');
-    if(themeToggle) {
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme === 'dark') {
-            document.body.classList.add('dark-theme');
-            themeToggle.checked = true;
-        }
-        themeToggle.addEventListener('change', function() {
-            document.body.classList.toggle('dark-theme', this.checked);
-            localStorage.setItem('theme', this.checked ? 'dark' : 'light');
-        });
+    if (eventId) {
+        // Режим редактирования
+        document.getElementById('form-title').textContent = 'Редактирование события';
+        await loadEventDataForEdit(eventId);
     }
-    const logoutBtn = document.getElementById('logoutBtn');
-    if(logoutBtn) logoutBtn.onclick = async () => {
-        await supabaseClient.auth.signOut();
-        window.location.href = '/';
-    };
-    const profileDropdown = document.getElementById('profile-dropdown');
-    if (profileDropdown) {
-        const profileTrigger = document.getElementById('profile-trigger');
-        profileTrigger.onclick = (event) => {
-            event.stopPropagation();
-            profileDropdown.classList.toggle('open');
-        };
-    }
-    document.addEventListener('click', (event) => {
-        if (profileDropdown && !profileDropdown.contains(event.target)) {
-            profileDropdown.classList.remove('open');
-        }
-    });
-}
 
+    // Вешаем обработчик на форму
+    document.getElementById('event-form').addEventListener('submit', (e) => handleFormSubmit(e, eventId));
+});
+
+// Загрузка категорий в <select>
 async function loadCategories() {
+    const categorySelect = document.getElementById('event-category');
     const { data, error } = await supabaseClient.from('categories').select('*').order('name');
-    if (error) { categoriesContainer.innerHTML = '<p>Ошибка загрузки категорий</p>'; return; }
-    let html = '';
-    (data || []).forEach(category => {
-        html += `<button type="button" class="category-pill" data-id="${category.id}">${category.name}</button>`;
-    });
-    categoriesContainer.innerHTML = html;
-    document.querySelectorAll('.categories-container-edit .category-pill').forEach(pill => {
-        pill.addEventListener('click', () => {
-            pill.classList.toggle('active');
-        });
-    });
-}
-
-async function loadOrganizations() {
-    const { data, error } = await supabaseClient.from('organizations').select('*').order('name');
-    if (error) return;
-    (data || []).forEach(org => {
-        const option = document.createElement('option');
-        option.value = org.id;
-        option.textContent = org.name;
-        organizationSelect.appendChild(option);
-    });
-}
-
-async function loadEventForEditing() {
-    const { data: event, error } = await supabaseClient.from('events').select('*, event_categories(category_id)').eq('id', editingEventId).single();
-    if (error || !event) { document.querySelector('.edit-layout-container').innerHTML = '<h2>Событие не найдено</h2>'; return; }
-    if (event.created_by !== currentUser.id && !isAdmin) { document.querySelector('.edit-layout-container').innerHTML = '<h2>У вас нет прав для редактирования этого события</h2>'; return; }
-    titleInput.value = event.title || '';
-    descriptionInput.value = event.description || '';
-    cityInput.value = event.city || '';
-    dateInput.value = event.event_date ? new Date(event.event_date).toISOString().split('T')[0] : '';
-    organizationSelect.value = event.organization_id || '';
-    if (event.image_url) {
-        imagePreview.src = event.image_url;
-        removeImageBtn.style.display = 'block';
+    if (error) {
+        console.error("Ошибка загрузки категорий:", error);
+        return;
     }
-    initialCategoryIds = event.event_categories.map(ec => ec.category_id);
-    document.querySelectorAll('.categories-container-edit .category-pill').forEach(pill => {
-        const pillId = parseInt(pill.dataset.id, 10);
-        if (initialCategoryIds.includes(pillId)) {
-            pill.classList.add('active');
-        }
-    });
+    categorySelect.innerHTML = data.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
 }
 
-function handleImagePreview() { const file = imageUploadInput.files[0]; if (file) { imageChanged = true; const reader = new FileReader(); reader.onload = (e) => { imagePreview.src = e.target.result; removeImageBtn.style.display = 'block'; }; reader.readAsDataURL(file); } }
-function handleImageRemove() { imageChanged = true; imagePreview.src = 'https://placehold.co/600x400/f0f2f5/ccc?text=Изображение'; imageUploadInput.value = ''; removeImageBtn.style.display = 'none'; }
-async function handleDeleteEvent() { if (!editingEventId) return; if (confirm('Вы уверены, что хотите удалить это событие навсегда?')) { const { error } = await supabaseClient.from('events').delete().eq('id', editingEventId); if (error) { alert(`Ошибка удаления: ${error.message}`); } else { alert('Событие удалено.'); window.location.href = '/'; } } }
+// Загрузка данных для существующего события
+async function loadEventDataForEdit(eventId) {
+    const { data: event, error } = await supabaseClient.from('events').select('*').eq('id', eventId).single();
+    if (error || !event) {
+        alert("Событие не найдено или у вас нет прав на его редактирование.");
+        window.location.href = '/';
+        return;
+    }
+    
+    // Проверяем, является ли текущий юзер автором
+    if (event.user_id !== currentUser.id && !isAdmin) {
+         alert("У вас нет прав на редактирование этого события.");
+         window.location.href = '/';
+         return;
+    }
 
-async function handleFormSubmit(e) {
+    // Заполняем форму
+    document.getElementById('event-title').value = event.title;
+    document.getElementById('event-description').value = event.description || '';
+    document.getElementById('event-image-url').value = event.image_url || '';
+    document.getElementById('event-category').value = event.category_id;
+    document.getElementById('event-date').value = event.event_date;
+    document.getElementById('event-city').value = event.city || '';
+    document.getElementById('event-link').value = event.link || ''; // ЗАПОЛНЯЕМ НОВОЕ ПОЛЕ
+}
+
+// Обработчик отправки формы
+async function handleFormSubmit(e, eventId) {
     e.preventDefault();
-    submitBtn.disabled = true;
-    formMessage.textContent = 'Сохранение...';
+    const formMessage = document.getElementById('form-message');
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    formMessage.textContent = 'Сохраняем...';
+    formMessage.style.color = 'var(--text-color)';
+
     try {
-        const eventData = { title: titleInput.value.trim(), description: descriptionInput.value.trim(), city: cityInput.value.trim(), event_date: dateInput.value || null, organization_id: organizationSelect.value || null };
-        let eventId = editingEventId;
-        let error, data;
-        if (editingEventId) {
-            ({ error } = await supabaseClient.from('events').update(eventData).eq('id', eventId));
+        const eventData = {
+            title: document.getElementById('event-title').value,
+            description: document.getElementById('event-description').value,
+            image_url: document.getElementById('event-image-url').value,
+            category_id: document.getElementById('event-category').value,
+            event_date: document.getElementById('event-date').value || null,
+            city: document.getElementById('event-city').value,
+            link: document.getElementById('event-link').value, // ПОЛУЧАЕМ НОВОЕ ПОЛЕ
+            user_id: currentUser.id,
+        };
+        
+        let result;
+        if (eventId) {
+            // Обновляем существующее
+            result = await supabaseClient.from('events').update(eventData).eq('id', eventId).select().single();
         } else {
-            eventData.created_by = currentUser.id;
-            ({ data, error } = await supabaseClient.from('events').insert(eventData).select().single());
-            if (data) eventId = data.id;
+            // Создаем новое
+            result = await supabaseClient.from('events').insert(eventData).select().single();
         }
+
+        const { data, error } = result;
+
         if (error) throw error;
-        if (!eventId) throw new Error('Не удалось получить ID события');
-        if (imageChanged) {
-            const imageFile = imageUploadInput.files[0];
-            let imageUrl = null;
-            if (imageFile) {
-                const filePath = `${currentUser.id}/${eventId}_${Date.now()}`;
-                const { error: uploadError } = await supabaseClient.storage.from('event-images').upload(filePath, imageFile);
-                if (uploadError) throw uploadError;
-                imageUrl = supabaseClient.storage.from('event-images').getPublicUrl(filePath).data.publicUrl;
-            }
-            await supabaseClient.from('events').update({ image_url: imageUrl }).eq('id', eventId);
-        }
-        const selectedPills = document.querySelectorAll('.categories-container-edit .category-pill.active');
-        const selectedCategoryIds = Array.from(selectedPills).map(pill => Number(pill.dataset.id));
-        const categoriesToAdd = selectedCategoryIds.filter(id => !initialCategoryIds.includes(id));
-        const categoriesToRemove = initialCategoryIds.filter(id => !initialCategoryIds.includes(id));
-        if (categoriesToRemove.length > 0) { await supabaseClient.from('event_categories').delete().eq('event_id', eventId).in('category_id', categoriesToRemove); }
-        if (categoriesToAdd.length > 0) { await supabaseClient.from('event_categories').insert(categoriesToAdd.map(catId => ({ event_id: eventId, category_id: catId }))); }
-        formMessage.textContent = '✅ Успешно сохранено!';
-        setTimeout(() => { window.location.href = `/event.html?id=${eventId}`; }, 1500);
+        
+        formMessage.textContent = '✅ Успешно сохранено! Перенаправляем...';
+        formMessage.style.color = '#2ecc71';
+        
+        // Перенаправляем на страницу созданного/обновленного события
+        setTimeout(() => { window.location.href = `/event.html?id=${data.id}`; }, 1500);
+
     } catch (error) {
         formMessage.textContent = `Ошибка: ${error.message}`;
+        formMessage.style.color = '#e74c3c';
         submitButton.disabled = false;
     }
 }
-
-// =================================================================
-// ПЕРВЫЙ ЗАПУСК
-// =================================================================
-main();
