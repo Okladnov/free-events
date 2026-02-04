@@ -95,3 +95,140 @@ body.dark-theme .card-description { color: #ccc; }
 }
 .login-page-body { /* ... */ }
 .login-container { /* ... */ }
+/* --- Стили для новой страницы логина --- */
+
+.login-page-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--background-color);
+}
+
+.login-modal-container {
+    padding: 20px;
+}
+
+.login-modal-card {
+    display: grid;
+    grid-template-columns: 300px 1fr; /* Левая колонка 300px, правая занимает остальное */
+    max-width: 800px;
+    width: 100%;
+    background-color: var(--card-background);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Чтобы скруглить углы у дочерних элементов */
+}
+
+/* Левая колонка с картинкой */
+.login-modal-image-side {
+    background-color: var(--input-background);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.login-modal-logo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.login-modal-image-side h2 {
+    margin-top: 0;
+    color: var(--text-color);
+}
+
+.login-modal-image-side p {
+    color: #888;
+}
+
+/* Правая колонка с формами */
+.login-modal-form-side {
+    padding: 40px;
+}
+
+.login-modal-form-side h2 {
+    margin-top: 0;
+    font-size: 24px;
+    color: var(--text-color);
+}
+
+.login-modal-form-side .form-subtitle {
+    margin-top: -10px;
+    margin-bottom: 30px;
+    color: #888;
+}
+
+/* Обновляем группу инпутов, чтобы label был сверху */
+.login-modal-form-side .input-group {
+    margin-bottom: 20px;
+}
+
+.login-modal-form-side .input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.login-modal-form-side .input-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--input-background);
+    color: var(--text-color);
+    font-size: 15px;
+    box-sizing: border-box; /* Важно для правильного расчета ширины */
+}
+
+/* Стили для кнопок */
+.login-modal-form-side .submit-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+
+.login-modal-form-side .submit-btn.primary {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+}
+.login-modal-form-side .submit-btn.primary:hover {
+    opacity: 0.9;
+}
+
+.login-modal-form-side .submit-btn.secondary {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+.login-modal-form-side .submit-btn.secondary:hover {
+    background-color: var(--input-background);
+}
+
+
+/* --- Адаптивность для мобильных --- */
+@media (max-width: 768px) {
+    .login-modal-card {
+        grid-template-columns: 1fr; /* На мобилках делаем одну колонку */
+        max-width: 400px;
+    }
+
+    .login-modal-image-side {
+        display: none; /* Скрываем левую колонку с картинкой */
+    }
+
+    .login-modal-form-side {
+        padding: 30px;
+    }
+}
