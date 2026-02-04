@@ -14,53 +14,58 @@
   <!-- Не забудь вставить сюда актуальный код шапки из index.html -->
 </header>
 
-<main class="container">
-    <div class="profile-page-card">
-        <div class="profile-page-header">
-            <div class="avatar-uploader">
-                <img src="https://placehold.co/100x100/f0f2f5/ccc?text=AV" alt="Аватар" id="user-avatar" class="user-avatar">
-                <label for="avatar-upload" class="avatar-upload-label">
-                    <span>✏️</span>
-                    <input type="file" id="avatar-upload" accept="image/*">
-                </label>
+<!-- ИЗМЕНЕНИЕ: Убрали класс "container" с main, чтобы он не мешал ширине -->
+<main>
+    <!-- НОВЫЙ КОНТЕЙНЕР ДЛЯ ДВУХ КОЛОНОК -->
+    <div class="profile-layout-container container">
+        
+        <!-- Левая колонка: Профиль -->
+        <div class="profile-page-card">
+            <div class="profile-page-header">
+                <div class="avatar-uploader">
+                    <img src="https://placehold.co/100x100/f0f2f5/ccc?text=AV" alt="Аватар" id="user-avatar" class="user-avatar">
+                    <label for="avatar-upload" class="avatar-upload-label">
+                        <span>✏️</span>
+                        <input type="file" id="avatar-upload" accept="image/*">
+                    </label>
+                </div>
+                <h2 id="welcome-message">Привет, ...</h2>
             </div>
-            <h2 id="welcome-message">Привет, ...</h2>
+    
+            <form id="profile-form">
+                <h3>Редактировать профиль</h3>
+                <div class="input-group">
+                    <label for="profile-name">Имя</label>
+                    <input id="profile-name" type="text" placeholder="Ваше имя">
+                </div>
+                <div class="input-group">
+                    <label for="profile-email">Email</label>
+                    <input id="profile-email" type="email" disabled>
+                </div>
+                <p id="profile-message" class="form-message"></p>
+                <div class="profile-actions">
+                    <button type="button" id="logout-profile-btn" class="logout-btn">Выйти</button>
+                    <button type="submit" class="submit-btn">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    
+        <!-- Правая колонка: Активность -->
+        <div class="profile-activity-card">
+            <div class="profile-tabs">
+                <button class="profile-tab active" id="show-favorites-btn">Мои закладки</button>
+                <button class="profile-tab" id="show-comments-btn">Мои комментарии</button>
+            </div>
+    
+            <div id="favorites-list" class="profile-events-list">
+                <p>Загрузка закладок...</p>
+            </div>
+    
+            <div id="comments-list" class="profile-events-list" style="display: none;">
+                <p>Загрузка комментированных событий...</p>
+            </div>
         </div>
 
-        <form id="profile-form">
-            <h3>Редактировать профиль</h3>
-            <div class="input-group">
-                <label for="profile-name">Имя</label>
-                <input id="profile-name" type="text" placeholder="Ваше имя">
-            </div>
-            <div class="input-group">
-                <label for="profile-email">Email</label>
-                <input id="profile-email" type="email" disabled>
-            </div>
-            <p id="profile-message" class="form-message"></p>
-            <div class="profile-actions">
-                <button type="button" id="logout-profile-btn" class="logout-btn">Выйти</button>
-                <button type="submit" class="submit-btn">Сохранить</button>
-            </div>
-        </form>
-    </div>
-
-    <!-- НОВЫЙ БЛОК ДЛЯ АКТИВНОСТИ ПОЛЬЗОВАТЕЛЯ -->
-    <div class="profile-activity-card">
-        <div class="profile-tabs">
-            <button class="profile-tab active" id="show-favorites-btn">Мои закладки</button>
-            <button class="profile-tab" id="show-comments-btn">Мои комментарии</button>
-        </div>
-
-        <!-- Контейнер для закладок (виден по умолчанию) -->
-        <div id="favorites-list" class="profile-events-list">
-            <p>Загрузка закладок...</p>
-        </div>
-
-        <!-- Контейнер для комментариев (скрыт по умолчанию) -->
-        <div id="comments-list" class="profile-events-list" style="display: none;">
-            <p>Загрузка комментированных событий...</p>
-        </div>
     </div>
 </main>
 
@@ -69,3 +74,4 @@
 <script src="profile.js"></script>
 </body>
 </html>
+
