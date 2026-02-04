@@ -227,3 +227,50 @@ body.dark-theme .event-detail-title-card p { color: #aaa; }
     width: auto;
     padding: 12px 30px;
 }
+/* --- СТИЛИ ДЛЯ АКТИВНОСТИ В ПРОФИЛЕ --- */
+.profile-activity-card {
+    max-width: 600px;
+    margin: 30px auto;
+    background-color: var(--card-background);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+.profile-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+}
+.profile-tab {
+    flex: 1;
+    padding: 15px;
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-color);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px; /* Компенсация border-bottom контейнера */
+    opacity: 0.6;
+}
+.profile-tab.active {
+    border-bottom-color: var(--primary-color);
+    opacity: 1;
+}
+.profile-events-list {
+    padding: 20px;
+}
+.profile-events-list .event-card-new {
+    gap: 12px;
+}
+.profile-events-list .event-card-new-image-link {
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.profile-events-list .event-card-new-content {
+    padding: 5px 10px 5px 0;
+}
+.profile-events-list .event-card-new-content h3 {
+    font-size: 16px;
+}
