@@ -35,18 +35,23 @@ body.dark-theme .search-button svg path { stroke: #bbb; }
 .profile-trigger { display: flex; align-items: center; gap: 8px; background-color: var(--input-background); border: none; padding: 0 16px; height: 40px; border-radius: 20px; cursor: pointer; font-weight: bold; color: var(--text-color); transition: background-color 0.3s; }
 .profile-menu { display: none; position: absolute; top: calc(100% + 10px); right: 0; background-color: var(--card-background); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); padding: 8px; min-width: 220px; z-index: 100; border: 1px solid var(--border-color); }
 .profile-dropdown.open .profile-menu { display: block; }
+.profile-menu a { display: block; padding: 10px 12px; color: var(--text-color); text-decoration: none; border-radius: 6px; font-size: 15px; }
 .profile-menu a:hover { background-color: var(--input-background); }
 .menu-separator { height: 1px; background-color: var(--border-color); margin: 8px 0; }
 #loginBtn { display: inline-block; background-color: transparent; color: var(--primary-color); padding: 0 16px; height: 40px; line-height: 38px; border: 1px solid var(--primary-color); border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; text-decoration: none; }
 #loginBtn:hover { background-color: var(--primary-color); color: white; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
-.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-input:checked + .slider { background-color: var(--primary-color); }
-input:checked + .slider:before { transform: translateX(20px); }
+.header-theme-switcher { display: flex; align-items: center; margin-left: 10px; }
+.theme-toggle-label { position: relative; display: inline-block; width: 44px; height: 24px; }
+.theme-toggle-label input { opacity: 0; width: 0; height: 0; }
+.theme-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+.theme-toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .theme-toggle-slider { background-color: var(--primary-color); }
+input:checked + .theme-toggle-slider:before { transform: translateX(20px); }
 .filters-section { padding: 20px 0 15px 0; margin: 0 20px 20px 20px; border-bottom: 1px solid var(--border-color); }
 .pills-container { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; scrollbar-width: none; }
 .pills-container::-webkit-scrollbar { display: none; }
 .category-pill { flex-shrink: 0; padding: 8px 16px; font-size: 14px; font-weight: 600; color: var(--text-color); background-color: var(--input-background); border: 1px solid var(--input-background); border-radius: 18px; cursor: pointer; transition: all 0.2s ease-in-out; }
+.category-pill.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
 #events { display: flex; flex-direction: column; gap: 16px; }
 .event-card-v3 { display: flex; flex-direction: column; background-color: var(--card-background); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; transition: box-shadow 0.2s; }
 .event-card-v3:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
@@ -81,172 +86,12 @@ body.dark-theme .card-description { color: #ccc; }
 #pagination-controls { text-align: center; margin-top: 30px; }
 #load-more-btn { background-color: var(--primary-color); color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 6px; cursor: pointer; }
 .footer { text-align: center; padding: 30px 20px; font-size: 14px; color: #888; }
-/* --- СТИЛИ ДЛЯ СТРАНИЦЫ РЕДАКТИРОВАНИЯ --- */
-.edit-layout-container {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 30px;
-    align-items: start;
-    margin-top: 20px;
+.profile-layout-container { display: grid; grid-template-columns: 320px 1fr; gap: 30px; align-items: start; padding-top: 40px; padding-bottom: 40px; }
+.profile-page-card { margin: 0; position: sticky; top: 20px; }
+.profile-activity-card { margin: 0; }
+@media (max-width: 900px) {
+    .profile-layout-container { grid-template-columns: 1fr; }
+    .profile-page-card { position: static; }
 }
-.edit-layout-container .card {
-    margin: 0; /* Убираем стандартные отступы */
-}
-.edit-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    position: sticky;
-    top: 20px;
-}
-
-#event-form .input-group {
-    margin-bottom: 20px;
-}
-#event-form .input-group label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 6px;
-    font-size: 14px;
-}
-#event-form input, #event-form textarea, #event-form select {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 15px;
-    background-color: var(--input-background);
-    color: var(--text-color);
-}
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-.categories-container-edit {
-    display: flex;
-    flex-wrap: wrap; /* Разрешаем перенос на новую строку */
-    gap: 10px;       /* Расстояние между таблетками */
-    background-color: var(--input-background);
-    padding: 15px;
-    border-radius: 8px;
-}
-.category-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.category-checkbox label {
-    cursor: pointer;
-}
-
-.image-uploader {
-    position: relative;
-}
-#image-preview {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    border-radius: 8px;
-    background-color: var(--input-background);
-    margin-bottom: 10px;
-}
-.image-upload-label {
-    display: block;
-    width: 100%;
-    text-align: center;
-    background-color: var(--input-background);
-    border: 1px solid var(--border-color);
-    padding: 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-}
-#image-upload {
-    display: none;
-}
-.remove-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(0,0,0,0.5);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-}
-#submit-btn {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-}
-.delete-btn {
-    width: 100%;
-    background: transparent;
-    border: 1px solid #e74c3c;
-    color: #e74c3c;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-@media (max-width: 768px) {
-    .edit-layout-container {
-        grid-template-columns: 1fr;
-    }
-    .edit-sidebar {
-        position: static;
-    }
-}
-.category-pill.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
-.header-theme-switcher {
-    display: flex;
-    align-items: center;
-    margin-left: 10px; /* Небольшой отступ от поиска */
-}
-/* НОВЫЕ, ИСПРАВЛЕННЫЕ СТИЛИ ДЛЯ ПЕРЕКЛЮЧАТЕЛЯ */
-.theme-toggle-label {
-    position: relative;
-    display: inline-block;
-    width: 44px;
-    height: 24px;
-}
-.theme-toggle-label input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-.theme-toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 24px;
-}
-.theme-toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-}
-input:checked + .theme-toggle-slider {
-    background-color: var(--primary-color);
-}
-input:checked + .theme-toggle-slider:before {
-    transform: translateX(20px);
-}
+.login-page-body { /* ... */ }
+.login-container { /* ... */ }
