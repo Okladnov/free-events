@@ -10,20 +10,30 @@
 </head>
 <body>
 
-    <header class="header">
+<header class="header">
   <div class="container header-container">
     <div class="header-title">
         <a href="/">
-            <!-- Используем наш логотип, но обернем его в ссылку на главную -->
             <img src="logo.png" alt="Логотип Free Events" class="header-logo">
         </a>
-        <!-- Просто добавим текстовый заголовок рядом, если хотим -->
-        <h1 class="page-title">Панель Модерации</h1>
     </div>
-    <!-- Поиск нам в админке не нужен, так что пропускаем -->
+    <div class="search-wrapper">
+        <input id="search-input" placeholder="Поиск..." onkeyup="if(event.keyCode===13) loadEvents(true)">
+        <button class="search-button" onclick="loadEvents(true)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21L16.65 16.65" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+    </div>
+
+    <!-- ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ПЕРЕЕХАЛ СЮДА -->
+    <div class="header-theme-switcher">
+        <label class="theme-switcher">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+
     <div class="auth-block">
-        <!-- Кнопка "Добавить" в админке тоже не нужна -->
-        <!-- <button class="add-event-btn" id="add-event-modal-btn" style="display: none;">Добавить событие</button> -->
+        <button class="add-event-btn" id="add-event-modal-btn" style="display: none;">Добавить событие</button>
         <div class="profile-dropdown" id="profile-dropdown" style="display: none;">
             <button class="profile-trigger" id="profile-trigger">
                 <span id="user-name-display"></span>
@@ -33,13 +43,7 @@
                 <a href="/profile.html">Мой профиль</a>
                 <a href="/favorites.html">Мое избранное</a>
                 <a href="/admin.html" id="admin-link" style="display: none;">Панель модерации</a>
-                <div class="menu-item-with-toggle">
-                    <span>Темная тема</span>
-                    <label class="theme-switcher">
-                        <input type="checkbox" id="theme-toggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
+                <!-- Переключатель темы отсюда убран -->
                 <div class="menu-separator"></div>
                 <a href="#" id="logoutBtn">Выйти</a>
             </div>
@@ -48,7 +52,6 @@
     </div>
   </div>
 </header>
-
 
     <main class="container">
       <section class="card">
