@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой профиль</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-container">
+    <div class="header-title">
+        <a href="/">
+            <img src="logo.png" alt="Логотип Free Events" class="header-logo">
+        </a>
+    </div>
+    <div class="search-wrapper">
+        <input id="search-input" placeholder="Поиск..." onkeyup="if(event.keyCode===13) loadEvents(true)">
+        <button class="search-button" onclick="loadEvents(true)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21L16.65 16.65" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+    </div>
+    <div class="auth-block">
+        <button class="add-event-btn" id="add-event-modal-btn" style="display: none;">Добавить событие</button>
+        <div class="profile-dropdown" id="profile-dropdown" style="display: none;">
+            <button class="profile-trigger" id="profile-trigger">
+                <span id="user-name-display"></span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="profile-menu" id="profile-menu">
+                <a href="/profile.html">Мой профиль</a>
+                <a href="/favorites.html">Мое избранное</a>
+                <a href="/admin.html" id="admin-link" style="display: none;">Панель модерации</a>
+                <div class="menu-item-with-toggle">
+                    <span>Темная тема</span>
+                    <label class="theme-switcher">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="menu-separator"></div>
+                <a href="#" id="logoutBtn">Выйти</a>
+            </div>
+        </div>
+        <a href="/login.html" id="loginBtn">Войти</a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+    <div class="profile-page-card">
+        <div class="profile-page-header">
+            <div class="avatar-uploader">
+                <img src="https://placehold.co/100x100/f0f2f5/ccc?text=AV" alt="Аватар" id="user-avatar" class="user-avatar">
+                <label for="avatar-upload" class="avatar-upload-label">
+                    <span>✏️</span>
+                    <input type="file" id="avatar-upload" accept="image/*">
+                </label>
+            </div>
+            <h2 id="welcome-message">Привет, ...</h2>
+        </div>
+
+        <form id="profile-form">
+            <h3>Редактировать профиль</h3>
+            <div class="input-group">
+                <label for="profile-name">Имя</label>
+                <input id="profile-name" type="text" placeholder="Ваше имя">
+            </div>
+            <div class="input-group">
+                <label for="profile-email">Email</label>
+                <input id="profile-email" type="email" disabled>
+            </div>
+            <p id="profile-message" class="form-message"></p>
+            <div class="profile-actions">
+                <button type="button" id="logout-profile-btn" class="logout-btn">Выйти</button>
+                <button type="submit" class="submit-btn">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="profile.js"></script>
+</body>
+</html>
