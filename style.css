@@ -83,3 +83,126 @@ body.dark-theme .card-description { color: #ccc; }
 #pagination-controls { text-align: center; margin-top: 30px; }
 #load-more-btn { background-color: var(--primary-color); color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 6px; cursor: pointer; }
 .footer { text-align: center; padding: 30px 20px; font-size: 14px; color: #888; }
+/* --- СТИЛИ ДЛЯ СТРАНИЦЫ РЕДАКТИРОВАНИЯ --- */
+.edit-layout-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    align-items: start;
+    margin-top: 20px;
+}
+.edit-layout-container .card {
+    margin: 0; /* Убираем стандартные отступы */
+}
+.edit-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 20px;
+}
+
+#event-form .input-group {
+    margin-bottom: 20px;
+}
+#event-form .input-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+#event-form input, #event-form textarea, #event-form select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 15px;
+    background-color: var(--input-background);
+    color: var(--text-color);
+}
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.categories-container-edit {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    background-color: var(--input-background);
+    padding: 15px;
+    border-radius: 8px;
+}
+.category-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.category-checkbox label {
+    cursor: pointer;
+}
+
+.image-uploader {
+    position: relative;
+}
+#image-preview {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 8px;
+    background-color: var(--input-background);
+    margin-bottom: 10px;
+}
+.image-upload-label {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: var(--input-background);
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+#image-upload {
+    display: none;
+}
+.remove-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+#submit-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+}
+.delete-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid #e74c3c;
+    color: #e74c3c;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .edit-layout-container {
+        grid-template-columns: 1fr;
+    }
+    .edit-sidebar {
+        position: static;
+    }
+}
