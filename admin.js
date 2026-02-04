@@ -9,11 +9,10 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ЭЛЕМЕНТЫ СТРАНИЦЫ
 // =================================================================
 const unapprovedContainer = document.getElementById('unapproved-events');
-const userInfo = document.getElementById('user-info');
-const logoutBtn = document.getElementById('logoutBtn');
+let currentUser = null; // Для проверки доступа
 
 // =================================================================
-// [УЛУЧШЕНИЕ 1] ДОБАВЛЕНА ФУНКЦИЯ БЕЗОПАСНОСТИ
+// ФУНКЦИЯ БЕЗОПАСНОСТИ
 // =================================================================
 function sanitizeHTML(text) {
     if (!text) return '';
@@ -21,36 +20,94 @@ function sanitizeHTML(text) {
 }
 
 // =================================================================
-// ГЛАВНАЯ ЛОГИКА
+// ГЛАВНАЯ ЛОГИКА - ОБНОВЛЕННАЯ
 // =================================================================
-logoutBtn.onclick = async function() {
-    await supabaseClient.auth.signOut();
-    window.location.reload();
-};
-
 async function main() {
-    const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-    if (sessionError || !session) {
+    setupEventListeners(); // Сначала настраиваем всю шапку
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    
+    if (!session) {
+        // Если пользователь не вошел, показываем ошибку и останавливаемся
         showAccessDenied();
+        // Скрываем меню профиля и показываем кнопку входа
+        document.getElementById('profile-dropdown').style.display = 'none';
+        document.getElementById('loginBtn').style.display = 'inline-block';
         return;
     }
-    const currentUser = session.user;
-    
-    userInfo.textContent = `Пользователь: ${currentUser.email}`;
-    logoutBtn.style.display = 'block';
 
+    // Если пользователь вошел, настраиваем интерфейс
+    currentUser = session.user;
+    document.getElementById('loginBtn').style.display = 'none';
+    document.getElementById('profile-dropdown').style.display = 'block';
+
+    const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single();
+    const userName = (profile && profile.full_name) ? profile.full_name : currentUser.email.split('@')[0];
+    document.getElementById('user-name-display').textContent = userName;
+    
+    // Проверяем, админ ли пользователь
     const { data: isAdmin, error: rpcError } = await supabaseClient.rpc('is_admin');
+    
     if (rpcError || !isAdmin) {
         showAccessDenied();
         return;
     }
     
-    userInfo.textContent = `👑 Админ: ${currentUser.email}`;
+    // Если все проверки пройдены, показываем контент админа
+    document.getElementById('admin-link').style.display = 'block'; // Показываем ссылку на админку в меню
     loadUnapprovedEvents();
 }
 
+// =================================================================
+// СТАНДАРТНАЯ ЛОГИКА ШАПКИ
+// =================================================================
+function setupEventListeners() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const currentTheme = localStorage.getItem('theme');
+    if (currentTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        if(themeToggle) themeToggle.checked = true;
+    }
+    if(themeToggle) {
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    }
+    
+    const logoutBtn = document.getElementById('logoutBtn');
+    if(logoutBtn) logoutBtn.onclick = async () => {
+        await supabaseClient.auth.signOut();
+        window.location.reload();
+    };
+
+    const profileDropdown = document.getElementById('profile-dropdown');
+    if (profileDropdown) {
+        const profileTrigger = document.getElementById('profile-trigger');
+        profileTrigger.onclick = (event) => {
+            event.stopPropagation();
+            profileDropdown.classList.toggle('open');
+        };
+    }
+    document.addEventListener('click', (event) => {
+        if (profileDropdown && !profileDropdown.contains(event.target)) {
+            profileDropdown.classList.remove('open');
+        }
+    });
+}
+
+
+// =================================================================
+// СПЕЦИФИЧНАЯ ЛОГИКА АДМИНКИ (без изменений)
+// =================================================================
+
 function showAccessDenied() {
-    unapprovedContainer.innerHTML = '<h2>⛔ Доступ запрещен</h2><p>Эта страница доступна только для администраторов.</p>';
+    unapprovedContainer.innerHTML = '<h2>⛔ Доступ запрещен</h2><p>Эта страница доступна только для администраторов. <a href="/">На главную</a></p>';
 }
 
 async function loadUnapprovedEvents() {
@@ -76,9 +133,7 @@ async function loadUnapprovedEvents() {
     events.forEach(event => {
         const eventCard = document.createElement('div');
         eventCard.className = 'admin-event-card';
-        eventCard.style.cssText = 'border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px;';
         
-        // [УЛУЧШЕНИЕ 2 и 3] Применяем sanitizeHTML и добавляем ссылку
         eventCard.innerHTML = `
             <h4>${sanitizeHTML(event.title)}</h4>
             <p>${sanitizeHTML(event.description) || 'Нет описания.'}</p>
@@ -98,7 +153,15 @@ window.approveEvent = async function(eventId, buttonElement) {
         buttonElement.disabled = false;
     } else {
         buttonElement.closest('.admin-event-card').remove();
+        // Проверяем, не пуст ли контейнер после удаления
+        if (unapprovedContainer.children.length === 0) {
+            unapprovedContainer.innerHTML = '<p>🎉 Все события одобрены! Новых на модерацию нет.</p>';
+        }
     }
 };
 
+// =================================================================
+// ПЕРВЫЙ ЗАПУСК
+// =================================================================
 main();
+
