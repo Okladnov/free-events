@@ -274,3 +274,39 @@ body.dark-theme .event-detail-title-card p { color: #aaa; }
 .profile-events-list .event-card-new-content h3 {
     font-size: 16px;
 }
+/* --- СТИЛИ ДЛЯ ДВУХ-КОЛОНОЧНОГО ЛЕЙАУТА ПРОФИЛЯ --- */
+
+/* 1. Сам контейнер-сетка */
+.profile-layout-container {
+    display: grid;
+    /* Определяем колонки: левая 320px, правая - всё остальное */
+    grid-template-columns: 320px 1fr;
+    gap: 30px; /* Расстояние между колонками */
+    align-items: start; /* Выравниваем блоки по верху */
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+/* 2. Убираем лишние отступы у дочерних карточек */
+.profile-page-card {
+    margin: 0;
+    /* Делаем левый блок "липким" при скролле */
+    position: sticky;
+    top: 20px;
+}
+
+.profile-activity-card {
+    margin: 0;
+}
+
+/* 3. Медиа-запрос для мобильных устройств */
+@media (max-width: 900px) {
+    .profile-layout-container {
+        /* На маленьких экранах возвращаем одну колонку */
+        grid-template-columns: 1fr;
+    }
+    .profile-page-card {
+        /* Отключаем "липкость" на мобильных */
+        position: static;
+    }
+}
