@@ -6,170 +6,247 @@ const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // =================================================================
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ БЕЗОПАСНОСТИ
-// =================================================================
-function sanitizeForAttribute(text) {
-    if (!text) return '';
-    return text.toString().replace(/"/g, '&quot;');
-}
-
-// =================================================================
 // ЭЛЕМЕНТЫ СТРАНИЦЫ
 // =================================================================
-const editFormContainer = document.getElementById('edit-form-container');
+const pageTitle = document.getElementById('page-title');
+const eventForm = document.getElementById('event-form');
+const titleInput = document.getElementById('title');
+const descriptionInput = document.getElementById('description');
+const dateInput = document.getElementById('date');
+const cityInput = document.getElementById('city');
+const categoriesContainer = document.getElementById('categories-container');
+const organizationSelect = document.getElementById('organization-select');
+const imagePreview = document.getElementById('image-preview');
+const imageUploadInput = document.getElementById('image-upload');
+const removeImageBtn = document.getElementById('remove-image-btn');
+const formMessage = document.getElementById('form-message');
+const submitBtn = document.getElementById('submit-btn');
+const deleteBtn = document.getElementById('delete-btn');
+
+// =================================================================
+// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+// =================================================================
+let currentUser = null;
+let isAdmin = false;
+let editingEventId = null;
+let initialCategoryIds = [];
+let imageChanged = false; // Флаг, чтобы отслеживать изменение картинки
 
 // =================================================================
 // ГЛАВНАЯ ЛОГИКА
 // =================================================================
 async function main() {
-    // 1. Получаем текущего пользователя
-    const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-    if (sessionError || !session) {
-        showAccessDenied('Пожалуйста, войдите в свой аккаунт, чтобы редактировать события.');
+    setupHeader();
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+        window.location.href = '/login.html';
         return;
     }
-    const currentUser = session.user;
+    currentUser = session.user;
+    const { data: adminStatus } = await supabaseClient.rpc('is_admin');
+    isAdmin = adminStatus;
+
+    // Загружаем общие данные (категории, организации)
+    await Promise.all([
+        loadCategories(),
+        loadOrganizations()
+    ]);
     
-    // Показываем информацию о пользователе
-    document.getElementById('user-info').textContent = `Вы вошли как: ${currentUser.email}`;
-    document.getElementById('logoutBtn').style.display = 'block';
-    document.getElementById('logoutBtn').onclick = async () => {
-        await supabaseClient.auth.signOut();
-        window.location.reload();
-    };
-
-    // 2. Загружаем и отображаем форму
-    loadEventForEdit(currentUser);
-}
-
-function showAccessDenied(message) {
-    editFormContainer.innerHTML = `<h2>Доступ запрещен</h2><p>${message}</p><a href="/">На главную</a>`;
-}
-
-// =================================================================
-// ЗАГРУЗКА И ОТОБРАЖЕНИЕ ФОРМЫ
-// =================================================================
-async function loadEventForEdit(currentUser) {
+    // Проверяем, это страница создания или редактирования
     const urlParams = new URLSearchParams(window.location.search);
-    const eventId = urlParams.get('id');
-    if (!eventId) {
-        showAccessDenied("ID события не найден.");
-        return;
+    editingEventId = urlParams.get('id');
+
+    if (editingEventId) {
+        // РЕЖИМ РЕДАКТИРОВАНИЯ
+        pageTitle.textContent = 'Редактирование события';
+        submitBtn.textContent = 'Сохранить изменения';
+        deleteBtn.style.display = 'block';
+        await loadEventForEditing();
+    } else {
+        // РЕЖИМ СОЗДАНИЯ
+        pageTitle.textContent = 'Добавление нового события';
+        submitBtn.textContent = 'Опубликовать';
     }
 
-    // [УЛУЧШЕНИЕ 2] Сначала получаем только основную инфу о событии
-    const { data: event, error: eventError } = await supabaseClient
+    // Настраиваем обработчики
+    imageUploadInput.addEventListener('change', handleImagePreview);
+    removeImageBtn.addEventListener('click', handleImageRemove);
+    eventForm.addEventListener('submit', handleFormSubmit);
+    deleteBtn.addEventListener('click', handleDeleteEvent);
+}
+
+// =================================================================
+// ЗАГРУЗКА ДАННЫХ
+// =================================================================
+async function loadCategories() {
+    const { data, error } = await supabaseClient.from('categories').select('*').order('name');
+    if (error) return;
+    let html = '';
+    (data || []).forEach(category => {
+        html += `<div class="category-checkbox"><input type="checkbox" id="cat-${category.id}" name="categories" value="${category.id}"><label for="cat-${category.id}">${category.name}</label></div>`;
+    });
+    categoriesContainer.innerHTML = html;
+}
+
+async function loadOrganizations() {
+    const { data, error } = await supabaseClient.from('organizations').select('*').order('name');
+    if (error) return;
+    (data || []).forEach(org => {
+        const option = document.createElement('option');
+        option.value = org.id;
+        option.textContent = org.name;
+        organizationSelect.appendChild(option);
+    });
+}
+
+async function loadEventForEditing() {
+    const { data: event, error } = await supabaseClient
         .from('events')
         .select('*, event_categories(category_id)')
-        .eq('id', eventId)
+        .eq('id', editingEventId)
         .single();
     
-    if (eventError || !event) {
-        showAccessDenied("Событие не найдено или произошла ошибка.");
+    if (error || !event) {
+        document.querySelector('.edit-layout-container').innerHTML = '<h2>Событие не найдено</h2>';
         return;
     }
 
-    // [УЛУЧШЕНИЕ 2] Проверяем авторство СРАЗУ
-    const { data: { isAdmin } } = await supabaseClient.rpc('is_admin'); // Проверяем, админ ли
     if (event.created_by !== currentUser.id && !isAdmin) {
-        showAccessDenied('Вы не можете редактировать это событие, так как не являетесь его автором.');
+        document.querySelector('.edit-layout-container').innerHTML = '<h2>У вас нет прав для редактирования этого события</h2>';
         return;
     }
-    
-    // Только если все проверки пройдены, грузим категории
-    const { data: allCategories, error: categoriesError } = await supabaseClient.from('categories').select('*').order('name');
-    if (categoriesError) console.error("Ошибка загрузки категорий:", categoriesError);
 
-    document.title = `Редактирование: ${sanitizeForAttribute(event.title)}`;
+    // Заполняем форму
+    titleInput.value = event.title || '';
+    descriptionInput.value = event.description || '';
+    cityInput.value = event.city || '';
+    dateInput.value = event.event_date ? new Date(event.event_date).toISOString().split('T')[0] : '';
+    organizationSelect.value = event.organization_id || '';
     
-    const currentCategoryIds = event.event_categories.map(ec => ec.category_id);
-    let categoriesCheckboxesHtml = '<p>Выберите категорию:</p>';
-    (allCategories || []).forEach(category => {
-        const isChecked = currentCategoryIds.includes(category.id) ? 'checked' : '';
-        categoriesCheckboxesHtml += `<div class="category-checkbox"><input type="checkbox" id="cat-form-${category.id}" name="categories" value="${category.id}" ${isChecked}><label for="cat-form-${category.id}">${category.name}</label></div>`;
-    });
-
-    const eventDate = event.event_date ? new Date(event.event_date).toISOString().split('T')[0] : '';
+    if (event.image_url) {
+        imagePreview.src = event.image_url;
+        removeImageBtn.style.display = 'block';
+    }
     
-    // [УЛУЧШЕНИЕ 1] Применяем sanitizeForAttribute к значениям в форме
-    const formHtml = `
-        <h2>✏️ Редактирование события</h2>
-        <form id="edit-event-form">
-            <input id="title" placeholder="Название события" required value="${sanitizeForAttribute(event.title || '')}">
-            <textarea id="description" placeholder="Описание">${event.description || ''}</textarea>
-            <div class="form-row">
-                <input id="city" placeholder="Город" value="${sanitizeForAttribute(event.city || '')}">
-                <input id="date" type="date" value="${eventDate}">
-            </div>
-            <div class="form-row file-input-row">
-                <label for="image-input">Заменить изображение:</label>
-                <input id="image-input" type="file" accept="image/*">
-            </div>
-            ${event.image_url ? `<p>Текущее изображение:</p><img src="${event.image_url}" style="max-width: 200px; border-radius: 8px; margin-bottom: 15px;">` : ''}
-            <div class="categories-container">${categoriesCheckboxesHtml}</div>
-            <button type="submit">Сохранить изменения</button>
-            <p id="message"></p>
-        </form>
-    `;
-
-    editFormContainer.innerHTML = formHtml;
-    
-    document.getElementById('edit-event-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await handleUpdate(event.id, currentCategoryIds, currentUser);
+    // Отмечаем категории
+    initialCategoryIds = event.event_categories.map(ec => ec.category_id);
+    initialCategoryIds.forEach(catId => {
+        const checkbox = document.getElementById(`cat-${catId}`);
+        if (checkbox) checkbox.checked = true;
     });
 }
 
+
 // =================================================================
-// ФУНКЦИЯ ОБНОВЛЕНИЯ ДАННЫХ
+// ОБРАБОТЧИКИ СОБЫТИЙ
 // =================================================================
-async function handleUpdate(eventId, initialCategoryIds, currentUser) {
-    // ... (весь код внутри handleUpdate остается почти таким же, он хороший)
-    const submitButton = document.querySelector('#edit-event-form button[type="submit"]');
-    const messageEl = document.getElementById("message");
-    submitButton.disabled = true;
-    messageEl.textContent = "Сохранение...";
+function handleImagePreview() {
+    const file = imageUploadInput.files[0];
+    if (file) {
+        imageChanged = true;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            removeImageBtn.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function handleImageRemove() {
+    imageChanged = true;
+    imagePreview.src = 'https://placehold.co/600x400/f0f2f5/ccc?text=Изображение';
+    imageUploadInput.value = ''; // Сбрасываем выбор файла
+    removeImageBtn.style.display = 'none';
+}
+
+async function handleDeleteEvent() {
+    if (!editingEventId) return;
+    if (confirm('Вы уверены, что хотите удалить это событие навсегда?')) {
+        const { error } = await supabaseClient.from('events').delete().eq('id', editingEventId);
+        if (error) {
+            alert(`Ошибка удаления: ${error.message}`);
+        } else {
+            alert('Событие удалено.');
+            window.location.href = '/';
+        }
+    }
+}
+
+// =================================================================
+// ГЛАВНАЯ ФУНКЦИЯ - СОХРАНЕНИЕ ФОРМЫ
+// =================================================================
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    formMessage.textContent = 'Сохранение...';
 
     try {
-        const updateData = {
-            title: document.getElementById("title").value.trim(),
-            description: document.getElementById("description").value.trim(),
-            city: document.getElementById("city").value.trim(),
-            event_date: document.getElementById("date").value || null,
+        const eventData = {
+            title: titleInput.value.trim(),
+            description: descriptionInput.value.trim(),
+            city: cityInput.value.trim(),
+            event_date: dateInput.value || null,
+            organization_id: organizationSelect.value || null
         };
-        const { error: updateError } = await supabaseClient.from('events').update(updateData).match({ id: eventId });
-        if (updateError) throw updateError;
         
-        const imageFile = document.getElementById('image-input').files[0];
-        if (imageFile) {
-            const fileName = `${currentUser.id}/${eventId}_${Date.now()}_${imageFile.name.replace(/\s/g, '-')}`;
-            const { error: uploadError } = await supabaseClient.storage.from('event-images').upload(fileName, imageFile, { upsert: true });
-            if (uploadError) throw uploadError;
-            const { data: { publicUrl } } = supabaseClient.storage.from('event-images').getPublicUrl(fileName);
-            await supabaseClient.from('events').update({ image_url: publicUrl }).match({ id: eventId });
+        let eventId = editingEventId;
+        let error, data;
+
+        if (editingEventId) {
+            // --- РЕЖИМ РЕДАКТИРОВАНИЯ ---
+            ({ error } = await supabaseClient.from('events').update(eventData).eq('id', eventId));
+        } else {
+            // --- РЕЖИМ СОЗДАНИЯ ---
+            eventData.created_by = currentUser.id;
+            ({ data, error } = await supabaseClient.from('events').insert(eventData).select().single());
+            if (data) eventId = data.id;
         }
 
-        const selectedCategoryIds = Array.from(document.querySelectorAll('#edit-form-container input:checked')).map(cb => Number(cb.value));
+        if (error) throw error;
+        if (!eventId) throw new Error('Не удалось получить ID события');
+
+        // --- Обработка изображения ---
+        if (imageChanged) {
+            const imageFile = imageUploadInput.files[0];
+            let imageUrl = null;
+            if (imageFile) {
+                // Загружаем новое
+                const filePath = `${currentUser.id}/${eventId}_${Date.now()}`;
+                const { error: uploadError } = await supabaseClient.storage.from('event-images').upload(filePath, imageFile);
+                if (uploadError) throw uploadError;
+                imageUrl = supabaseClient.storage.from('event-images').getPublicUrl(filePath).data.publicUrl;
+            }
+            // Обновляем ссылку на картинку в базе
+            await supabaseClient.from('events').update({ image_url: imageUrl }).eq('id', eventId);
+        }
+
+        // --- Обработка категорий ---
+        const selectedCategoryIds = Array.from(document.querySelectorAll('#categories-container input:checked')).map(cb => Number(cb.value));
         const categoriesToAdd = selectedCategoryIds.filter(id => !initialCategoryIds.includes(id));
         const categoriesToRemove = initialCategoryIds.filter(id => !selectedCategoryIds.includes(id));
         
-        if (categoriesToAdd.length > 0) {
-            const linksToAdd = categoriesToAdd.map(catId => ({ event_id: eventId, category_id: catId }));
-            await supabaseClient.from('event_categories').insert(linksToAdd);
-        }
         if (categoriesToRemove.length > 0) {
             await supabaseClient.from('event_categories').delete().eq('event_id', eventId).in('category_id', categoriesToRemove);
         }
+        if (categoriesToAdd.length > 0) {
+            await supabaseClient.from('event_categories').insert(categoriesToAdd.map(catId => ({ event_id: eventId, category_id: catId })));
+        }
 
-        messageEl.textContent = "✅ Успешно сохранено! Перенаправляем...";
-        setTimeout(() => { window.location.href = `event.html?id=${eventId}`; }, 1500);
+        formMessage.textContent = '✅ Успешно сохранено!';
+        setTimeout(() => { window.location.href = `/event.html?id=${eventId}`; }, 1500);
 
     } catch (error) {
-        console.error("Ошибка при обновлении:", error);
-        messageEl.textContent = `Ошибка: ${error.message}`;
-        submitButton.disabled = false;
+        formMessage.textContent = `Ошибка: ${error.message}`;
+        submitBtn.disabled = false;
     }
 }
 
-// ЗАПУСКАЕМ ВСЮ ЛОГИКУ
+
+// =================================================================
+// СТАНДАРТНАЯ ШАПКА
+// =================================================================
+function setupHeader() { /* ... код из предыдущих шагов ... */ }
+
 main();
