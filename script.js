@@ -6,10 +6,25 @@ const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // =================================================================
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ БЕЗОПАСНОСТИ
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // =================================================================
-function sanitizeHTML(text) { if (!text) return ''; return DOMPurify.sanitize(text, { ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li'] }); }
+function sanitizeHTML(text) { if (!text) return ''; return DOMPurify.sanitize(text, { ALLOWED_TAGS: [] }); }
 function sanitizeForAttribute(text) { if (!text) return ''; return text.toString().replace(/"/g, '&quot;'); }
+
+function timeAgo(date) {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " г. назад";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " мес. назад";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " д. назад";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " ч. назад";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " мин. назад";
+    return "только что";
+}
 
 // =================================================================
 // ЭЛЕМЕНТЫ СТРАНИЦЫ
@@ -33,19 +48,14 @@ let currentCategoryId = null;
 // ГЛАВНАЯ ЛОГИКА
 // =================================================================
 async function main() {
-    setupEventListeners(); 
-    
+    setupEventListeners();
     const { data: { session } } = await supabaseClient.auth.getSession();
     currentUser = session ? session.user : null;
 
-    const loginBtn = document.getElementById('loginBtn');
-    const addEventModalBtn = document.getElementById('add-event-modal-btn');
-    const profileDropdown = document.getElementById('profile-dropdown');
-
     if (currentUser) {
-        loginBtn.style.display = 'none';
-        addEventModalBtn.style.display = 'block';
-        profileDropdown.style.display = 'block';
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('add-event-modal-btn').style.display = 'block';
+        document.getElementById('profile-dropdown').style.display = 'block';
         
         const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single();
         const userName = (profile && profile.full_name) ? profile.full_name : currentUser.email.split('@')[0];
@@ -56,11 +66,10 @@ async function main() {
         if (isAdmin) {
             document.getElementById('admin-link').style.display = 'block';
         }
-
     } else {
-        loginBtn.style.display = 'block';
-        addEventModalBtn.style.display = 'none';
-        profileDropdown.style.display = 'none';
+        document.getElementById('loginBtn').style.display = 'block';
+        document.getElementById('add-event-modal-btn').style.display = 'none';
+        document.getElementById('profile-dropdown').style.display = 'none';
     }
 
     loadAndDisplayCategories();
@@ -160,7 +169,7 @@ if(addEventForm) {
 // =================================================================
 window.deleteEvent = async (eventId, button) => {
     if (!confirm('Вы уверены, что хотите удалить это событие?')) return;
-    const card = button.closest('.event-card-new');
+    const card = button.closest('.event-card-v3'); // Обновленный класс
     card.style.opacity = '0.5';
     const { error } = await supabaseClient.from('events').delete().match({ id: eventId });
     if(error) {
@@ -190,35 +199,34 @@ window.toggleFavorite = async (eventId, isFavorited, buttonElement) => {
     if (isFavorited) {
         const { error } = await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id });
         if (error) { buttonElement.disabled = false; } else {
-            buttonElement.innerHTML = '🤍'; buttonElement.classList.remove('active');
-            buttonElement.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, false, this)`); buttonElement.disabled = false;
+            buttonElement.classList.remove('active');
         }
     } else {
         const { error } = await supabaseClient.from('favorites').insert({ event_id: eventId, user_id: currentUser.id });
         if (error) { buttonElement.disabled = false; } else {
-            buttonElement.innerHTML = '❤️'; buttonElement.classList.add('active');
-            buttonElement.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, true, this)`); buttonElement.disabled = false;
+            buttonElement.classList.add('active');
         }
     }
+    buttonElement.disabled = false;
 };
 
 // =================================================================
-// ЗАГРУЗКА СОБЫТИЙ - ИСПРАВЛЕННАЯ ВЕРСИЯ
+// ЗАГРУЗКА СОБЫТИЙ - ВЕРСИЯ V3
 // =================================================================
 async function loadEvents(isNewSearch = false) {
     if (isNewSearch) {
         currentPage = 0;
-        eventsContainer.innerHTML = 'Загрузка событий...';
+        eventsContainer.innerHTML = '<p>Загрузка событий...</p>';
         paginationControls.innerHTML = '';
     }
 
     const searchTerm = searchInput.value.trim();
     const from = currentPage * PAGE_SIZE;
-    const to = from + PAGE_SIZE; // Supabase range is inclusive on both ends, so we just need the end index
+    const to = from + PAGE_SIZE;
 
     let query = supabaseClient
-        .from("events")
-        .select(`id, title, description, city, event_date, created_by, image_url, rating, profiles ( full_name ), favorites ( user_id ), categories${currentCategoryId ? '!inner' : ''} ( id, name )`, { count: 'exact' })
+        .from('events_with_comment_count')
+        .select(`*, organizations(name), categories!inner(id, name), profiles(full_name, avatar_url), favorites(user_id)`)
         .eq('is_approved', true);
     
     if (searchTerm) {
@@ -228,15 +236,13 @@ async function loadEvents(isNewSearch = false) {
         query = query.eq('categories.id', currentCategoryId);
     }
     
-    query = query.order('created_at', { ascending: false }).range(from, to -1); // range is inclusive, so to-1
+    query = query.order('created_at', { ascending: false }).range(from, to - 1);
 
-    const { data, error, count } = await query;
+    const { data: events, error, count } = await query;
 
     if (error) {
         console.error("Ошибка загрузки событий:", error);
-        if (isNewSearch) {
-            eventsContainer.innerHTML = "Ошибка загрузки.";
-        }
+        if (isNewSearch) eventsContainer.innerHTML = "<p>Ошибка загрузки событий.</p>";
         return; 
     }
     
@@ -244,66 +250,66 @@ async function loadEvents(isNewSearch = false) {
         eventsContainer.innerHTML = "";
     }
 
-    if (!data || data.length === 0) {
-        if (isNewSearch) {
-            eventsContainer.innerHTML = 'Событий по вашему запросу не найдено. <a href="#" onclick="resetFilters(); return false;">Сбросить фильтры</a>';
-        }
-        paginationControls.innerHTML = ''; // Убираем кнопку, если ничего не найдено
+    if (!events || events.length === 0) {
+        if (isNewSearch) eventsContainer.innerHTML = '<p>Событий по вашему запросу не найдено.</p>';
+        paginationControls.innerHTML = '';
         return;
     }
     
-    data.forEach(event => {
+    events.forEach(event => {
         const div = document.createElement("div");
-        div.className = "event-card-new";
-        let dateHtml = '';
-        if (event.event_date) { dateHtml = new Date(event.event_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }); }
-        const isFavorited = currentUser ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
-        const favoriteIcon = isFavorited ? '❤️' : '🤍';
-        const favoriteClass = isFavorited ? 'active' : '';
-        let adminControls = '';
-        if (currentUser && (currentUser.id === event.created_by || isAdmin)) {
-            adminControls = `<div class="card-admin-controls"><button class="admin-btn" onclick="event.stopPropagation(); editEvent(${event.id})">✏️</button><button class="admin-btn" onclick="event.stopPropagation(); deleteEvent(${event.id}, this)">🗑️</button></div>`;
-        }
-        let categoriesHtml = '';
-        if (event.categories && event.categories.length > 0) {
-            categoriesHtml = '<div class="card-categories">';
-            event.categories.forEach(cat => { categoriesHtml += `<span class="tag" onclick="event.stopPropagation(); setCategoryFilter(${cat.id})">${sanitizeHTML(cat.name)}</span>`; });
-            categoriesHtml += '</div>';
-        }
+        div.className = "event-card-v3"; 
         
+        const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
+        const authorAvatar = event.profiles ? event.profiles.avatar_url : 'https://placehold.co/24x24/f0f2f5/ccc';
+        const isFavorited = currentUser ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
+
         div.innerHTML = `
-          <a href="event.html?id=${event.id}" class="event-card-new-image-link">
-            <img src="${event.image_url || 'https://placehold.co/400x400/f0f2f5/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}">
-          </a>
-          <div class="event-card-new-content">
-            ${categoriesHtml}
-            <a href="event.html?id=${event.id}" class="event-card-new-title-link">
-              <h3>${sanitizeHTML(event.title)}</h3>
-            </a>
-            <div class="meta">
-                <div class="meta-item"><span>🗓️</span><span>${dateHtml || 'Дата не указана'}</span></div>
-                <div class="meta-item"><span>📍</span><span>${sanitizeHTML(event.city) || 'Онлайн'}</span></div>
+            <div class="card-header">
+                <span>Опубликовано ${timeAgo(event.created_at)}</span>
+                <span class="card-temp">-5°</span>
             </div>
-          </div>
-          <div class="event-card-new-actions">
-            <button class="card-save-btn ${favoriteClass}" onclick="event.stopPropagation(); toggleFavorite(${event.id}, ${isFavorited}, this)">${favoriteIcon}</button>
-            ${adminControls}
-          </div>`;
+            <div class="card-body">
+                <a href="event.html?id=${event.id}" class="card-image-link">
+                    <img src="${event.image_url || 'https://placehold.co/250x250/f0f2f5/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}">
+                </a>
+                <div class="card-content">
+                    ${event.organizations ? `<a href="/?org=${event.organization_id}" class="card-organization">${sanitizeHTML(event.organizations.name)}</a>` : '<div class="card-organization-placeholder"></div>'}
+                    <a href="event.html?id=${event.id}" class="card-title-link">
+                        <h3>${sanitizeHTML(event.title)}</h3>
+                    </a>
+                    <p class="card-description">${sanitizeHTML(event.description || '').substring(0, 100)}...</p>
+                    <div class="card-author">
+                        <img src="${authorAvatar || 'https://placehold.co/24x24/f0f2f5/ccc'}" alt="avatar">
+                        <span>${sanitizeHTML(authorName)}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="card-actions">
+                    <button class="action-btn ${isFavorited ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite(${event.id}, ${isFavorited}, this)">
+                        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+                        <span>В избранное</span>
+                    </button>
+                    <div class="action-btn">
+                        <svg viewBox="0 0 24 24"><path d="M21 6h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1zm-4 6V3c0-.55-.45-1-1-1H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1z"></path></svg>
+                        <span>${event.comment_count}</span>
+                    </div>
+                </div>
+                <a href="event.html?id=${event.id}" class="card-main-link">К событию</a>
+            </div>
+        `;
         eventsContainer.appendChild(div);
     });
 
     const existingLoadMoreBtn = document.getElementById('load-more-btn');
     if (existingLoadMoreBtn) existingLoadMoreBtn.remove();
     
-    // ЖЕЛЕЗОБЕТОННАЯ ЛОГИКА
-    if (count > to) {
+    if (count && count > to) {
         const loadMoreBtn = document.createElement('button');
-        loadMoreBtn.textContent = 'Загрузить еще';
         loadMoreBtn.id = 'load-more-btn';
-        loadMoreBtn.onclick = () => { 
-            currentPage++; 
-            loadEvents(false); 
-        };
+        loadMoreBtn.textContent = 'Загрузить еще';
+        loadMoreBtn.onclick = () => { currentPage++; loadEvents(false); };
         paginationControls.appendChild(loadMoreBtn);
     }
 }
@@ -319,13 +325,13 @@ async function loadAndDisplayCategories() {
     const categoryPillsContainer = document.getElementById('category-pills-container');
     
     let categoriesCheckboxesHtml = '<p>Выберите категорию:</p>';
-    data.forEach(category => {
+    (data || []).forEach(category => {
         categoriesCheckboxesHtml += `<div class="category-checkbox"><input type="checkbox" id="cat-form-${category.id}" name="categories" value="${category.id}"><label for="cat-form-${category.id}">${category.name}</label></div>`;
     });
     if (categoriesContainer) categoriesContainer.innerHTML = categoriesCheckboxesHtml;
     
     let categoryPillsHtml = '<button class="category-pill" onclick="resetFilters()">Все</button>';
-    data.forEach(category => {
+    (data || []).forEach(category => {
         categoryPillsHtml += `<button class="category-pill" onclick="setCategoryFilter(${category.id})">${category.name}</button>`;
     });
     if (categoryPillsContainer) categoryPillsContainer.innerHTML = categoryPillsHtml;
