@@ -8,14 +8,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // =================================================================
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ БЕЗОПАСНОСТИ
 // =================================================================
-function sanitizeHTML(text) {
-    if (!text) return '';
-    return DOMPurify.sanitize(text, { ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li'] });
-}
-function sanitizeForAttribute(text) {
-    if (!text) return '';
-    return text.toString().replace(/"/g, '&quot;');
-}
+function sanitizeHTML(text) { if (!text) return ''; return DOMPurify.sanitize(text, { ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li'] }); }
+function sanitizeForAttribute(text) { if (!text) return ''; return text.toString().replace(/"/g, '&quot;'); }
 
 // =================================================================
 // ЭЛЕМЕНТЫ СТРАНИЦЫ
@@ -24,39 +18,85 @@ const eventDetailContainer = document.getElementById('event-detail-container');
 let currentUser = null; // Оставляем для функций vote, addComment, toggleFavorite
 
 // =================================================================
-// ГЛАВНАЯ ЛОГИКА
+// ГЛАВНАЯ ЛОГИКА - ОБНОВЛЕННАЯ
 // =================================================================
 async function main() {
-    // [УЛУЧШЕНИЕ] Используем прямой, надежный способ получения сессии
+    setupEventListeners(); // Настраиваем шапку
+
     const { data: { session } } = await supabaseClient.auth.getSession();
     currentUser = session ? session.user : null;
-    
-    // Показываем информацию о пользователе
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const userInfo = document.getElementById('user-info');
-    
-    loginBtn.style.display = session ? 'none' : 'block';
-    logoutBtn.style.display = session ? 'block' : 'none';
-    if(session) {
-        userInfo.textContent = `Вы вошли как: ${session.user.email}`;
-    }
-    
-    window.loginWithGoogle = async () => await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
-    logoutBtn.onclick = async () => {
-        await supabaseClient.auth.signOut();
-        window.location.reload();
-    };
 
-    // Загружаем детали события
+    if (currentUser) {
+        // Пользователь вошел - настраиваем его меню
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('profile-dropdown').style.display = 'block';
+
+        const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single();
+        const userName = (profile && profile.full_name) ? profile.full_name : currentUser.email.split('@')[0];
+        document.getElementById('user-name-display').textContent = userName;
+
+        const { data: adminStatus } = await supabaseClient.rpc('is_admin');
+        if (adminStatus) {
+            document.getElementById('admin-link').style.display = 'block';
+        }
+    } else {
+        // Пользователь - гость
+        document.getElementById('loginBtn').style.display = 'inline-block';
+        document.getElementById('profile-dropdown').style.display = 'none';
+    }
+
+    // Загружаем основную информацию страницы
     loadEventDetails();
 }
 
 // =================================================================
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (toggleFavorite, vote, addComment)
+// СТАНДАРТНАЯ ЛОГИКА ШАПКИ
 // =================================================================
+function setupEventListeners() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const currentTheme = localStorage.getItem('theme');
+    if (currentTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        if(themeToggle) themeToggle.checked = true;
+    }
+    if(themeToggle) {
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    }
+    
+    const logoutBtn = document.getElementById('logoutBtn');
+    if(logoutBtn) logoutBtn.onclick = async () => {
+        await supabaseClient.auth.signOut();
+        window.location.reload();
+    };
+
+    const profileDropdown = document.getElementById('profile-dropdown');
+    if (profileDropdown) {
+        const profileTrigger = document.getElementById('profile-trigger');
+        profileTrigger.onclick = (event) => {
+            event.stopPropagation();
+            profileDropdown.classList.toggle('open');
+        };
+    }
+    document.addEventListener('click', (event) => {
+        if (profileDropdown && !profileDropdown.contains(event.target)) {
+            profileDropdown.classList.remove('open');
+        }
+    });
+}
+
+// =================================================================
+// СПЕЦИФИЧНАЯ ЛОГИКА СТРАНИЦЫ (без изменений)
+// =================================================================
+
 window.toggleFavorite = async function(eventId, isCurrentlyFavorited, buttonElement) {
-    // ... (код без изменений)
     if (!currentUser) { alert('Пожалуйста, войдите, чтобы добавлять в избранное.'); return; }
     buttonElement.disabled = true;
     if (isCurrentlyFavorited) {
@@ -79,14 +119,12 @@ window.toggleFavorite = async function(eventId, isCurrentlyFavorited, buttonElem
 };
 
 window.vote = async function(eventId, value) {
-    // ... (код без изменений)
     if (!currentUser) { alert("Пожалуйста, войдите."); return; }
     await supabaseClient.from("votes").insert([{ event_id: eventId, value, user_id: currentUser.id }]);
     location.reload();
 };
 
 window.addComment = async function(eventId) {
-    // ... (код без изменений)
     if (!currentUser) { alert("Пожалуйста, войдите."); return; }
     const contentInput = document.getElementById('comment-input');
     const content = contentInput.value.trim();
@@ -95,26 +133,19 @@ window.addComment = async function(eventId) {
     if (!error) location.reload();
 };
 
-// =================================================================
-// ГЛАВНАЯ ФУНКЦИЯ: ЗАГРУЗКА ДЕТАЛЕЙ СОБЫТИЯ
-// =================================================================
 async function loadEventDetails() {
-    // ... (весь код внутри loadEventDetails остается таким же, он идеален)
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('id');
     if (!eventId) {
         eventDetailContainer.innerHTML = `<p style="color: red; text-align: center;">Ошибка: ID события не найден.</p>`;
         return;
     }
-
     const { data: event, error: eventError } = await supabaseClient.from('events').select(`id, title, description, city, event_date, created_by, image_url, rating, profiles ( full_name ), categories ( id, name ), votes(user_id, value), favorites(user_id)`).eq('id', eventId).single();
-
     if (eventError || !event) {
         document.title = "Событие не найдено";
         eventDetailContainer.innerHTML = `<p style="color: red; text-align: center;">Событие не найдено.</p>`;
         return;
     }
-
     const { data: comments, error: commentsError } = await supabaseClient.from('comments').select('id, content, created_at, profiles ( full_name )').eq('event_id', eventId).order('created_at', { ascending: true });
     
     document.title = sanitizeForAttribute(event.title);
@@ -150,7 +181,7 @@ async function loadEventDetails() {
     
     const eventHtml = `
         <div class="event-detail-header">
-            <img src="${event.image_url || 'https://placehold.co/1200x600/f0f2f5/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}" class="event-detail-image">
+            <img src="${event.image_url || 'https://placehold.co/1200x400/1e1e1e/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}" class="event-detail-image">
             <button class="card-save-btn ${favoriteClass}" onclick="event.stopPropagation(); toggleFavorite(${event.id}, ${isFavorited}, this)">${favoriteIcon}</button>
             <div class="event-detail-title-card">
                 <div class="event-detail-tags">${categoriesHtml}</div>
@@ -174,19 +205,17 @@ async function loadEventDetails() {
                     </div>
                 </div>
                 <h2>Описание</h2>
-                <p>${sanitizeHTML(event.description) || 'Описание отсутствует.'}</p>
+                <p style="white-space: pre-wrap;">${sanitizeHTML(event.description) || 'Описание отсутствует.'}</p>
+            </div>
+            <div class="event-detail-sidebar">
+                <h3>Комментарии</h3>
                 <div class="comments-section">
-                    <h2>Комментарии</h2>
                     ${commentsHtml}
                     <form class="comment-form" onsubmit="addComment(${event.id}); return false;">
                         <input id="comment-input" placeholder="Написать комментарий..." required>
                         <button type="submit">Отправить</button>
                     </form>
                 </div>
-            </div>
-            <div class="event-detail-sidebar">
-                <h3>Место на карте</h3>
-                <div id="map-placeholder" style="width: 100%; height: 250px; background-color: #f0f2f5; border-radius: 8px; display:flex; align-items:center; justify-content:center; text-align:center; color:#888;">Интерактивная карта появится здесь</div>
             </div>
         </div>
     `;
