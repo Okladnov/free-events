@@ -128,8 +128,8 @@ body.dark-theme .card-description { color: #ccc; }
 }
 .categories-container-edit {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: 1fr; 
+    gap: 12px;                  
     background-color: var(--input-background);
     padding: 15px;
     border-radius: 8px;
