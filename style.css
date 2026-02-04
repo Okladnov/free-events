@@ -136,3 +136,94 @@ body.dark-theme .event-detail-title-card p { color: #aaa; }
   .event-detail-header { margin-bottom: 0; }
   .event-detail-image { height: 250px; }
 }
+/* --- СТИЛИ ДЛЯ СТРАНИЦЫ ПРОФИЛЯ --- */
+.profile-page-card {
+    max-width: 600px;
+    margin: 40px auto;
+    background-color: var(--card-background);
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+.profile-page-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+.avatar-uploader {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+}
+.user-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--card-background);
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.avatar-upload-label {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid var(--card-background);
+    transition: transform 0.2s;
+}
+.avatar-upload-label:hover {
+    transform: scale(1.1);
+}
+.avatar-upload-label input {
+    display: none;
+}
+.profile-page-header h2 {
+    margin: 0;
+    font-size: 24px;
+}
+#profile-form h3 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 20px;
+}
+.input-group input[disabled] {
+    background-color: var(--input-background);
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+.profile-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+}
+.logout-btn {
+    background: transparent;
+    border: 1px solid #e74c3c;
+    color: #e74c3c;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+.logout-btn:hover {
+    background-color: #e74c3c;
+    color: white;
+}
+.profile-actions .submit-btn {
+    width: auto;
+    padding: 12px 30px;
+}
