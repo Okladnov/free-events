@@ -1,5 +1,5 @@
 // =================================================================
-// СКРИПТ ДЛЯ СТРАНИЦЫ ВХОДА - login.html (ИСПРАВЛЕННАЯ АВТОНОМНАЯ ВЕРСИЯ)
+// СКРИПТ ДЛЯ СТРАНИЦЫ ВХОДА - login.html (ПОЛНОСТЬЮ АВТОНОМНАЯ ВЕРСИЯ)
 // =================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 1. Инициализация Supabase (ТОЛЬКО для этой страницы) ---
     const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
     const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
-    // ИСПРАВЛЕНО: Вызываем createClient из глобального объекта supabase
+    // Используем 'supabase.createClient', так как 'supabase' - глобальный объект из CDN
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // --- 2. Элементы страницы ---
@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- 4. Обработчик входа через Google ---
     async function signInWithGoogle() {
-        // Используем наш локально созданный supabaseClient
         await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
             options: {
