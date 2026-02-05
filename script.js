@@ -93,19 +93,20 @@ function initializeHeader() {
     }
 }
 
-// --- 4. Точка входа ---
 document.addEventListener("DOMContentLoaded", async () => {
-    // Шаг 1: Загружаем HTML шапки
+    // ПРОВЕРКА: Если у body есть класс login-page-body, значит мы на странице логина.
+    // В этом случае мы ничего не делаем и уходим.
+    if (document.body.classList.contains('login-page-body')) {
+        // Запускаем событие 'headerLoaded' сразу, чтобы login.js мог проверить пользователя
+        document.dispatchEvent(new CustomEvent('headerLoaded'));
+        return; 
+    }
+
+    // Если мы не на странице логина, работаем как обычно:
     await loadComponent('main-header', 'header.html');
-    
-    // Шаг 2: Настраиваем всю логику внутри шапки
     initializeHeader();
-    
-    // Шаг 3: Загружаем HTML подвала
     await loadComponent('main-footer', 'footer.html');
     
-    // Шаг 4: "КРИЧИМ", ЧТО ВСЕ ГОТОВО!
-    // Это событие услышат app.js, profile.js и другие скрипты.
     document.dispatchEvent(new CustomEvent('headerLoaded'));
 });
 
