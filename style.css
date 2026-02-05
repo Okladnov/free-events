@@ -396,7 +396,7 @@ body.dark-theme .admin-event-card:hover {
 .score-hot { color: #ff8c00; }  /* Оранжевый */
 .score-fire { color: #ff0000; } /* Красный */
 /* =====================================================================
-   9. НОВЫЕ СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ ("ПУЛЕНЕПРОБИВАЕМАЯ" ВЕРСИЯ)
+   9. НОВЫЕ СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ (ФИНАЛЬНАЯ ВЕРСИЯ)
    ===================================================================== */
 
 /* Фон и рамка меню */
@@ -409,7 +409,7 @@ body.dark-theme .admin-event-card:hover {
     border-radius: 12px;
 }
 
-/* Стили для КАЖДОЙ ссылки в меню */
+/* === ИСПРАВЛЕНО: Меняем цвет текста на приглушенный серый === */
 .profile-menu a.profile-menu-item {
     display: flex !important;
     align-items: center;
@@ -417,28 +417,32 @@ body.dark-theme .admin-event-card:hover {
     padding: 10px 12px !important;
     font-size: 15px !important;
     font-weight: 500;
-    color: #e4e4e6 !important;
+    color: #d1d1d6 !important; /* Приглушенный серый, как на iOS */
     border-radius: 8px !important;
     transition: background-color 0.15s ease-in-out;
 }
 
-/* Эффект при наведении */
+/* Эффект при наведении (текст становится ярким) */
 .profile-menu a.profile-menu-item:hover {
     background-color: #424245 !important;
     color: #fff !important;
 }
 
-/* === "ЖЕСТКИЕ" СТИЛИ ДЛЯ ИКОНОК === */
+/* "Жесткие" стили для иконок */
 .profile-menu a.profile-menu-item svg {
     width: 20px;
     height: 20px;
-    flex-shrink: 0; /* ЗАПРЕЩАЕМ иконке растягиваться */
+    flex-shrink: 0;
     transition: color 0.15s ease-in-out;
 }
 
 /* Задаем цвета, используя более конкретные селекторы */
 .profile-menu a.profile-menu-item .icon-profile {
     color: #a9a9b0; /* Серый */
+}
+/* === ДОБАВЛЕНО: Цвет для иконки "Избранное" === */
+.profile-menu a.profile-menu-item .icon-favorites {
+    color: #ff453a; /* Такой же красный, как у "Выйти" */
 }
 .profile-menu a.profile-menu-item .icon-admin {
     color: #5e5ce6; /* Фиолетовый */
@@ -451,7 +455,6 @@ body.dark-theme .admin-event-card:hover {
 .profile-menu a.profile-menu-item:hover svg {
     color: #fff;
 }
-/* === КОНЕЦ ЖЕСТКИХ СТИЛЕЙ === */
 
 /* Разделитель */
 .menu-separator {
