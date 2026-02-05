@@ -15,36 +15,13 @@
 </head>
 <body>
 
-    <!-- ==================== ШАПКА ==================== -->
-    <header>
-        <div class="container header-container">
-            <a href="/" class="header-logo-link"><img src="logo.png" alt="Логотип Free Events" class="header-logo"></a>
-            <div class="search-container">
-                <input id="search-input" placeholder="Поиск...">
-                <button class="search-button"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg></button>
-            </div>
-            <div class="header-actions">
-                <button id="add-event-modal-btn" class="add-event-btn" style="display: none;">+ Добавить</button>
-                <div class="theme-switch-wrapper">
-                    <label class="theme-switch" for="theme-toggle"><input type="checkbox" id="theme-toggle" /><div class="slider round"></div></label>
-                </div>
-                <a href="/login.html" id="loginBtn" class="login-btn">Войти</a>
-                <div id="profile-dropdown" style="display: none;">
-                    <div id="profile-trigger" class="profile-avatar"><span id="user-name-display">Профиль</span> <span class="arrow-down">▼</span></div>
-                    <div class="dropdown-content">
-                        <a href="/profile.html">Мой профиль</a>
-                        <a href="/admin.html" id="admin-link" style="display: none;">Админка</a>
-                        <a href="#" id="logoutBtn">Выйти</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
+    <!-- ==================== ШАПКА (ЗАГЛУШКА) ==================== -->
+    <header class="header" id="main-header"></header>
 
     <!-- ==================== ОСНОВНОЙ КОНТЕНТ ==================== -->
     <main class="container">
+        <!-- Вся твоя форма остается здесь без изменений -->
         <form id="event-form" class="form-grid-container">
-
             <!-- ЛЕВАЯ КОЛОНКА -->
             <div class="main-column">
                 <div class="form-card-main">
@@ -63,7 +40,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- ПРАВАЯ КОЛОНКА -->
             <div class="side-column">
                 <div class="form-card-aside">
@@ -104,11 +80,16 @@
         </form>
     </main>
     
+    <!-- ==================== ПОДВАЛ (ЗАГЛУШКА) ==================== -->
+    <footer class="footer" id="main-footer"></footer>
+
     <!-- ==================== СКРИПТЫ ==================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
     <script src="https://unpkg.com/pell"></script>
     <script src="app.js"></script>
     <script src="edit-event.js"></script>
+    <script src="script.js"></script> <!-- Наш главный скрипт -->
+
 </body>
 </html>
