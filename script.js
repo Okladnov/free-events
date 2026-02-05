@@ -77,24 +77,41 @@ window.setCategoryFilter = (categoryId) => {
     loadEvents(true);
 };
 
-window.toggleFavorite = async (eventId, isFavorited, buttonElement) => {
-    if (!currentUser) { alert('Пожалуйста, войдите, чтобы добавлять в избранное.'); return; }
-    buttonElement.disabled = true;
-    if (isFavorited) {
-        const { error } = await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id });
-        if (error) { buttonElement.disabled = false; } else {
-            buttonElement.classList.remove('active');
-            // Обновляем состояние для следующего клика
-            buttonElement.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, false, this)`);
-        }
-    } else {
-        const { error } = await supabaseClient.from('favorites').insert({ event_id: eventId, user_id: currentUser.id });
-        if (error) { buttonElement.disabled = false; } else {
-            buttonElement.classList.add('active');
-            // Обновляем состояние для следующего клика
-            buttonElement.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, true, this)`);
-        }
+window.toggleFavorite = async (eventId, buttonElement) => {
+    if (!currentUser) {
+        alert('Пожалуйста, войдите, чтобы добавлять в избранное.');
+        return;
     }
+
+    // Предотвращаем двойные клики
+    buttonElement.disabled = true;
+
+    // Проверяем текущий статус по наличию класса 'active'
+    const isFavorited = buttonElement.classList.contains('active');
+
+    let error;
+
+    if (isFavorited) {
+        // Если уже в избранном, удаляем
+        const { error: deleteError } = await supabaseClient
+            .from('favorites')
+            .delete()
+            .match({ event_id: eventId, user_id: currentUser.id });
+        error = deleteError;
+    } else {
+        // Если не в избранном, добавляем
+        const { error: insertError } = await supabaseClient
+            .from('favorites')
+            .insert({ event_id: eventId, user_id: currentUser.id });
+        error = insertError;
+    }
+
+    // Если не было ошибки, меняем внешний вид кнопки
+    if (!error) {
+        buttonElement.classList.toggle('active');
+    }
+
+    // Включаем кнопку обратно
     buttonElement.disabled = false;
 };
 
