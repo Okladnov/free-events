@@ -115,7 +115,7 @@ async function loadEventDataForEdit(eventId, editor) {
             return;
         }
 
-        if (event.user_id !== currentUser.id && !isAdmin) {
+        if (event.created_by !== currentUser.id && !isAdmin) {
              alert("У вас нет прав на редактирование этого события.");
              window.location.href = '/';
              return;
@@ -147,6 +147,13 @@ async function loadEventDataForEdit(eventId, editor) {
  */
 async function handleFormSubmit(e, eventId, editor, fileToUpload) {
     e.preventDefault();
+    const title = document.getElementById('event-title').value.trim();
+if (!title) {
+    formMessage.textContent = 'Ошибка: Заголовок не может быть пустым.';
+    formMessage.style.color = '#e74c3c';
+    submitButton.disabled = false;
+    return; // Прерываем выполнение функции
+}
     const formMessage = document.getElementById('form-message');
     const submitButton = e.target.querySelector('button[type="submit"]');
     submitButton.disabled = true;
@@ -183,7 +190,7 @@ async function handleFormSubmit(e, eventId, editor, fileToUpload) {
             event_date: document.getElementById('event-date').value || null,
             city: document.getElementById('event-city').value.trim(),
             link: document.getElementById('event-link').value.trim(),
-            user_id: currentUser.id,
+            created_by: currentUser.id,
         };
 
         // 3. Обновляем или вставляем запись
