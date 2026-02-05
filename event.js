@@ -144,43 +144,42 @@ async function loadEventDetails() {
     const favoriteClass = isFavorited ? 'active' : '';
 
     const eventHtml = `
-    <div class="event-detail-header">
-        <img src="${event.image_url || 'https://placehold.co/1200x400/1e1e1e/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}" class="event-detail-image">
-        <button class="card-save-btn ${favoriteClass}" onclick="event.stopPropagation(); toggleFavorite(${event.id}, ${isFavorited}, this)">${favoriteIcon}</button>
-        <div class="event-detail-title-card">
-            <div class="event-detail-tags">${categoriesHtml}</div>
-            <h1>${sanitizeHTML(event.title)}</h1>
-            <p>Добавил: ${sanitizeHTML(authorName)}</p>
-        </div>
+<div class="event-detail-header">
+    <img src="${event.image_url || 'https://placehold.co/1200x400/1e1e1e/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}" class="event-detail-image">
+    <button class="card-save-btn ${favoriteClass}" data-action="toggle-favorite">${favoriteIcon}</button>
+    <div class="event-detail-title-card">
+        <div class="event-detail-tags">${categoriesHtml}</div>
+        <h1>${sanitizeHTML(event.title)}</h1>
+        <p>Добавил: ${sanitizeHTML(authorName)}</p>
     </div>
-    <div class="event-detail-body">
-        <div class="event-detail-main">
-            <h2>Детали события</h2>
-            <div class="info-grid">
-                <div class="info-item"><strong>📍 Город</strong><span>${sanitizeHTML(event.city) || 'Онлайн'}</span></div>
-                <div class="info-item"><strong>🗓️ Дата</strong><span>${dateString}</span></div>
-                <div class="info-item">
-                    <strong>⭐ Рейтинг</strong>
-                    <div class="vote">
-                        <button onclick="vote(${event.id}, 1)" ${hasVoted ? 'disabled' : ''}>▲</button>
-                        <span class="score ${scoreClass}">${rating} ${scoreIcon}</span>
-                        <button onclick="vote(${event.id}, -1)" ${hasVoted ? 'disabled' : ''}>▼</button>
-                    </div>
+</div>
+<div class="event-detail-body">
+    <div class="event-detail-main">
+        <h2>Детали события</h2>
+        <div class="info-grid">
+            <div class="info-item"><strong>📍 Город</strong><span>${sanitizeHTML(event.city) || 'Онлайн'}</span></div>
+            <div class="info-item"><strong>🗓️ Дата</strong><span>${dateString}</span></div>
+            <div class="info-item" id="rating-section">
+                <strong>⭐ Рейтинг</strong>
+                <div class="vote">
+                    <button data-action="vote" data-value="1" ${hasVoted ? 'disabled' : ''}>▲</button>
+                    <span class="score ${scoreClass}">${rating} ${scoreIcon}</span>
+                    <button data-action="vote" data-value="-1" ${hasVoted ? 'disabled' : ''}>▼</button>
                 </div>
             </div>
-            <h2>Описание</h2>
-            <div style="white-space: pre-wrap;">${sanitizeHTML(event.description) || 'Описание отсутствует.'}</div>
         </div>
-        <div class="event-detail-sidebar">
-            <h3>Комментарии</h3>
-            <div class="comments-section">
-                ${commentsHtml}
-                <form class="comment-form" onsubmit="addComment(${event.id}); return false;">
-                    <input id="comment-input" placeholder="Написать комментарий..." required>
-                    <button type="submit">Отправить</button>
-                </form>
-            </div>
+        <h2>Описание</h2>
+        <div style="white-space: pre-wrap;">${DOMPurify.sanitize(event.description || 'Описание отсутствует.', {ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li']})}</div>
+    </div>
+    <div class="event-detail-sidebar">
+        <h3>Комментарии</h3>
+        <div class="comments-section">
+            <div id="comments-list-container">${commentsHtml}</div>
+            <form id="comment-form">
+                <input id="comment-input" placeholder="Написать комментарий..." required>
+                <button type-="submit">Отправить</button>
+            </form>
         </div>
-    </div>`;
-    eventDetailContainer.innerHTML = eventHtml;
+    </div>
+</div>`;
 }
