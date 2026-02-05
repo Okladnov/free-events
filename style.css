@@ -108,7 +108,6 @@ body { margin: 0; font-family: var(--font-family-main); background-color: var(--
 .search-button svg path { stroke: var(--text-color-secondary); }
 
 .header-right-side { display: flex; align-items: center; gap: 20px; }
-.auth-block { display: flex; align-items: center; gap: 15px; } /* Убрали margin-left: auto */
 .add-event-btn { background-color: var(--primary-color); color: var(--white-color); padding: 0 16px; height: 40px; border: none; border-radius: var(--border-radius-small); font-weight: bold; cursor: pointer; transition: background-color 0.2s; white-space: nowrap; }
 
 .profile-dropdown { position: relative; }
