@@ -1,186 +1,162 @@
 // =================================================================
-// ЭЛЕМЕНТЫ СТРАНИЦЫ
+// СКРИПТ ДЛЯ СТРАНИЦЫ ДЕТАЛЬНОГО ПРОСМОТРА - event.html (event.js)
 // =================================================================
-const eventDetailContainer = document.getElementById('event-detail-container');
+// Важно: supabaseClient и currentUser уже созданы в script.js.
 
-// =================================================================
-// ТОЧКА ВХОДА
-// =================================================================
-document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Инициализируем общую шапку (из app.js)
-    // Эта функция сама проверит пользователя и настроит меню.
-    await initializeHeader();
+// --- 1. Функция-инициализатор для этой страницы ---
+function initializeEventDetailPage() {
+    const eventDetailContainer = document.getElementById('event-detail-container');
+    // Если мы не на странице детального просмотра, ничего не делаем
+    if (!eventDetailContainer) return;
 
-    // 2. Загружаем контент, специфичный для этой страницы
     loadEventDetails();
-});
-
-// =================================================================
-// СПЕЦИФИЧНАЯ ЛОГИКА СТРАНИЦЫ
-// =================================================================
-
-// ВАЖНО: На этой странице нам нужно более "мягкое" очищение HTML,
-// чтобы в описании события работали теги <p>, <strong> и т.д.
-// Поэтому мы "переопределяем" функцию sanitizeHTML из app.js.
-function sanitizeHTML(text) {
-    if (!text) return '';
-    return DOMPurify.sanitize(text, { ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li'] });
 }
 
-window.toggleFavorite = async function(eventId, isCurrentlyFavorited, buttonElement) {
-    // Используем глобальную переменную `currentUser` из app.js
-    if (!currentUser) {
-        alert('Пожалуйста, войдите, чтобы добавлять в избранное.');
-        return;
-    }
-    buttonElement.disabled = true;
 
-    if (isCurrentlyFavorited) {
-        const { error } = await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id });
-        if (error) {
-            buttonElement.disabled = false;
-        } else {
-            // Обновляем иконку и состояние для следующего клика
-            buttonElement.innerHTML = '🤍';
-            buttonElement.classList.remove('active');
-            buttonElement.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, false, this)`);
-        }
-    } else {
-        const { error } = await supabaseClient.from('favorites').insert({ event_id: eventId, user_id: currentUser.id });
-        if (error) {
-            buttonElement.disabled = false;
-        } else {
-            // Обновляем иконку и состояние для следующего клика
-            buttonElement.innerHTML = '❤️';
-            buttonElement.classList.add('active');
-            buttonElement.setAttribute('onclick', `event.stopPropagation(); toggleFavorite(${eventId}, true, this)`);
-        }
-    }
-    buttonElement.disabled = false;
-};
-
-window.vote = async function(eventId, value) {
-    if (!currentUser) {
-        alert("Пожалуйста, войдите, чтобы голосовать.");
-        return;
-    }
-    // TODO: Заменить location.reload() на динамическое обновление
-    await supabaseClient.from("votes").insert([{ event_id: eventId, value, user_id: currentUser.id }]);
-    location.reload();
-};
-
-window.addComment = async function(eventId) {
-    if (!currentUser) {
-        alert("Пожалуйста, войдите, чтобы комментировать.");
-        return;
-    }
-    const contentInput = document.getElementById('comment-input');
-    const content = contentInput.value.trim();
-    if (!content) return;
-    
-    // TODO: Заменить location.reload() на динамическое добавление комментария
-    const { error } = await supabaseClient.from('comments').insert([{ content, event_id: eventId, user_id: currentUser.id }]);
-    if (!error) {
-        location.reload();
-    }
-};
-
+// --- 2. Основная функция загрузки данных ---
 async function loadEventDetails() {
+    const eventDetailContainer = document.getElementById('event-detail-container');
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('id');
 
     if (!eventId) {
-        eventDetailContainer.innerHTML = `<p style="color: red; text-align: center;">Ошибка: ID события не найден.</p>`;
+        eventDetailContainer.innerHTML = `<p class="error-message">Ошибка: ID события не найден.</p>`;
         return;
     }
 
-    const { data: event, error: eventError } = await supabaseClient
-        .from('events')
-        .select(`*, profiles ( full_name ), categories ( id, name ), votes(user_id, value), favorites(user_id)`)
+    // Загружаем всю нужную информацию одним запросом
+    const { data: event, error } = await supabaseClient
+        .from('events_with_details') // Используем наше view
+        .select('*')
         .eq('id', eventId)
         .single();
-
-    if (eventError || !event) {
+    
+    if (error || !event) {
         document.title = "Событие не найдено";
-        eventDetailContainer.innerHTML = `<p style="color: red; text-align: center;">Событие не найдено.</p>`;
+        eventDetailContainer.innerHTML = `<p class="error-message">Событие не найдено.</p>`;
         return;
     }
 
+    // Загружаем комментарии отдельно
     const { data: comments } = await supabaseClient
         .from('comments')
-        .select('*, profiles ( full_name )')
+        .select('*, profiles(full_name, avatar_url)')
         .eq('event_id', eventId)
         .order('created_at', { ascending: true });
 
+    // --- Отображение всей информации ---
     document.title = sanitizeForAttribute(event.title);
 
-    let dateString = 'Дата не указана';
-    if (event.event_date) {
-        dateString = new Date(event.event_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-    }
+    const isFavorited = currentUser ? (event.favorited_by || []).includes(currentUser.id) : false;
+    const hasVoted = currentUser ? (event.voted_by || []).includes(currentUser.id) : false;
 
-    const categoriesHtml = (event.categories || [])
-        .map(cat => `<a href="/?category=${cat.id}" class="tag">${sanitizeHTML(cat.name)}</a>`)
-        .join('');
-
-    const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
-
-    const rating = event.votes.reduce((acc, vote) => acc + vote.value, 0);
-    let scoreClass = '', scoreIcon = '';
-    if (rating < 0) { scoreClass = 'score-cold'; scoreIcon = '❄️'; }
-    else if (rating > 20) { scoreClass = 'score-fire'; scoreIcon = '🔥🔥'; }
-    else if (rating > 5) { scoreClass = 'score-hot'; scoreIcon = '🔥'; }
-
-    const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
-
-    const commentsHtml = '<ul class="comments-list">' + (comments || []).map(comment => {
-        const commentAuthor = comment.profiles ? sanitizeHTML(comment.profiles.full_name) : 'Аноним';
-        const commentDate = new Date(comment.created_at).toLocaleString('ru-RU');
-        return `<li class="comment"><span class="comment-author">${commentAuthor}</span><span class="comment-date">${commentDate}</span><p>${sanitizeHTML(comment.content)}</p></li>`;
-    }).join('') + '</ul>';
-
-    const isFavorited = currentUser ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
-    const favoriteIcon = isFavorited ? '❤️' : '🤍';
-    const favoriteClass = isFavorited ? 'active' : '';
-
+    // Используем глобальную функцию sanitizeHTML из script.js.
+    // Для описания можно сделать более "мягкую" версию, если нужно.
+    const descriptionHTML = DOMPurify.sanitize(event.description, { ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li', 'a'] });
+    
     const eventHtml = `
-    <div class="event-detail-header">
-        <img src="${event.image_url || 'https://placehold.co/1200x400/1e1e1e/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}" class="event-detail-image">
-        <button class="card-save-btn ${favoriteClass}" onclick="event.stopPropagation(); toggleFavorite(${event.id}, ${isFavorited}, this)">${favoriteIcon}</button>
-        <div class="event-detail-title-card">
-            <div class="event-detail-tags">${categoriesHtml}</div>
-            <h1>${sanitizeHTML(event.title)}</h1>
-            <p>Добавил: ${sanitizeHTML(authorName)}</p>
+        <div class="event-detail-header">
+            <img src="${sanitizeForAttribute(event.image_url) || 'https://placehold.co/1200x400/1e1e1e/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}" class="event-detail-image">
+            <div class="event-detail-title-card">
+                <div class="event-detail-tags">
+                    <a href="/?category=${event.category_id}" class="tag">${sanitizeHTML(event.category_name)}</a>
+                </div>
+                <h1>${sanitizeHTML(event.title)}</h1>
+                <p>Добавил: ${sanitizeHTML(event.author_full_name || 'Аноним')}</p>
+            </div>
         </div>
-    </div>
-    <div class="event-detail-body">
-        <div class="event-detail-main">
-            <h2>Детали события</h2>
-            <div class="info-grid">
-                <div class="info-item"><strong>📍 Город</strong><span>${sanitizeHTML(event.city) || 'Онлайн'}</span></div>
-                <div class="info-item"><strong>🗓️ Дата</strong><span>${dateString}</span></div>
-                <div class="info-item">
-                    <strong>⭐ Рейтинг</strong>
-                    <div class="vote">
-                        <button onclick="vote(${event.id}, 1)" ${hasVoted ? 'disabled' : ''}>▲</button>
-                        <span class="score ${scoreClass}">${rating} ${scoreIcon}</span>
-                        <button onclick="vote(${event.id}, -1)" ${hasVoted ? 'disabled' : ''}>▼</button>
-                    </div>
+        <div class="event-detail-body">
+            <div class="event-detail-main">
+                <h2>Детали события</h2>
+                <div class="info-grid">
+                    <div class="info-item"><strong>📍 Город</strong><span>${sanitizeHTML(event.city) || 'Онлайн'}</span></div>
+                    <div class="info-item"><strong>🗓️ Дата</strong><span>${event.event_date ? new Date(event.event_date).toLocaleDateString() : 'Не указана'}</span></div>
+                    <div class="info-item"><strong>⭐ Избранное</strong><span>${event.favorites_count || 0}</span></div>
+                </div>
+                <h2>Описание</h2>
+                <div class="description-content">${descriptionHTML || 'Описание отсутствует.'}</div>
+            </div>
+            <div class="event-detail-sidebar">
+                <h3>Комментарии (${comments ? comments.length : 0})</h3>
+                <div class="comments-section" id="comments">
+                    ${renderComments(comments)}
+                    ${currentUser ? renderCommentForm(event.id) : '<p><a href="/login.html">Войдите</a>, чтобы оставить комментарий.</p>'}
                 </div>
             </div>
-            <h2>Описание</h2>
-            <div style="white-space: pre-wrap;">${sanitizeHTML(event.description) || 'Описание отсутствует.'}</div>
         </div>
-        <div class="event-detail-sidebar">
-            <h3>Комментарии</h3>
-            <div class="comments-section">
-                ${commentsHtml}
-                <form class="comment-form" onsubmit="addComment(${event.id}); return false;">
-                    <input id="comment-input" placeholder="Написать комментарий..." required>
-                    <button type="submit">Отправить</button>
-                </form>
-            </div>
-        </div>
-    </div>`;
+    `;
     eventDetailContainer.innerHTML = eventHtml;
 }
+
+// --- 3. Функции для рендера частей страницы ---
+
+function renderComments(comments) {
+    if (!comments || comments.length === 0) {
+        return '<p>Комментариев пока нет.</p>';
+    }
+    return '<ul class="comments-list">' + comments.map(comment => {
+        const authorAvatar = comment.profiles ? comment.profiles.avatar_url : 'https://placehold.co/32x32/f0f2f5/ccc';
+        return `
+            <li class="comment">
+                <img src="${sanitizeForAttribute(authorAvatar)}" class="comment-avatar" alt="avatar">
+                <div class="comment-body">
+                    <span class="comment-author">${sanitizeHTML(comment.profiles.full_name || 'Аноним')}</span>
+                    <p>${sanitizeHTML(comment.content)}</p>
+                    <span class="comment-date">${new Date(comment.created_at).toLocaleString()}</span>
+                </div>
+            </li>`;
+    }).join('') + '</ul>';
+}
+
+function renderCommentForm(eventId) {
+    return `
+        <form class="comment-form" onsubmit="addComment(event, ${eventId})">
+            <textarea id="comment-input" placeholder="Написать комментарий..." required></textarea>
+            <button type="submit" class="submit-btn primary">Отправить</button>
+        </form>`;
+}
+
+
+// --- 4. Глобальные функции-обработчики (для onclick) ---
+
+window.addComment = async function(e, eventId) {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    const contentInput = document.getElementById('comment-input');
+    const content = contentInput.value.trim();
+    if (!content) return;
+    
+    const submitButton = e.target.querySelector('button');
+    submitButton.disabled = true;
+
+    const { data, error } = await supabaseClient
+        .from('comments')
+        .insert({ content, event_id: eventId, user_id: currentUser.id })
+        .select('*, profiles(full_name, avatar_url)')
+        .single();
+    
+    if (error) {
+        alert('Не удалось добавить комментарий.');
+        submitButton.disabled = false;
+    } else {
+        // Динамическое добавление без перезагрузки
+        const newCommentHTML = `
+            <li class="comment">
+                <img src="${sanitizeForAttribute(data.profiles.avatar_url)}" class="comment-avatar" alt="avatar">
+                <div class="comment-body">
+                    <span class="comment-author">${sanitizeHTML(data.profiles.full_name || 'Аноним')}</span>
+                    <p>${sanitizeHTML(data.content)}</p>
+                    <span class="comment-date">${new Date(data.created_at).toLocaleString()}</span>
+                </div>
+            </li>`;
+        document.querySelector('.comments-list').insertAdjacentHTML('beforeend', newCommentHTML);
+        contentInput.value = '';
+        submitButton.disabled = false;
+    }
+};
+
+
+// --- 5. Точка входа ---
+document.addEventListener('DOMContentLoaded', initializeEventDetailPage);
+
