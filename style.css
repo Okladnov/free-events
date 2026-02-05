@@ -294,11 +294,6 @@ body.dark-theme .card-description { color: #ccc; }
     margin-left: .5em;
 }
 /* Делаем шапку шире, если нет поиска */
-.hide-search .header-container {
-    justify-content: space-between;
-}
-.hide-search .header-logo-link {
-    flex-grow: 1; /* Позволяет лого занимать больше места */
 }
 /* --- Стили для страницы создания/редактирования --- */
 .form-grid-container {
