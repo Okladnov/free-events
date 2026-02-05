@@ -51,7 +51,6 @@ async function initializeHeader() {
 
     // 3. Настройка интерфейса в зависимости от того, вошел ли пользователь
     if (currentUser) {
-        // Пользователь в системе
         const loginBtn = document.getElementById('loginBtn');
         const addEventBtn = document.getElementById('add-event-modal-btn');
         const profileDropdown = document.getElementById('profile-dropdown');
@@ -59,13 +58,11 @@ async function initializeHeader() {
         if (addEventBtn) addEventBtn.style.display = 'block';
         if (profileDropdown) profileDropdown.style.display = 'block';
 
-        // Получаем и отображаем имя
         const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single();
         const userName = (profile && profile.full_name) ? profile.full_name : (currentUser.email ? currentUser.email.split('@')[0] : 'Профиль');
         const userNameDisplay = document.getElementById('user-name-display');
         if (userNameDisplay) userNameDisplay.textContent = userName;
 
-        // Проверяем, админ ли, и показываем ссылку
         try {
             const { data: adminStatus } = await supabaseClient.rpc('is_admin');
             isAdmin = adminStatus;
@@ -74,11 +71,10 @@ async function initializeHeader() {
                 adminLink.style.display = 'block';
             }
         } catch (e) {
-            isAdmin = false; // Если rpc не сработал, считаем что не админ
+            isAdmin = false;
         }
 
     } else {
-        // Пользователь - гость
         const loginBtn = document.getElementById('loginBtn');
         const addEventBtn = document.getElementById('add-event-modal-btn');
         const profileDropdown = document.getElementById('profile-dropdown');
@@ -117,3 +113,4 @@ async function initializeHeader() {
             profileDropdownEl.classList.remove('open');
         }
     });
+} // <--- ВОТ ЭТА ФИГУРНАЯ СКОБКА БЫЛА ПОТЕРЯНА!
