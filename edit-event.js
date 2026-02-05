@@ -6,26 +6,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // 1. ИНИЦИАЛИЗИРУЕМ РЕДАКТОР
-    const editor = pell.init({
-        element: document.getElementById('editor-container'),
-        onChange: html => {}, // Можно добавить логику сюда
-        defaultParagraphSeparator: 'p',
-        styleWithCSS: false,
-        actions: [
-            'bold',
-            'italic',
-            'underline',
-            'strikethrough',
-            'heading1',
-            'heading2',
-            'paragraph',
-            'quote',
-            'olist',
-            'ulist',
-            'link'
-        ]
-    });
+    // 1. ИНИЦИАЛИЗИРУЕМ КАСТОМНЫЙ РЕДАКТОР
+const editor = pell.init({
+    element: document.getElementById('editor-container'),
+    onChange: html => {},
+    defaultParagraphSeparator: 'p',
+    actions: [
+        {
+            name: 'bold',
+            icon: '<b>B</b>',
+            result: () => pell.exec('bold')
+        },
+        {
+            name: 'italic',
+            icon: '<i>I</i>',
+            result: () => pell.exec('italic')
+        },
+        {
+            name: 'underline',
+            icon: '<u>U</u>',
+            result: () => pell.exec('underline')
+        },
+        {
+            name: 'link',
+            icon: '🔗',
+            result: () => {
+                const url = window.prompt('Введите URL');
+                if (url) pell.exec('createLink', url);
+            }
+        }
+    ],
+    // Указываем, что будем использовать свои классы для кнопок
+    classes: {
+        actionbar: 'pell-actionbar-custom',
+        button: 'pell-button-custom',
+        content: 'pell-content',
+        selected: 'pell-button-selected'
+    }
+});
     
     await loadCategories();
 
