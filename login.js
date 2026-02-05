@@ -20,10 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // --- 3. Проверка сессии: если пользователь уже вошел, перенаправляем ---
-    supabaseClient.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-            window.location.href = '/'; // Отправляем на главную, если уже есть сессия
         }
     });
     
