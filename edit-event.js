@@ -1,110 +1,125 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // Инициализируем шапку и проверяем пользователя
     await initializeHeader();
 
-    // Если гость - отправляем на логин
     if (!currentUser) {
         window.location.href = '/login.html';
         return;
     }
 
-    // Загружаем категории в выпадающий список
+    // 1. ИНИЦИАЛИЗИРУЕМ РЕДАКТОР
+    const editor = pell.init({
+        element: document.getElementById('editor-container'),
+        onChange: html => {}, // Можно добавить логику сюда
+        defaultParagraphSeparator: 'p',
+        styleWithCSS: false,
+        actions: [
+            'bold',
+            'italic',
+            'underline',
+            'strikethrough',
+            'heading1',
+            'heading2',
+            'paragraph',
+            'quote',
+            'olist',
+            'ulist',
+            'link'
+        ]
+    });
+    
     await loadCategories();
 
-    // Проверяем, это создание или редактирование
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('id');
 
     if (eventId) {
-        // Режим редактирования
         document.getElementById('form-title').textContent = 'Редактирование события';
-        await loadEventDataForEdit(eventId);
+        await loadEventDataForEdit(eventId, editor);
     }
 
-    // Вешаем обработчик на форму
-    document.getElementById('event-form').addEventListener('submit', (e) => handleFormSubmit(e, eventId));
+    // 2. ОБРАБОТЧИК ПРЕДПРОСМОТРА КАРТИНКИ
+    document.getElementById('preview-btn').addEventListener('click', () => {
+        const imageUrl = document.getElementById('event-image-url').value;
+        const preview = document.getElementById('image-preview');
+        if (imageUrl) {
+            preview.src = imageUrl;
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    });
+
+    document.getElementById('event-form').addEventListener('submit', (e) => handleFormSubmit(e, eventId, editor));
 });
 
-// Загрузка категорий в <select>
+
 async function loadCategories() {
+    // ... (код этой функции не меняется, можно скопировать из старой версии)
     const categorySelect = document.getElementById('event-category');
     const { data, error } = await supabaseClient.from('categories').select('*').order('name');
-    if (error) {
-        console.error("Ошибка загрузки категорий:", error);
-        return;
-    }
+    if (error) { console.error("Ошибка загрузки категорий:", error); return; }
     categorySelect.innerHTML = data.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
 }
 
-// Загрузка данных для существующего события
-async function loadEventDataForEdit(eventId) {
+async function loadEventDataForEdit(eventId, editor) {
     const { data: event, error } = await supabaseClient.from('events').select('*').eq('id', eventId).single();
     if (error || !event) {
-        alert("Событие не найдено или у вас нет прав на его редактирование.");
+        alert("Событие не найдено.");
         window.location.href = '/';
         return;
     }
-    
-    // Проверяем, является ли текущий юзер автором
     if (event.user_id !== currentUser.id && !isAdmin) {
-         alert("У вас нет прав на редактирование этого события.");
+         alert("Нет прав на редактирование.");
          window.location.href = '/';
          return;
     }
 
-    // Заполняем форму
     document.getElementById('event-title').value = event.title;
-    document.getElementById('event-description').value = event.description || '';
+    document.getElementById('event-link').value = event.link || '';
+    editor.content.innerHTML = event.description || ''; // ЗАПОЛНЯЕМ РЕДАКТОР
     document.getElementById('event-image-url').value = event.image_url || '';
     document.getElementById('event-category').value = event.category_id;
     document.getElementById('event-date').value = event.event_date;
     document.getElementById('event-city').value = event.city || '';
-    document.getElementById('event-link').value = event.link || ''; // ЗАПОЛНЯЕМ НОВОЕ ПОЛЕ
+    
+    // Показываем предпросмотр, если есть картинка
+    if(event.image_url) {
+        document.getElementById('image-preview').src = event.image_url;
+        document.getElementById('image-preview').style.display = 'block';
+    }
 }
 
-// Обработчик отправки формы
-async function handleFormSubmit(e, eventId) {
+async function handleFormSubmit(e, eventId, editor) {
     e.preventDefault();
     const formMessage = document.getElementById('form-message');
     const submitButton = e.target.querySelector('button[type="submit"]');
     submitButton.disabled = true;
     formMessage.textContent = 'Сохраняем...';
-    formMessage.style.color = 'var(--text-color)';
 
     try {
         const eventData = {
             title: document.getElementById('event-title').value,
-            description: document.getElementById('event-description').value,
+            description: editor.content.innerHTML, // ПОЛУЧАЕМ HTML ИЗ РЕДАКТОРА
             image_url: document.getElementById('event-image-url').value,
             category_id: document.getElementById('event-category').value,
             event_date: document.getElementById('event-date').value || null,
             city: document.getElementById('event-city').value,
-            link: document.getElementById('event-link').value, // ПОЛУЧАЕМ НОВОЕ ПОЛЕ
+            link: document.getElementById('event-link').value,
             user_id: currentUser.id,
         };
         
-        let result;
-        if (eventId) {
-            // Обновляем существующее
-            result = await supabaseClient.from('events').update(eventData).eq('id', eventId).select().single();
-        } else {
-            // Создаем новое
-            result = await supabaseClient.from('events').insert(eventData).select().single();
-        }
+        let result = eventId 
+            ? await supabaseClient.from('events').update(eventData).eq('id', eventId).select().single()
+            : await supabaseClient.from('events').insert(eventData).select().single();
 
         const { data, error } = result;
-
         if (error) throw error;
         
-        formMessage.textContent = '✅ Успешно сохранено! Перенаправляем...';
-        formMessage.style.color = '#2ecc71';
-        
-        // Перенаправляем на страницу созданного/обновленного события
+        formMessage.textContent = '✅ Успешно! Перенаправляем...';
         setTimeout(() => { window.location.href = `/event.html?id=${data.id}`; }, 1500);
 
     } catch (error) {
         formMessage.textContent = `Ошибка: ${error.message}`;
-        formMessage.style.color = '#e74c3c';
         submitButton.disabled = false;
     }
 }
