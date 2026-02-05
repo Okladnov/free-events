@@ -1,7 +1,3 @@
-/* ===================================================================
-   STYLE.CSS - ЕДИНАЯ ИСПРАВЛЕННАЯ ВЕРСИЯ
-   =================================================================== */
-
 /* ====================
    1. ПЕРЕМЕННЫЕ И БАЗА
    ==================== */
@@ -64,7 +60,8 @@ input:checked + .slider:before { transform: translateX(20px); }
 /* ====================
    3. ГЛАВНАЯ СТРАНИЦА (Карточки, фильтры)
    ==================== */
-.pills-container { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; margin-bottom: 20px; }
+.pills-container { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; margin-bottom: 20px; scrollbar-width: none; }
+.pills-container::-webkit-scrollbar { display: none; }
 .category-pill { flex-shrink: 0; padding: 8px 16px; font-size: 14px; font-weight: 600; color: var(--text-color); background-color: var(--input-background); border: 1px solid transparent; border-radius: 18px; cursor: pointer; transition: all 0.2s; }
 .category-pill.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
 #events { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
@@ -118,7 +115,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .input-group { margin-bottom: 24px; }
 .input-group label { display: block; font-size: 14px; margin-bottom: 8px; font-weight: 500; }
 .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--input-background); color: var(--text-color); font-size: 15px; }
-.input-group input:focus, .input-group select:focus, .input-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px var(--primary-color-light); }
+.input-group input[type="text"]:focus, .input-group input[type="url"]:focus, .input-group input[type="date"]:focus, .input-group select:focus, .input-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px var(--primary-color-light); }
 .submit-btn { width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; margin-top: 10px; }
 .submit-btn.primary { background-color: var(--primary-color); color: white; }
 .submit-btn.secondary { background-color: var(--input-background); color: var(--text-color); border: 1px solid var(--border-color); }
@@ -133,6 +130,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .pell-content { min-height: 250px; padding: 15px; background: var(--input-background); color: var(--text-color); outline: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
 
 /* Загрузчик изображений */
+.image-uploader { position: relative; }
 .upload-area { border: 2px dashed var(--border-color); border-radius: 12px; min-height: 150px; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer; position: relative; overflow: hidden; transition: border-color 0.2s; }
 .upload-area:hover, .upload-area.active { border-color: var(--primary-color); }
 .upload-instructions p { margin: 0 0 10px 0; }
@@ -151,4 +149,6 @@ input:checked + .slider:before { transform: translateX(20px); }
     .header-logo-link { order: 1; }
     .login-modal-card { grid-template-columns: 1fr; }
     .login-modal-image-side { display: none; }
+    .card-body { flex-direction: column; }
+    .card-image-link { width: 100%; height: 180px; }
 }
