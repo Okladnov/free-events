@@ -1,5 +1,5 @@
 // =================================================================
-// СКРИПТ ДЛЯ ГЛАВНОЙ СТРАНИЦЫ - index.html (app.js)
+// СКРИПТ ДЛЯ ГЛАВНОЙ СТРАНИЦЫ - index.html (app.js) - ИСПРАВЛЕННЫЙ
 // =================================================================
 // Важно: supabaseClient и currentUser уже созданы в script.js,
 // поэтому здесь мы их просто используем.
@@ -12,15 +12,13 @@ let currentPage = 0;
 let currentCategoryId = null;
 
 
-// --- 2. Точка входа: запускается после загрузки страницы ---
-// document.addEventListener('DOMContentLoaded') уже есть в script.js,
-// поэтому мы просто вызываем нужные функции, когда они понадобятся.
-// Мы обернем все в одну функцию, чтобы было чисто.
+// --- 2. Функция-инициализатор для этой страницы ---
 function initializeIndexPage() {
     const pageElement = document.getElementById('events');
-    // Если мы не на главной странице (где есть блок #events), то ничего не делаем
+    // Если мы не на главной странице, ничего не делаем
     if (!pageElement) return;
 
+    // Теперь, когда мы уверены, что шапка загружена, мы можем безопасно искать в ней элементы
     setupIndexPageListeners();
     loadAndDisplayCategories();
     loadEvents(true);
@@ -29,8 +27,6 @@ function initializeIndexPage() {
 
 // --- 3. Обработчики событий (поиск) ---
 function setupIndexPageListeners() {
-    // Поиск может быть в шапке, поэтому ищем его там.
-    // initializeHeader из script.js уже загрузил шапку к этому моменту.
     const searchInput = document.getElementById('search-input');
     const searchButton = document.querySelector('.search-button');
 
@@ -74,12 +70,13 @@ async function loadEvents(isNewSearch = false) {
         if (paginationControls) paginationControls.innerHTML = '';
     }
 
+    // ВОТ МЕСТО ОШИБКИ. Теперь оно безопасно, т.к. input уже существует
     const searchTerm = document.getElementById('search-input').value.trim();
     const from = currentPage * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
 
     let query = supabaseClient
-        .from('events_with_details') // Используем созданное view для простоты
+        .from('events_with_details')
         .select('*', { count: 'exact' })
         .eq('is_approved', true);
 
@@ -109,12 +106,10 @@ async function loadEvents(isNewSearch = false) {
     }
 
     events.forEach(event => {
-        // Здесь будет функция для создания карточки (мы ее вынесем в script.js позже)
         const card = createEventCard(event);
         eventsContainer.appendChild(card);
     });
     
-    // Кнопка "Загрузить еще"
     const existingLoadMoreBtn = document.getElementById('load-more-btn');
     if (existingLoadMoreBtn) existingLoadMoreBtn.remove();
     
@@ -134,11 +129,9 @@ async function loadEvents(isNewSearch = false) {
 
 // --- 6. Функции-обработчики для фильтров ---
 function resetFilters() {
-    if (document.getElementById('search-input')) {
-      document.getElementById('search-input').value = '';
-    }
+    if (document.getElementById('search-input')) { document.getElementById('search-input').value = ''; }
     document.querySelectorAll('.category-pill').forEach(pill => pill.classList.remove('active'));
-    document.querySelector('.category-pill').classList.add('active'); // Активируем кнопку "Все"
+    document.querySelector('.category-pill').classList.add('active');
     currentCategoryId = null;
     loadEvents(true);
 }
@@ -151,11 +144,9 @@ function setCategoryFilter(categoryId, element) {
 }
 
 // --- 7. Функция для создания карточки события ---
-// Эту функцию мы потом сделаем глобальной, но пока пусть будет здесь
 function createEventCard(event) {
     const div = document.createElement("div");
-    div.className = "event-card-v3"; // Используем твой новый класс
-    
+    div.className = "event-card-v3";
     const isFavorited = currentUser ? (event.favorited_by || []).includes(currentUser.id) : false;
     const authorAvatar = event.author_avatar_url || 'https://placehold.co/24x24/f0f2f5/ccc?text=A';
 
@@ -196,43 +187,24 @@ function createEventCard(event) {
 }
 
 async function toggleFavorite(event, eventId, buttonElement) {
-    event.stopPropagation(); // Обязательно, чтобы не переходить по ссылке карточки
-    if (!currentUser) {
-        alert('Пожалуйста, войдите, чтобы добавлять в избранное.');
-        return;
-    }
-
+    event.stopPropagation();
+    if (!currentUser) { alert('Пожалуйста, войдите, чтобы добавлять в избранное.'); return; }
     buttonElement.disabled = true;
     const isActive = buttonElement.classList.contains('active');
     const countSpan = buttonElement.querySelector('span');
     let currentCount = parseInt(countSpan.textContent, 10);
-
     if (isActive) {
-        // --- УДАЛЯЕМ ИЗ ИЗБРАННОГО ---
         const { error } = await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id });
-        if (error) {
-            console.error("Ошибка при удалении из избранного:", error);
-            buttonElement.disabled = false;
-        } else {
-            buttonElement.classList.remove('active');
-            countSpan.textContent = currentCount - 1;
-            buttonElement.disabled = false;
-        }
+        if (error) { console.error("Ошибка:", error); buttonElement.disabled = false; }
+        else { buttonElement.classList.remove('active'); countSpan.textContent = currentCount - 1; buttonElement.disabled = false; }
     } else {
-        // --- ДОБАВЛЯЕМ В ИЗБРАННОЕ ---
         const { error } = await supabaseClient.from('favorites').insert({ event_id: eventId, user_id: currentUser.id });
-        if (error) {
-            console.error("Ошибка при добавлении в избранное:", error);
-            buttonElement.disabled = false;
-        } else {
-            buttonElement.classList.add('active');
-            countSpan.textContent = currentCount + 1;
-            buttonElement.disabled = false;
-        }
+        if (error) { console.error("Ошибка:", error); buttonElement.disabled = false; }
+        else { buttonElement.classList.add('active'); countSpan.textContent = currentCount + 1; buttonElement.disabled = false; }
     }
 }
 
 
-// --- 8. Запускаем все, когда DOM готов ---
-document.addEventListener('DOMContentLoaded', initializeIndexPage);
-
+// --- 8. ИЗМЕНЕНИЕ ЗДЕСЬ! ---
+// Теперь этот скрипт ждет, пока script.js не "крикнет", что шапка готова.
+document.addEventListener('headerLoaded', initializeIndexPage);
