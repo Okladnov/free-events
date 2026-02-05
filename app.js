@@ -33,20 +33,21 @@ function sanitizeForAttribute(text) {
 }
 
 // =================================================================
-// ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ШАПКИ
+// ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ШАПКИ (ВЕРСИЯ С НОВЫМ МЕНЮ)
 // =================================================================
 async function initializeHeader() {
-    // Безопасно получаем все элементы шапки в одном месте
+    // --- Часть 1: Находим все элементы (без изменений) ---
     const themeToggle = document.getElementById('theme-toggle');
     const loginBtn = document.getElementById('loginBtn');
     const addEventBtn = document.getElementById('add-event-modal-btn');
     const profileDropdown = document.getElementById('profile-dropdown');
     const userNameDisplay = document.getElementById('user-name-display');
-    const adminLink = document.getElementById('admin-link');
+    const adminLink = document.getElementById('admin-link'); // Это ссылка в старом меню, мы ее скроем
+    const profileMenu = document.getElementById('profile-menu'); // Контейнер нового меню
     const logoutBtn = document.getElementById('logoutBtn');
     const profileTrigger = document.getElementById('profile-trigger');
 
-    // 1. Настройка темы
+    // --- Часть 2: Настройка темы (без изменений) ---
     if (themeToggle) {
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme === 'dark') {
@@ -59,35 +60,60 @@ async function initializeHeader() {
         });
     }
 
-    // 2. Проверка сессии пользователя
+    // --- Часть 3: Проверка сессии и настройка UI ---
     const { data: { session } } = await supabaseClient.auth.getSession();
     currentUser = session ? session.user : null;
 
-    // 3. Настройка UI в зависимости от сессии
     if (currentUser) {
-        // Пользователь в системе: показываем нужное, скрываем лишнее
+        // Пользователь в системе
         if (loginBtn) loginBtn.style.display = 'none';
         if (addEventBtn) addEventBtn.style.display = 'block';
         if (profileDropdown) profileDropdown.style.display = 'block';
 
-        // Получаем и отображаем имя
         const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single();
         if (userNameDisplay) {
             const name = (profile && profile.full_name) ? profile.full_name : (currentUser.email ? currentUser.email.split('@')[0] : 'Профиль');
             userNameDisplay.textContent = name;
         }
 
-        // Проверяем, админ ли, и показываем ссылку
+        // --- НОВАЯ ЧАСТЬ: Генерируем HTML для нового меню ---
         try {
             const { data: adminStatus } = await supabaseClient.rpc('is_admin');
             isAdmin = adminStatus;
-            if (isAdmin && adminLink) {
-                adminLink.style.display = 'block';
-            }
-        } catch (e) {
-            isAdmin = false; // Если rpc не сработал, считаем что не админ
-        }
+            
+            // Прячем старую ссылку "Админка", если она есть
+            if (adminLink) adminLink.style.display = 'none';
 
+            let menuHtml = `
+                <a href="/profile.html" class="profile-menu-item">
+                    <svg class="icon-profile" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+                    <span>Мой профиль</span>
+                </a>
+            `;
+
+            if (isAdmin) {
+                menuHtml += `
+                    <a href="/admin.html" class="profile-menu-item">
+                        <svg class="icon-admin" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"></path></svg>
+                        <span>Админ панель</span>
+                    </a>
+                `;
+            }
+            
+            menuHtml += `
+                <div class="menu-separator"></div>
+                <a href="#" class="profile-menu-item" id="logoutBtn">
+                    <svg class="icon-logout" viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"></path></svg>
+                    <span>Выйти</span>
+                </a>
+            `;
+            
+            if(profileMenu) profileMenu.innerHTML = menuHtml;
+
+        } catch (e) {
+            isAdmin = false;
+        }
+        
     } else {
         // Пользователь - гость
         if (loginBtn) loginBtn.style.display = 'block';
@@ -95,20 +121,21 @@ async function initializeHeader() {
         if (profileDropdown) profileDropdown.style.display = 'none';
     }
 
-    // 4. Настройка обработчиков событий для шапки
-    if (logoutBtn) {
-        logoutBtn.onclick = async () => {
-            await supabaseClient.auth.signOut();
-            window.location.reload();
-        };
+    // --- Часть 4: Настройка обработчиков (Выход теперь внутри меню) ---
+    // Используем делегирование, чтобы повесить обработчик на новую кнопку выхода
+    if (profileMenu) {
+        profileMenu.addEventListener('click', async (event) => {
+            if (event.target.closest('#logoutBtn')) {
+                event.preventDefault();
+                await supabaseClient.auth.signOut();
+                window.location.reload();
+            }
+        });
     }
     
     if (addEventBtn) {
-        addEventBtn.onclick = () => {
-            window.location.href = '/edit-event.html';
-        };
+        addEventBtn.onclick = () => { window.location.href = '/edit-event.html'; };
     }
-
     if (profileTrigger) {
         profileTrigger.onclick = (event) => {
             event.stopPropagation();
