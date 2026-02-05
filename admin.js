@@ -128,4 +128,4 @@ window.rejectEvent = async function(eventId, buttonElement) {
 
 
 // --- 3. Точка входа: запускаем инициализацию ---
-document.addEventListener('DOMContentLoaded', initializeAdminPage);
+document.addEventListener('appReady', initializeAdminPage);
