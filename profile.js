@@ -172,4 +172,4 @@ function createProfileEventCard(event) {
 }
 
 // --- 4. Точка входа ---
-document.addEventListener('DOMContentLoaded', initializeProfilePage);
+document.addEventListener('appReady', initializeProfilePage);
