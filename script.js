@@ -2,14 +2,48 @@
 // ГЛОБАЛЬНЫЙ СКРИПТ УПРАВЛЕНИЯ САЙТОМ (script.js) - ФИНАЛЬНАЯ ВЕРСИЯ
 // =================================================================
 
-const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
-const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
+// --- ГЛАВНАЯ ЛОГИКА ЗАПУСКА ---
+document.addEventListener("DOMContentLoaded", async () => {
+    // ПРОВЕРКА: Если у body есть класс 'login-page-body',
+    // этот скрипт прекращает свою работу. Вся логика на login.js.
+    if (document.body.classList.contains('login-page-body')) {
+        return; 
+    }
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-window.currentUser = null; // Объявляем глобально
+    // --- Если это ОБЫЧНАЯ страница, инициализируем все как надо ---
+    const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    window.currentUser = null; // Объявляем глобально
 
-let appReadyFired = false; // Флаг, чтобы событие сработало только один раз
+    let appReadyFired = false; // Флаг, чтобы событие сработало только один раз
 
+    // Загружаем HTML-каркас
+    await loadComponent('main-header', 'header.html');
+    await loadComponent('main-footer', 'footer.html');
+
+    // Вешаем слушатель Supabase
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+        const user = session ? session.user : null;
+        window.currentUser = user; 
+
+        if (user) {
+            localStorage.setItem('user', JSON.stringify(user));
+        } else {
+            localStorage.removeItem('user');
+        }
+        
+        initializeHeader(user, supabaseClient);
+
+        if (!appReadyFired) {
+            document.dispatchEvent(new CustomEvent('appReady'));
+            appReadyFired = true;
+        }
+    });
+});
+
+
+// --- Функция загрузки компонентов ---
 async function loadComponent(elementId, filePath) {
     const element = document.getElementById(elementId);
     if (!element) return;
@@ -23,9 +57,9 @@ async function loadComponent(elementId, filePath) {
     }
 }
 
-function initializeHeader(user) {
+// --- Функция настройки шапки ---
+function initializeHeader(user, supabaseClient) {
     const currentUser = user;
-    // ... (весь код твоей функции initializeHeader, он правильный)
     const addEventBtn = document.getElementById('add-event-modal-btn');
     const profileDropdown = document.getElementById('profile-dropdown');
     const loginBtn = document.getElementById('loginBtn');
@@ -78,35 +112,7 @@ function initializeHeader(user) {
     }
 }
 
-// --- ГЛАВНАЯ ЛОГИКА ЗАПУСКА ---
-document.addEventListener("DOMContentLoaded", async () => {
-    // Сначала загружаем HTML-каркас
-    await loadComponent('main-header', 'header.html');
-    await loadComponent('main-footer', 'footer.html');
-
-    // Теперь, когда HTML на месте, вешаем слушатель Supabase
-    supabaseClient.auth.onAuthStateChange((_event, session) => {
-        const user = session ? session.user : null;
-        window.currentUser = user; // Обновляем глобальную переменную
-
-        if (user) {
-            localStorage.setItem('user', JSON.stringify(user));
-        } else {
-            localStorage.removeItem('user');
-        }
-
-        // Настраиваем шапку с правильным пользователем (или null)
-        initializeHeader(user);
-
-        // "КРИЧИМ" ВСЕМУ САЙТУ: "ПРИЛОЖЕНИЕ ГОТОВО!"
-        // Делаем это только один раз
-        if (!appReadyFired) {
-            document.dispatchEvent(new CustomEvent('appReady'));
-            appReadyFired = true;
-        }
-    });
-});
-
+// --- Глобальные утилиты ---
 function sanitizeHTML(text) {
     const temp = document.createElement('div');
     if (text) { temp.textContent = text; }
