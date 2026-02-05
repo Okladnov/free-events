@@ -1,10 +1,10 @@
 // =================================================================
-// СКРИПТ ДЛЯ СТРАНИЦЫ ВХОДА - login.html (login.js)
+// СКРИПТ ДЛЯ СТРАНИЦЫ ВХОДА - login.html (САМОСТОЯТЕЛЬНАЯ ВЕРСИЯ)
 // =================================================================
-// Важно: supabaseClient уже создан в script.js, мы его просто используем.
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. Получаем все нужные элементы ---
+
+    // --- 1. Элементы страницы ---
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     const loginMessage = document.getElementById('login-message');
@@ -14,14 +14,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const googleLoginBtnLogin = document.getElementById('google-login-btn-login');
     const googleLoginBtnRegister = document.getElementById('google-login-btn-register');
 
-    // --- 2. Проверяем, не залогинен ли пользователь уже ---
-    // Если да, то ему нечего делать на этой странице - отправляем на главную.
-    if (currentUser) {
-        window.location.href = '/';
-        return; // Прерываем выполнение скрипта
-    }
+    // --- 2. Инициализация Supabase (ТОЛЬКО для этой страницы) ---
+    // Эта страница особенная, она не использует script.js
+    const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // --- 3. Проверка сессии: если пользователь уже вошел, перенаправляем ---
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+            window.location.href = '/'; // Отправляем на главную, если уже есть сессия
+        }
+    });
     
-    // --- 3. Обработчики событий ---
+    // --- 4. Обработчики событий ---
 
     // Переключение между формами
     toggleToRegisterBtn.addEventListener('click', (e) => {
@@ -36,9 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.style.display = 'block';
     });
 
-    // Обработчик для входа через Google
+    // Вход через Google
     const handleGoogleLogin = async () => {
-        // Используем глобальный supabaseClient
         await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
             options: { redirectTo: window.location.origin }
@@ -47,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     googleLoginBtnLogin.addEventListener('click', handleGoogleLogin);
     googleLoginBtnRegister.addEventListener('click', handleGoogleLogin);
 
-    // Обработчик формы регистрации
+    // Регистрация
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const submitButton = registerForm.querySelector('button[type="submit"]');
@@ -65,15 +70,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 options: { data: { full_name: name } }
             });
             if (error) throw error;
-            // Если требуется подтверждение по почте
             if (data.user && data.user.identities && data.user.identities.length === 0) {
-                 registerMessage.textContent = '✅ Успешно! Проверьте вашу почту для подтверждения.';
+                 registerMessage.textContent = '✅ Успешно! Пожалуйста, проверьте вашу почту для подтверждения регистрации.';
                  registerMessage.style.color = '#2ecc71';
             } else {
-                registerMessage.textContent = '✅ Успешно! Входим...';
+                registerMessage.textContent = '✅ Успешно! Перенаправляем на главную...';
                 registerMessage.style.color = '#2ecc71';
                 setTimeout(() => { window.location.href = '/'; }, 1500);
             }
         } catch (error) {
+            // ИСПРАВЛЕНО: Убран лишний обратный слэш
             registerMessage.textContent = `Ошибка: ${error.message}`;
-            registerMessage.style.color = '#e74c3
+            registerMessage.style.color = '#e74c3c';
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+
+    // Вход
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitButton = loginForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        loginMessage.textContent = 'Выполняем вход...';
+        
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        try {
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            window.location.href = '/';
+        } catch (error) {
+            // ИСПРАВЛЕНО: Убран лишний обратный слэш
+            loginMessage.textContent = `Ошибка: ${error.message}`;
+            loginMessage.style.color = '#e74c3c';
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+});
