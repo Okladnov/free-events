@@ -196,7 +196,7 @@ async function loadEvents(isNewSearch = false) {
     // В Supabase v2 count возвращается в другом формате, проверим его наличие
     const { count: totalCount } = await supabaseClient.from('events').select('*', { count: 'exact', head: true });
     
-    if (events.length + from < totalCount) {
+    if (events.length + from < count) {
         const loadMoreBtn = document.createElement('button');
         loadMoreBtn.id = 'load-more-btn';
         loadMoreBtn.textContent = 'Загрузить еще';
