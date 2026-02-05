@@ -1,5 +1,5 @@
 /* ===================================================================
-   STYLE.CSS - ФИНАЛЬНАЯ ВЕРСИЯ С ПОЛНЫМ КОНТРОЛЕМ
+   STYLE.CSS - ФИНАЛЬНАЯ ВЕРСИЯ С GRID-ШАПКОЙ И ВСЕМИ ФИКСАМИ
    =================================================================== */
 
 /* ====================
@@ -8,7 +8,7 @@
 :root {
   /* --- Цвета --- */
   --primary-color: #ff6a00;
-  --primary-color-light: rgba(255, 106, 0, 0.1); /* Для ховеров и выделений */
+  --primary-color-light: rgba(255, 106, 0, 0.1);
   --background-color: #f4f5f7;
   --card-background: #ffffff;
   --input-background: #f0f2f5;
@@ -47,7 +47,6 @@
 }
 
 body.dark-theme {
-  /* --- Переопределяем цвета для темной темы --- */
   --background-color: #121212;
   --card-background: #1e1e1e;
   --input-background: #2c2c2c;
@@ -88,25 +87,34 @@ body { margin: 0; font-family: var(--font-family-main); background-color: var(--
 .form-message { font-size: 14px; margin-top: 15px; }
 
 /* ====================
-   4. ШАПКА
+   4. ШАПКА (ИСПРАВЛЕНО НА GRID)
    ==================== */
 .header { background-color: var(--card-background); padding: 15px 20px; border-bottom: 1px solid var(--border-color); transition: background-color 0.3s, border-color 0.3s; }
-.header-container { display: flex; justify-content: space-between; align-items: center; gap: 20px; width: 100%; max-width: var(--container-width); margin: 0 auto; }
+.header-container {
+    display: grid;
+    grid-template-columns: auto 1fr auto; /* Лого | Поиск | Кнопки */
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px; /* Можно сделать шапку чуть шире для больших экранов */
+    margin: 0 auto;
+}
 .header-logo { height: 40px; display: block; filter: var(--header-logo-filter); transition: filter 0.3s; }
 
-.search-wrapper { position: relative; flex-grow: 1; }
+.search-wrapper { position: relative; display: flex; align-items: center; } /* Убрали flex-grow */
 .search-wrapper input { width: 100%; height: 40px; padding: 5px 45px 5px 20px; font-size: var(--font-size-base); border: none; border-radius: 20px; background-color: var(--input-background); color: var(--text-color-main); -webkit-appearance: none; transition: background-color 0.3s; }
 .search-wrapper input:focus { outline: none; }
 .search-button { position: absolute; right: 3px; top: 3px; bottom: 3px; width: 34px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: var(--border-radius-round); }
 .search-button svg path { stroke: var(--text-color-secondary); }
 
-.auth-block { display: flex; align-items: center; gap: 15px; }
+.header-right-side { display: flex; align-items: center; gap: 20px; }
+.auth-block { display: flex; align-items: center; gap: 15px; } /* Убрали margin-left: auto */
 .add-event-btn { background-color: var(--primary-color); color: var(--white-color); padding: 0 16px; height: 40px; border: none; border-radius: var(--border-radius-small); font-weight: bold; cursor: pointer; transition: background-color 0.2s; white-space: nowrap; }
 
 .profile-dropdown { position: relative; }
 .profile-trigger { display: flex; align-items: center; gap: var(--border-radius-small); background-color: var(--input-background); border: none; padding: 0 16px; height: 40px; border-radius: 20px; cursor: pointer; font-weight: bold; color: var(--text-color-main); transition: background-color 0.3s; }
 .profile-menu { display: none; position: absolute; top: calc(100% + 10px); right: 0; background-color: var(--card-background); border-radius: var(--border-radius-small); box-shadow: var(--shadow-strong); padding: var(--border-radius-small); min-width: 220px; z-index: 100; border: 1px solid var(--border-color); }
-.profile-dropdown.open .profile-menu, .profile-menu.active { display: block; } /* Добавил .active */
+.profile-menu.active { display: block; }
 .profile-menu a { display: block; padding: 10px 12px; color: var(--text-color-main); text-decoration: none; border-radius: 6px; font-size: var(--font-size-base); }
 .profile-menu a:hover { background-color: var(--input-background); }
 .menu-separator { height: 1px; background-color: var(--border-color); margin: var(--border-radius-small) 0; }
@@ -121,10 +129,9 @@ body { margin: 0; font-family: var(--font-family-main); background-color: var(--
 input:checked + .theme-toggle-slider { background-color: var(--primary-color); }
 input:checked + .theme-toggle-slider:before { transform: translateX(20px); }
 
-/* ... (Остальные стили, адаптированные под переменные) ... */
 
 /* ====================
-   5. ГЛАВНАЯ СТРАНИЦА
+   5. ОСНОВНЫЕ СТРАНИЦЫ (Главная, Логин и т.д.)
    ==================== */
 .filters-section { padding: 20px 0 15px 0; margin: 0 20px 20px 20px; border-bottom: 1px solid var(--border-color); }
 .pills-container { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; scrollbar-width: none; }
@@ -155,7 +162,21 @@ input:checked + .theme-toggle-slider:before { transform: translateX(20px); }
 #pagination-controls { text-align: center; margin-top: 30px; }
 .footer { text-align: center; padding: 30px 20px; font-size: 14px; color: var(--text-color-subtle); }
 
-/* ... (Стили для других страниц: admin, profile, login, edit-event, event) ... */
+.login-container-normal { max-width: 450px; margin: 40px auto; padding: 32px; background-color: var(--card-background); border: 1px solid var(--border-color); border-radius: var(--border-radius-large); }
+.auth-form h2 { text-align: center; margin-top: 0; }
+.auth-form .form-subtitle { text-align: center; margin-top: -10px; margin-bottom: 30px; color: var(--text-color-secondary); }
+.toggle-form-text { text-align: center; margin-top: 20px; font-size: 14px; }
+.toggle-form-text a { color: var(--primary-color); font-weight: bold; text-decoration: none; }
+.toggle-form-text a:hover { text-decoration: underline; }
+.google-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px; background-color: var(--white-color); color: var(--text-color-main); border: 1px solid var(--border-color); border-radius: var(--border-radius-small); font-size: 15px; font-weight: 500; cursor: pointer; transition: background-color 0.2s, box-shadow 0.2s; }
+.google-btn:hover { background-color: #f7f7f7; }
+body.dark-theme .google-btn { background-color: var(--input-background); border-color: #444; }
+.google-btn img { width: 20px; height: 20px; margin-right: 12px; }
+.divider { display: flex; align-items: center; text-align: center; color: var(--text-color-subtle); margin: 20px 0; }
+.divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
+.divider:not(:empty)::before { margin-right: .5em; }
+.divider:not(:empty)::after { margin-left: .5em; }
+
 
 /* ====================
    6. АДАПТИВНОСТЬ
@@ -166,62 +187,15 @@ input:checked + .theme-toggle-slider:before { transform: translateX(20px); }
 }
 
 @media (max-width: 768px) {
-    .header-container { flex-wrap: wrap; }
+    /* На маленьких экранах возвращаемся к flex, чтобы переносить элементы */
+    .header-container { display: flex; flex-wrap: wrap; }
     .search-wrapper { width: 100%; margin-top: 10px; order: 3; }
-    .auth-block { order: 2; }
+    .header-right-side { order: 2; margin-left: auto; } /* Сдвигаем вправо */
     .header-title { order: 1; }
-    .login-modal-card { grid-template-columns: 1fr; }
-    .login-modal-image-side { display: none; }
 }
 
 @media (max-width: 600px) {
   .card-body { flex-direction: column; }
   .card-image-link { width: 100%; height: 180px; }
 }
-/* ====================
-   8. СТИЛИ ДЛЯ НОРМАЛЬНОЙ СТРАНИЦЫ ЛОГИНА
-   ==================== */
-.login-container-normal {
-    max-width: 450px;
-    margin: 40px auto; /* Отступ сверху и центрирование */
-    padding: 32px;
-    background-color: var(--card-background);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-large);
-}
 
-.auth-form h2 {
-    text-align: center;
-    margin-top: 0;
-}
-
-.auth-form .form-subtitle {
-    text-align: center;
-    margin-top: -10px;
-    margin-bottom: 30px;
-    color: var(--text-color-secondary);
-}
-
-.toggle-form-text {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 14px;
-}
-
-.toggle-form-text a {
-    color: var(--primary-color);
-    font-weight: bold;
-    text-decoration: none;
-}
-
-.toggle-form-text a:hover {
-    text-decoration: underline;
-}
-/* ====================
-   9. ФИКСЫ ВЕРСТКИ
-   ==================== */
-.header-right-side {
-    display: flex;
-    align-items: center;
-    gap: 20px; /* Расстояние между переключателем темы и блоком кнопок */
-}
