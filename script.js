@@ -1,31 +1,31 @@
 // =================================================================
-// ГЛОБАЛЬНЫЙ СКРИПТ УПРАВЛЕНИЯ САЙТОМ (script.js) - ФИНАЛЬНАЯ ВЕРСИЯ
+// ГЛОБАЛЬНЫЙ СКРИПТ УПРАВЛЕНИЯ САЙТОМ (script.js) - ЖЕЛЕЗОБЕТОННАЯ ВЕРСИЯ
 // =================================================================
 
-// --- ГЛАВНАЯ ЛОГИКА ЗАПУСКА ---
+// --- 1. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ДЛЯ ВСЕГО САЙТА ---
+// Создаем один клиент Supabase и делаем его доступным для всех (через window)
+const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
+const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
+window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+window.currentUser = null; // Пользователь будет определен позже
+
+let appReadyFired = false; // Флаг, чтобы главный сигнал сработал только один раз
+
+// --- 2. ГЛАВНАЯ ЛОГИКА ЗАПУСКА ---
 document.addEventListener("DOMContentLoaded", async () => {
-    // ПРОВЕРКА: Если у body есть класс 'login-page-body',
-    // этот скрипт прекращает свою работу. Вся логика на login.js.
+    // Проверка: Если это страница логина - этот скрипт не работает.
     if (document.body.classList.contains('login-page-body')) {
         return; 
     }
-
-    // --- Если это ОБЫЧНАЯ страница, инициализируем все как надо ---
-    const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    window.currentUser = null; // Объявляем глобально
-
-    let appReadyFired = false; // Флаг, чтобы событие сработало только один раз
 
     // Загружаем HTML-каркас
     await loadComponent('main-header', 'header.html');
     await loadComponent('main-footer', 'footer.html');
 
-    // Вешаем слушатель Supabase
-    supabaseClient.auth.onAuthStateChange((_event, session) => {
+    // Вешаем главный слушатель аутентификации
+    window.supabaseClient.auth.onAuthStateChange((_event, session) => {
         const user = session ? session.user : null;
-        window.currentUser = user; 
+        window.currentUser = user; // Обновляем глобальную переменную
 
         if (user) {
             localStorage.setItem('user', JSON.stringify(user));
@@ -33,8 +33,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             localStorage.removeItem('user');
         }
         
-        initializeHeader(user, supabaseClient);
+        // Настраиваем шапку с правильным пользователем
+        initializeHeader(user);
 
+        // "КРИЧИМ" ВСЕМУ САЙТУ: "ПРИЛОЖЕНИЕ ГОТОВО!"
+        // Этот сигнал услышат app.js, profile.js и другие.
         if (!appReadyFired) {
             document.dispatchEvent(new CustomEvent('appReady'));
             appReadyFired = true;
@@ -43,23 +46,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 
-// --- Функция загрузки компонентов ---
-async function loadComponent(elementId, filePath) {
-    const element = document.getElementById(elementId);
-    if (!element) return;
-    try {
-        const response = await fetch(filePath);
-        if (!response.ok) throw new Error(`Network response was not ok for ${filePath}`);
-        const data = await response.text();
-        element.innerHTML = data;
-    } catch (error) {
-        console.error(`Ошибка при загрузке компонента ${filePath}:`, error);
-    }
-}
-
-// --- Функция настройки шапки ---
-function initializeHeader(user, supabaseClient) {
-    const currentUser = user;
+// --- 3. Функция настройки шапки ---
+function initializeHeader(user) {
+    // Эта функция настраивает кнопки, меню и тему в шапке
+    // ... (код этой функции не менялся, он работает правильно)
     const addEventBtn = document.getElementById('add-event-modal-btn');
     const profileDropdown = document.getElementById('profile-dropdown');
     const loginBtn = document.getElementById('loginBtn');
@@ -70,16 +60,16 @@ function initializeHeader(user, supabaseClient) {
     const profileMenu = document.getElementById('profile-menu');
     const themeToggle = document.getElementById('theme-toggle');
 
-    if (currentUser) {
+    if (user) {
         if (loginBtn) loginBtn.style.display = 'none';
         if (profileDropdown) profileDropdown.style.display = 'flex';
         if (addEventBtn) addEventBtn.style.display = 'inline-block';
-        if (userNameDisplay) userNameDisplay.textContent = currentUser.user_metadata.name || 'Профиль';
-        if (adminLink && currentUser.user_metadata.role === 'admin') { adminLink.style.display = 'block'; }
+        if (userNameDisplay) userNameDisplay.textContent = user.user_metadata.name || 'Профиль';
+        if (adminLink && user.user_metadata.role === 'admin') { adminLink.style.display = 'block'; }
         if (logoutBtn) {
             logoutBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
-                await supabaseClient.auth.signOut();
+                await window.supabaseClient.auth.signOut();
                 localStorage.removeItem('user');
                 window.location.href = '/login.html';
             });
@@ -112,7 +102,21 @@ function initializeHeader(user, supabaseClient) {
     }
 }
 
-// --- Глобальные утилиты ---
+
+// --- 4. Вспомогательные и глобальные функции ---
+async function loadComponent(elementId, filePath) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    try {
+        const response = await fetch(filePath);
+        if (!response.ok) throw new Error(`Network response was not ok for ${filePath}`);
+        const data = await response.text();
+        element.innerHTML = data;
+    } catch (error) {
+        console.error(`Ошибка при загрузке компонента ${filePath}:`, error);
+    }
+}
+
 function sanitizeHTML(text) {
     const temp = document.createElement('div');
     if (text) { temp.textContent = text; }
