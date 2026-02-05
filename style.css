@@ -395,3 +395,64 @@ body.dark-theme .admin-event-card:hover {
 .score-cold { color: #007bff; } /* Синий */
 .score-hot { color: #ff8c00; }  /* Оранжевый */
 .score-fire { color: #ff0000; } /* Красный */
+/* ==========================================================
+   9. НОВЫЕ СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ ПРОФИЛЯ (КАК НА СКРИНЕ)
+   ========================================================== */
+
+/* Переопределяем старые стили, делая их более современными */
+.profile-menu {
+    padding: 8px;
+    background-color: #2c2c2e; /* Цвет фона меню как на скрине */
+    border: 1px solid #424245;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+    min-width: 240px;
+    border-radius: 12px; /* Более скругленные углы */
+}
+
+/* Стили для каждого пункта меню */
+.profile-menu-item {
+    display: flex !important; /* !important, чтобы перебить старый 'block' */
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px !important;
+    font-size: 15px !important;
+    font-weight: 500;
+    color: #e4e4e6 !important; /* Светлый текст */
+    border-radius: 8px !important;
+    transition: background-color 0.15s ease-in-out;
+}
+
+/* Эффект при наведении */
+.profile-menu-item:hover {
+    background-color: #424245 !important; /* Цвет фона при наведении */
+    color: #fff !important;
+}
+
+/* Стили для иконок */
+.profile-menu-item svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Разные цвета для иконок, как на скриншоте */
+.icon-profile path {
+    fill: #a9a9b0; /* Серый */
+}
+.icon-admin path {
+    fill: #5e5ce6; /* Фиолетовый */
+}
+.icon-logout path {
+    fill: #ff453a; /* Красный */
+}
+.profile-menu-item:hover .icon-profile path,
+.profile-menu-item:hover .icon-admin path,
+.profile-menu-item:hover .icon-logout path {
+    fill: #fff; /* Делаем иконки белыми при наведении */
+}
+
+/* Разделитель */
+.menu-separator {
+    height: 1px;
+    background-color: #424245; /* Цвет разделителя */
+    margin: 8px 0;
+}
