@@ -395,64 +395,67 @@ body.dark-theme .admin-event-card:hover {
 .score-cold { color: #007bff; } /* Синий */
 .score-hot { color: #ff8c00; }  /* Оранжевый */
 .score-fire { color: #ff0000; } /* Красный */
-/* ==========================================================
-   9. НОВЫЕ СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ ПРОФИЛЯ (КАК НА СКРИНЕ)
-   ========================================================== */
+/* =====================================================================
+   9. НОВЫЕ СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ ("ПУЛЕНЕПРОБИВАЕМАЯ" ВЕРСИЯ)
+   ===================================================================== */
 
-/* Переопределяем старые стили, делая их более современными */
+/* Фон и рамка меню */
 .profile-menu {
     padding: 8px;
-    background-color: #2c2c2e; /* Цвет фона меню как на скрине */
+    background-color: #2c2c2e;
     border: 1px solid #424245;
     box-shadow: 0 12px 24px rgba(0,0,0,0.4);
     min-width: 240px;
-    border-radius: 12px; /* Более скругленные углы */
+    border-radius: 12px;
 }
 
-/* Стили для каждого пункта меню */
-.profile-menu-item {
-    display: flex !important; /* !important, чтобы перебить старый 'block' */
+/* Стили для КАЖДОЙ ссылки в меню */
+.profile-menu a.profile-menu-item {
+    display: flex !important;
     align-items: center;
     gap: 12px;
     padding: 10px 12px !important;
     font-size: 15px !important;
     font-weight: 500;
-    color: #e4e4e6 !important; /* Светлый текст */
+    color: #e4e4e6 !important;
     border-radius: 8px !important;
     transition: background-color 0.15s ease-in-out;
 }
 
 /* Эффект при наведении */
-.profile-menu-item:hover {
-    background-color: #424245 !important; /* Цвет фона при наведении */
+.profile-menu a.profile-menu-item:hover {
+    background-color: #424245 !important;
     color: #fff !important;
 }
 
-/* Стили для иконок */
-.profile-menu-item svg {
+/* === "ЖЕСТКИЕ" СТИЛИ ДЛЯ ИКОНОК === */
+.profile-menu a.profile-menu-item svg {
     width: 20px;
     height: 20px;
+    flex-shrink: 0; /* ЗАПРЕЩАЕМ иконке растягиваться */
+    transition: color 0.15s ease-in-out;
 }
 
-/* Разные цвета для иконок, как на скриншоте */
-.icon-profile path {
-    fill: #a9a9b0; /* Серый */
+/* Задаем цвета, используя более конкретные селекторы */
+.profile-menu a.profile-menu-item .icon-profile {
+    color: #a9a9b0; /* Серый */
 }
-.icon-admin path {
-    fill: #5e5ce6; /* Фиолетовый */
+.profile-menu a.profile-menu-item .icon-admin {
+    color: #5e5ce6; /* Фиолетовый */
 }
-.icon-logout path {
-    fill: #ff453a; /* Красный */
+.profile-menu a.profile-menu-item .icon-logout {
+    color: #ff453a; /* Красный */
 }
-.profile-menu-item:hover .icon-profile path,
-.profile-menu-item:hover .icon-admin path,
-.profile-menu-item:hover .icon-logout path {
-    fill: #fff; /* Делаем иконки белыми при наведении */
+
+/* При наведении на пункт меню, меняем цвет иконки на белый */
+.profile-menu a.profile-menu-item:hover svg {
+    color: #fff;
 }
+/* === КОНЕЦ ЖЕСТКИХ СТИЛЕЙ === */
 
 /* Разделитель */
 .menu-separator {
     height: 1px;
-    background-color: #424245; /* Цвет разделителя */
+    background-color: #424245;
     margin: 8px 0;
 }
