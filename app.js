@@ -117,12 +117,3 @@ async function initializeHeader() {
             profileDropdownEl.classList.remove('open');
         }
     });
-
-    // 5. [ИСПРАВЛЕНИЕ] Скрываем поиск, если нужно
-    if (document.body.classList.contains('hide-search')) {
-        const searchContainer = document.querySelector('.search-container');
-        if (searchContainer) {
-            searchContainer.style.display = 'none';
-        }
-    }
-}
