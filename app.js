@@ -14,7 +14,9 @@ let isAdmin = false;
 // =================================================================
 function sanitizeHTML(text) {
     if (!text) return '';
-    return DOMPurify.sanitize(text, { ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'a', 'blockquote'] });
+    try {
+        return DOMPurify.sanitize(text, { ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'a', 'blockquote'] });
+    } catch(e) { return text; }
 }
 
 function sanitizeForAttribute(text) {
