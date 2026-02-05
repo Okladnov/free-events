@@ -7,26 +7,63 @@ const unapprovedContainer = document.getElementById('unapproved-events');
 // ТОЧКА ВХОДА
 // =================================================================
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Инициализируем шапку, проверяем пользователя и его права (из app.js)
     await initializeHeader();
 
-    // 2. `isAdmin` - это глобальная переменная из app.js.
-    //    Если false, блокируем доступ, если пользователь ввел URL вручную.
     if (!isAdmin) {
-        showAccessDenied();
+        document.body.innerHTML = '<h2>⛔ Доступ запрещен</h2><p>Эта страница доступна только для администраторов. <a href="/">На главную</a></p>';
         return;
     }
 
-    // 3. Если мы здесь, значит пользователь - админ. Загружаем события.
-    loadUnapprovedEvents();
+    const unapprovedContainer = document.getElementById('unapproved-events');
+    loadUnapprovedEvents(unapprovedContainer);
+    setupAdminListeners(unapprovedContainer);
 });
 
-// =================================================================
-// СПЕЦИФИЧНАЯ ЛОГИКА АДМИНКИ
-// =================================================================
 
-function showAccessDenied() {
-    unapprovedContainer.innerHTML = '<h2>⛔ Доступ запрещен</h2><p>Эта страница доступна только для администраторов. <a href="/">На главную</a></p>';
+function setupAdminListeners(container) {
+    container.addEventListener('click', async (event) => {
+        const button = event.target.closest('button[data-action]');
+        if (!button) return;
+
+        const action = button.dataset.action;
+        const eventId = button.dataset.eventId;
+        const card = button.closest('.admin-event-card');
+
+        if (action === 'approve') {
+            await handleEventAction('approve', eventId, button, card, container);
+        }
+        if (action === 'delete') {
+            if (confirm('Вы уверены, что хотите НАВСЕГДА удалить это событие?')) {
+                 await handleEventAction('delete', eventId, button, card, container);
+            }
+        }
+    });
+}
+
+async function handleEventAction(action, eventId, button, card, container) {
+    button.disabled = true;
+    const originalText = button.textContent;
+    button.textContent = 'Выполняем...';
+
+    let error;
+    if (action === 'approve') {
+        const { error: approveError } = await supabaseClient.from('events').update({ is_approved: true }).eq('id', eventId);
+        error = approveError;
+    } else if (action === 'delete') {
+        const { error: deleteError } = await supabaseClient.from('events').delete().eq('id', eventId);
+        error = deleteError;
+    }
+
+    if (error) {
+        alert(`Ошибка: ${error.message}`);
+        button.disabled = false;
+        button.textContent = originalText;
+    } else {
+        card.remove();
+        if (container.children.length === 0) {
+            container.innerHTML = '<p>🎉 Список пуст!</p>';
+        }
+    }
 }
 
 async function loadUnapprovedEvents() {
