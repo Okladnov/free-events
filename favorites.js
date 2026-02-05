@@ -143,5 +143,5 @@ window.removeFromFavorites = async function(eventId, buttonElement) {
 
 
 // --- 5. Точка входа ---
-document.addEventListener('DOMContentLoaded', initializeFavoritesPage);
+document.addEventListener('appReady', initializeFavoritesPage);
 
