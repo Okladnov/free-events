@@ -103,3 +103,7 @@ async function initializeHeader() {
         }
     });
 }
+if (document.body.classList.contains('hide-search')) {
+        document.querySelector('.search-container').style.display = 'none';
+    }
+}
