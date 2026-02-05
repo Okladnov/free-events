@@ -1,4 +1,8 @@
 // =================================================================
+// app.js - ЕДИНАЯ ИСПРАВЛЕННАЯ ВЕРСИЯ
+// =================================================================
+
+// =================================================================
 // ГЛОБАЛЬНОЕ ПОДКЛЮЧЕНИЕ И НАСТРОЙКИ
 // =================================================================
 const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
@@ -14,7 +18,13 @@ let isAdmin = false;
 // =================================================================
 function sanitizeHTML(text) {
     if (!text) return '';
-    return DOMPurify.sanitize(text, { ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'a', 'blockquote'] });
+    try {
+        // Используем более разрешающую версию, чтобы форматирование в описаниях работало
+        return DOMPurify.sanitize(text, { ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'a', 'blockquote'] });
+    } catch(e) {
+        // Если DOMPurify не загружен, просто возвращаем текст
+        return text;
+    }
 }
 
 function sanitizeForAttribute(text) {
@@ -23,25 +33,29 @@ function sanitizeForAttribute(text) {
 }
 
 // =================================================================
-// ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ШАПКИ (ВЫЗЫВАЕТСЯ НА КАЖДОЙ СТРАНИЦЕ)
+// ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ШАПКИ
 // =================================================================
 async function initializeHeader() {
-    // 1. Настройка переключателя темы
+    // Безопасно получаем все элементы шапки в одном месте
     const themeToggle = document.getElementById('theme-toggle');
-    const currentTheme = localStorage.getItem('theme');
-    if (currentTheme === 'dark') {
-        document.body.classList.add('dark-theme');
-        if (themeToggle) themeToggle.checked = true;
-    }
+    const loginBtn = document.getElementById('loginBtn');
+    const addEventBtn = document.getElementById('add-event-modal-btn');
+    const profileDropdown = document.getElementById('profile-dropdown');
+    const userNameDisplay = document.getElementById('user-name-display');
+    const adminLink = document.getElementById('admin-link');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const profileTrigger = document.getElementById('profile-trigger');
+
+    // 1. Настройка темы
     if (themeToggle) {
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            themeToggle.checked = true;
+        }
         themeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                document.body.classList.add('dark-theme');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.body.classList.remove('dark-theme');
-                localStorage.setItem('theme', 'light');
-            }
+            document.body.classList.toggle('dark-theme', this.checked);
+            localStorage.setItem('theme', this.checked ? 'dark' : 'light');
         });
     }
 
@@ -49,73 +63,64 @@ async function initializeHeader() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     currentUser = session ? session.user : null;
 
-    // 3. Настройка интерфейса в зависимости от того, вошел ли пользователь
+    // 3. Настройка UI в зависимости от сессии
     if (currentUser) {
-        // Пользователь в системе
-        const loginBtn = document.getElementById('loginBtn');
-        const addEventBtn = document.getElementById('add-event-modal-btn');
-        const profileDropdown = document.getElementById('profile-dropdown');
+        // Пользователь в системе: показываем нужное, скрываем лишнее
         if (loginBtn) loginBtn.style.display = 'none';
         if (addEventBtn) addEventBtn.style.display = 'block';
         if (profileDropdown) profileDropdown.style.display = 'block';
 
         // Получаем и отображаем имя
         const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single();
-        const userName = (profile && profile.full_name) ? profile.full_name : (currentUser.email ? currentUser.email.split('@')[0] : 'Профиль');
-        const userNameDisplay = document.getElementById('user-name-display');
-        if (userNameDisplay) userNameDisplay.textContent = userName;
+        if (userNameDisplay) {
+            const name = (profile && profile.full_name) ? profile.full_name : (currentUser.email ? currentUser.email.split('@')[0] : 'Профиль');
+            userNameDisplay.textContent = name;
+        }
 
         // Проверяем, админ ли, и показываем ссылку
         try {
             const { data: adminStatus } = await supabaseClient.rpc('is_admin');
             isAdmin = adminStatus;
-            const adminLink = document.getElementById('admin-link');
             if (isAdmin && adminLink) {
                 adminLink.style.display = 'block';
             }
         } catch (e) {
             isAdmin = false; // Если rpc не сработал, считаем что не админ
-            isAdmin = false;
         }
 
     } else {
         // Пользователь - гость
-        const loginBtn = document.getElementById('loginBtn');
-        const addEventBtn = document.getElementById('add-event-modal-btn');
-        const profileDropdown = document.getElementById('profile-dropdown');
         if (loginBtn) loginBtn.style.display = 'block';
         if (addEventBtn) addEventBtn.style.display = 'none';
         if (profileDropdown) profileDropdown.style.display = 'none';
     }
 
     // 4. Настройка обработчиков событий для шапки
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) logoutBtn.onclick = async () => {
-        await supabaseClient.auth.signOut();
-        window.location.reload();
-    };
-
-    const addEventModalBtn = document.getElementById('add-event-modal-btn');
-    if(addEventModalBtn) {
-        addEventModalBtn.onclick = () => {
+    if (logoutBtn) {
+        logoutBtn.onclick = async () => {
+            await supabaseClient.auth.signOut();
+            window.location.reload();
+        };
+    }
+    
+    if (addEventBtn) {
+        addEventBtn.onclick = () => {
             window.location.href = '/edit-event.html';
         };
     }
 
-    const profileDropdown = document.getElementById('profile-dropdown');
-    if (profileDropdown) {
-        const profileTrigger = document.getElementById('profile-trigger');
-        if (profileTrigger) {
-            profileTrigger.onclick = (event) => {
-                event.stopPropagation();
+    if (profileTrigger) {
+        profileTrigger.onclick = (event) => {
+            event.stopPropagation();
+            if (profileDropdown) {
                 profileDropdown.classList.toggle('open');
-            };
-        }
+            }
+        };
     }
+    
     document.addEventListener('click', (event) => {
-        const profileDropdownEl = document.getElementById('profile-dropdown');
-        if (profileDropdownEl && !profileDropdownEl.contains(event.target)) {
-            profileDropdownEl.classList.remove('open');
+        if (profileDropdown && !profileDropdown.contains(event.target)) {
+            profileDropdown.classList.remove('open');
         }
     });
-} // <--- ВОТ ЭТА ФИГУРНАЯ СКОБКА БЫЛА ПОТЕРЯНА!
+}
