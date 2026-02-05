@@ -117,4 +117,5 @@ async function toggleFavorite(event, eventId, buttonElement) {
     // ... Твой код для toggleFavorite, он правильный
 }
 
-document.addEventListener('headerLoaded', initializeIndexPage);
+document.addEventListener('appReady', initializeIndexPage);
+
