@@ -167,5 +167,5 @@ async function handleFormSubmit(e, eventId, editor, fileToUpload) {
 
 
 // --- 5. Точка входа: запускаем инициализацию ---
-document.addEventListener('DOMContentLoaded', initializeEditEventPage);
+document.addEventListener('appReady', initializeEditEventPage);
 
