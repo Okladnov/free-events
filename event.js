@@ -158,5 +158,5 @@ window.addComment = async function(e, eventId) {
 
 
 // --- 5. Точка входа ---
-document.addEventListener('DOMContentLoaded', initializeEventDetailPage);
+document.addEventListener('appReady', initializeEventDetailPage);
 
