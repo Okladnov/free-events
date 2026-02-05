@@ -37,11 +37,13 @@ a:hover { text-decoration: underline; }
 header { background-color: var(--card-background); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000; }
 .header-container { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; max-width: 960px; margin: 0 auto; }
 .header-logo { height: 40px; display: block; }
+.header-logo-link { flex-shrink: 0; }
 .search-container { flex-grow: 1; margin: 0 20px; max-width: 500px; position: relative; }
 .search-container input { width: 100%; padding: 10px 15px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--input-background); font-size: 15px; }
 .search-button { display: none; }
 .header-actions { display: flex; align-items: center; gap: 15px; }
-.add-event-btn, .login-btn { background-color: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+.add-event-btn, .login-btn { background-color: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; white-space: nowrap; }
+.theme-switch-wrapper { display: flex; align-items: center; }
 .theme-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
 .theme-switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 24px; transition: .4s; }
@@ -50,15 +52,15 @@ input:checked + .slider { background-color: var(--primary-color); }
 input:checked + .slider:before { transform: translateX(20px); }
 #profile-dropdown { position: relative; }
 #profile-trigger { cursor: pointer; display: flex; align-items: center; gap: 5px; }
-.dropdown-content { display: none; position: absolute; right: 0; background-color: var(--card-background); min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 8px; overflow: hidden; }
-.dropdown-content a { color: var(--text-color); padding: 12px 16px; text-decoration: none; display: block; }
+.dropdown-content { display: none; position: absolute; right: 0; background-color: var(--card-background); min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); }
+.dropdown-content a { color: var(--text-color); padding: 12px 16px; text-decoration: none; display: block; font-size: 15px; }
 .dropdown-content a:hover { background-color: var(--input-background); }
 #profile-dropdown.open .dropdown-content { display: block; }
 
 /* ====================
    3. СТРАНИЦА ЛОГИНА
    ==================== */
-.login-page-body { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+.login-page-body { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
 .login-modal-card { display: grid; grid-template-columns: 300px 1fr; max-width: 800px; width: 100%; background: var(--card-background); border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); overflow: hidden; }
 .login-modal-image-side { background: var(--input-background); padding: 40px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .login-modal-form-side { padding: 40px; }
@@ -85,6 +87,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .submit-btn.primary { background-color: var(--primary-color); color: white; }
 .submit-btn.secondary { background-color: var(--input-background); color: var(--text-color); border: 1px solid var(--border-color); }
 .submit-btn.secondary:hover { background-color: var(--border-color); }
+.form-message { color: var(--secondary-text-color); font-size: 14px; margin-top: 15px; }
 
 /* Редактор Pell */
 .pell-actionbar-custom { display: flex; padding: 10px; background-color: var(--card-background); border-bottom: 1px solid var(--border-color); }
@@ -98,17 +101,38 @@ input:checked + .slider:before { transform: translateX(20px); }
 .upload-area:hover, .upload-area.active { border-color: var(--primary-color); }
 .upload-instructions p { margin: 0 0 10px 0; }
 #image-preview { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-.form-message { color: var(--secondary-text-color); font-size: 14px; margin-top: 15px; }
 
 /* ====================
-   5. АДАПТИВНОСТЬ
+   5. КАРТОЧКИ СОБЫТИЙ (Главная)
+   ==================== */
+#events { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.event-card-v3 { background: var(--card-background); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s; }
+.event-card-v3:hover { transform: translateY(-5px); }
+.card-header { padding: 10px 15px; font-size: 12px; color: var(--secondary-text-color); display: flex; justify-content: space-between; }
+.card-body { display: flex; flex-direction: column; padding: 0 15px 15px 15px; flex-grow: 1; }
+.card-image-link { display: block; margin-bottom: 15px; }
+.card-image-link img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; }
+.card-title-link { text-decoration: none; }
+.card-title-link h3 { margin: 5px 0; color: var(--text-color); font-size: 18px; }
+.card-description { font-size: 14px; color: var(--secondary-text-color); flex-grow: 1; margin-bottom: 10px; }
+.card-author { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.card-author img { width: 24px; height: 24px; border-radius: 50%; }
+.card-footer { border-top: 1px solid var(--border-color); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; }
+.card-actions { display: flex; gap: 15px; }
+.action-btn { background: none; border: none; display: flex; align-items: center; gap: 5px; color: var(--secondary-text-color); cursor: pointer; }
+.action-btn svg { width: 20px; height: 20px; fill: var(--secondary-text-color); }
+.action-btn.active svg { fill: red; }
+.card-main-link { font-size: 14px; font-weight: bold; }
+
+/* ====================
+   6. АДАПТИВНОСТЬ
    ==================== */
 @media (max-width: 900px) {
     .form-grid-container { grid-template-columns: 1fr; }
 }
 @media (max-width: 768px) {
     .header-container { flex-wrap: wrap; justify-content: space-between; }
-    .search-container { width: 100%; margin: 10px 0 0 0; order: 3; }
+    .search-container { width: 100%; margin: 10px 0 0 0; order: 3; flex-grow: 0; }
     .header-actions { order: 2; }
     .header-logo-link { order: 1; }
     .login-modal-card { grid-template-columns: 1fr; }
