@@ -7,12 +7,51 @@
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
   <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 <body>
 
-<!-- Заглушка для шапки -->
-<header class="header" id="main-header"></header>
+<header class="header">
+  <div class="container header-container">
+    <div class="header-title">
+        <a href="/">
+            <img src="logo.png" alt="Логотип Free Events" class="header-logo">
+        </a>
+    </div>
+    <div class="search-wrapper">
+        <input id="search-input" placeholder="Поиск...">
+        <button class="search-button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21L16.65 16.65" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+    </div>
+
+    <div class="header-theme-switcher">
+    <label class="theme-toggle-label"> <!-- Изменен класс -->
+        <input type="checkbox" id="theme-toggle">
+        <span class="theme-toggle-slider"></span> <!-- Изменен класс -->
+    </label>
+</div>
+
+    <div class="auth-block">
+        <button class="add-event-btn" id="add-event-modal-btn" style="display: none;">Добавить событие</button>
+        <div class="profile-dropdown" id="profile-dropdown" style="display: none;">
+            <button class="profile-trigger" id="profile-trigger">
+                <span id="user-name-display"></span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="profile-menu" id="profile-menu">
+                <a href="/profile.html">Мой профиль</a>
+                <a href="/favorites.html">Мое избранное</a>
+                <a href="/admin.html" id="admin-link" style="display: none;">Панель модерации</a>
+                <!-- Переключатель темы отсюда убран -->
+                <div class="menu-separator"></div>
+                <a href="#" id="logoutBtn">Выйти</a>
+            </div>
+        </div>
+        <a href="/login.html" id="loginBtn">Войти</a>
+    </div>
+  </div>
+</header>
 
 <main class="container">
   <div id="event-detail-container">
@@ -20,14 +59,10 @@
   </div>
 </main>
 
-<!-- Заглушка для подвала -->
-<footer class="footer" id="main-footer"></footer>
+<footer class="footer">© 2026 · Бесплатные события</footer>
 
-<!-- Скрипты -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
 <script src="event.js"></script>
-<script src="script.js"></script> <!-- Наш общий скрипт -->
-
 </body>
 </html>
