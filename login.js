@@ -1,11 +1,19 @@
 // =================================================================
-// СКРИПТ ДЛЯ СТРАНИЦЫ ВХОДА - login.html (САМОСТОЯТЕЛЬНАЯ ВЕРСИЯ)
+// СКРИПТ ДЛЯ СТРАНИЦЫ ВХОДА - login.html (ВЕРСИЯ ДЛЯ СТАНДАРТНОЙ СТРАНИЦЫ)
 // =================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
-
-    // --- 1. Элементы страницы ---
+function initializeLoginPage() {
     const loginForm = document.getElementById('login-form');
+    // Если мы не на странице логина, ничего не делаем
+    if (!loginForm) return;
+
+    // --- Проверка: если пользователь уже вошел, отправляем на главную ---
+    if (currentUser) {
+        window.location.href = '/';
+        return;
+    }
+    
+    // --- Получаем остальные элементы ---
     const registerForm = document.getElementById('register-form');
     const loginMessage = document.getElementById('login-message');
     const registerMessage = document.getElementById('register-message');
@@ -14,18 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const googleLoginBtnLogin = document.getElementById('google-login-btn-login');
     const googleLoginBtnRegister = document.getElementById('google-login-btn-register');
 
-    // --- 2. Инициализация Supabase (ТОЛЬКО для этой страницы) ---
-    // Эта страница особенная, она не использует script.js
-    const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // --- Обработчики событий ---
 
-        }
-    });
-    
-    // --- 4. Обработчики событий ---
-
-    // Переключение между формами
     toggleToRegisterBtn.addEventListener('click', (e) => {
         e.preventDefault();
         loginForm.style.display = 'none';
@@ -38,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.style.display = 'block';
     });
 
-    // Вход через Google
     const handleGoogleLogin = async () => {
         await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
@@ -48,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
     googleLoginBtnLogin.addEventListener('click', handleGoogleLogin);
     googleLoginBtnRegister.addEventListener('click', handleGoogleLogin);
 
-    // Регистрация
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const submitButton = registerForm.querySelector('button[type="submit"]');
@@ -66,24 +62,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 options: { data: { full_name: name } }
             });
             if (error) throw error;
-            if (data.user && data.user.identities && data.user.identities.length === 0) {
-                 registerMessage.textContent = '✅ Успешно! Пожалуйста, проверьте вашу почту для подтверждения регистрации.';
-                 registerMessage.style.color = '#2ecc71';
+            if (data.user && data.user.identities.length === 0) {
+                 registerMessage.textContent = '✅ Успешно! Проверьте вашу почту для подтверждения.';
+                 registerMessage.style.color = 'var(--success-color)';
             } else {
-                registerMessage.textContent = '✅ Успешно! Перенаправляем на главную...';
-                registerMessage.style.color = '#2ecc71';
+                registerMessage.textContent = '✅ Успешно! Входим...';
+                registerMessage.style.color = 'var(--success-color)';
                 setTimeout(() => { window.location.href = '/'; }, 1500);
             }
         } catch (error) {
-            // ИСПРАВЛЕНО: Убран лишний обратный слэш
             registerMessage.textContent = `Ошибка: ${error.message}`;
-            registerMessage.style.color = '#e74c3c';
+            registerMessage.style.color = 'var(--error-color)';
         } finally {
             submitButton.disabled = false;
         }
     });
 
-    // Вход
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const submitButton = loginForm.querySelector('button[type="submit"]');
@@ -98,11 +92,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (error) throw error;
             window.location.href = '/';
         } catch (error) {
-            // ИСПРАВЛЕНО: Убран лишний обратный слэш
             loginMessage.textContent = `Ошибка: ${error.message}`;
-            loginMessage.style.color = '#e74c3c';
+            loginMessage.style.color = 'var(--error-color)';
         } finally {
             submitButton.disabled = false;
         }
     });
-});
+}
+
+// Запускаемся только после того, как script.js подготовил шапку
+document.addEventListener('headerLoaded', initializeLoginPage);
