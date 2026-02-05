@@ -87,12 +87,6 @@ async function loadEventDataForEdit(eventId, editor) {
     document.getElementById('event-category').value = event.category_id;
     document.getElementById('event-date').value = event.event_date;
     document.getElementById('event-city').value = event.city || '';
-    
-    // Показываем предпросмотр, если есть картинка
-    if(event.image_url) {
-        document.getElementById('image-preview').src = event.image_url;
-        document.getElementById('image-preview').style.display = 'block';
-    }
 }
 
 async function handleFormSubmit(e, eventId, editor) {
