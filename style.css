@@ -27,27 +27,43 @@ body {
     margin: 0;
     transition: background-color 0.2s, color 0.2s;
 }
+a { color: var(--primary-color); text-decoration: none; }
+a:hover { text-decoration: underline; }
 .container { max-width: 960px; margin: 0 auto; padding: 20px 15px; }
 
 /* ====================
    2. ШАПКА (HEADER)
    ==================== */
-header { background-color: var(--card-background); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
-.header-container { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; padding-bottom: 10px; }
-.header-logo { height: 40px; }
-.search-container { flex-grow: 1; margin: 0 20px; max-width: 500px; }
-.search-container input { width: 100%; padding: 10px 15px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--input-background); }
+header { background-color: var(--card-background); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000; }
+.header-container { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; max-width: 960px; margin: 0 auto; }
+.header-logo { height: 40px; display: block; }
+.search-container { flex-grow: 1; margin: 0 20px; max-width: 500px; position: relative; }
+.search-container input { width: 100%; padding: 10px 15px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--input-background); font-size: 15px; }
+.search-button { display: none; }
 .header-actions { display: flex; align-items: center; gap: 15px; }
-/* ... (другие стили для профиля, переключателя темы, кнопок) ... */
+.add-event-btn, .login-btn { background-color: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+.theme-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.theme-switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 24px; transition: .4s; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .4s; }
+input:checked + .slider { background-color: var(--primary-color); }
+input:checked + .slider:before { transform: translateX(20px); }
+#profile-dropdown { position: relative; }
+#profile-trigger { cursor: pointer; display: flex; align-items: center; gap: 5px; }
+.dropdown-content { display: none; position: absolute; right: 0; background-color: var(--card-background); min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 8px; overflow: hidden; }
+.dropdown-content a { color: var(--text-color); padding: 12px 16px; text-decoration: none; display: block; }
+.dropdown-content a:hover { background-color: var(--input-background); }
+#profile-dropdown.open .dropdown-content { display: block; }
 
 /* ====================
    3. СТРАНИЦА ЛОГИНА
    ==================== */
 .login-page-body { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
 .login-modal-card { display: grid; grid-template-columns: 300px 1fr; max-width: 800px; width: 100%; background: var(--card-background); border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); overflow: hidden; }
-.login-modal-image-side { background: var(--input-background); padding: 40px; text-align: center; }
+.login-modal-image-side { background: var(--input-background); padding: 40px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .login-modal-form-side { padding: 40px; }
-.google-btn { display: flex; align-items: center; justify-content: center; width: 100%; /*...*/ }
+.google-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; }
+.google-btn img { width: 20px; height: 20px; margin-right: 10px; }
 .divider { display: flex; align-items: center; text-align: center; color: #aaa; margin: 20px 0; }
 .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
 .divider:not(:empty)::before { margin-right: .5em; }
@@ -60,27 +76,29 @@ header { background-color: var(--card-background); border-bottom: 1px solid var(
 .main-column, .side-column { display: flex; flex-direction: column; gap: 24px; }
 .form-card-main, .form-card-aside { background-color: var(--card-background); padding: 24px; border-radius: 16px; border: 1px solid var(--border-color); }
 .form-card-main { padding: 32px; }
-.form-card-aside h4 { margin-top: 0; font-size: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px; }
+.form-card-aside h4 { margin-top: 0; font-size: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px; font-weight: 600; }
 .input-group { margin-bottom: 24px; }
-.input-group label { display: block; font-size: 14px; margin-bottom: 8px; }
+.input-group label { display: block; font-size: 14px; margin-bottom: 8px; font-weight: 500; }
 .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--input-background); color: var(--text-color); font-size: 15px; }
 .input-group input:focus, .input-group select:focus, .input-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px var(--primary-color-light); }
 .submit-btn { width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
 .submit-btn.primary { background-color: var(--primary-color); color: white; }
 .submit-btn.secondary { background-color: var(--input-background); color: var(--text-color); border: 1px solid var(--border-color); }
+.submit-btn.secondary:hover { background-color: var(--border-color); }
 
-/* Стили для редактора */
+/* Редактор Pell */
 .pell-actionbar-custom { display: flex; padding: 10px; background-color: var(--card-background); border-bottom: 1px solid var(--border-color); }
 .pell-button-custom { border: none; cursor: pointer; background: transparent; color: var(--text-color); font-size: 16px; width: 36px; height: 36px; margin-right: 5px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
 .pell-button-custom:hover { background-color: var(--input-background); }
 .pell-button-selected { background-color: var(--primary-color-light) !important; color: var(--primary-color) !important; }
 .pell-content { min-height: 250px; padding: 15px; background: var(--input-background); color: var(--text-color); outline: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
 
-/* Стили для загрузчика */
-.upload-area { border: 2px dashed var(--border-color); border-radius: 12px; min-height: 150px; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer; position: relative; overflow: hidden; }
+/* Загрузчик изображений */
+.upload-area { border: 2px dashed var(--border-color); border-radius: 12px; min-height: 150px; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer; position: relative; overflow: hidden; transition: border-color 0.2s; }
 .upload-area:hover, .upload-area.active { border-color: var(--primary-color); }
 .upload-instructions p { margin: 0 0 10px 0; }
 #image-preview { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+.form-message { color: var(--secondary-text-color); font-size: 14px; margin-top: 15px; }
 
 /* ====================
    5. АДАПТИВНОСТЬ
@@ -89,8 +107,10 @@ header { background-color: var(--card-background); border-bottom: 1px solid var(
     .form-grid-container { grid-template-columns: 1fr; }
 }
 @media (max-width: 768px) {
-    .header-container { flex-wrap: wrap; }
+    .header-container { flex-wrap: wrap; justify-content: space-between; }
     .search-container { width: 100%; margin: 10px 0 0 0; order: 3; }
+    .header-actions { order: 2; }
+    .header-logo-link { order: 1; }
     .login-modal-card { grid-template-columns: 1fr; }
     .login-modal-image-side { display: none; }
 }
