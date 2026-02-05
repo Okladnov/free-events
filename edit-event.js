@@ -55,18 +55,6 @@ const editor = pell.init({
         await loadEventDataForEdit(eventId, editor);
     }
 
-    // 2. ОБРАБОТЧИК ПРЕДПРОСМОТРА КАРТИНКИ
-    document.getElementById('preview-btn').addEventListener('click', () => {
-        const imageUrl = document.getElementById('event-image-url').value;
-        const preview = document.getElementById('image-preview');
-        if (imageUrl) {
-            preview.src = imageUrl;
-            preview.style.display = 'block';
-        } else {
-            preview.style.display = 'none';
-        }
-    });
-
     document.getElementById('event-form').addEventListener('submit', (e) => handleFormSubmit(e, eventId, editor));
 });
 
