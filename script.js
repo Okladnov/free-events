@@ -1,12 +1,12 @@
 // =================================================================
-// ГЛОБАЛЬНЫЙ СКРИПТ УПРАВЛЕНИЯ САЙТОМ (script.js) - ФИНАЛЬНАЯ ВЕРСИЯ
+// ГЛОБАЛЬНЫЙ СКРИПТ УПРАВЛЕНИЯ САЙТОМ (script.js) - ВЕРСИЯ С AUTH LISTENER
 // =================================================================
 
 const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const currentUser = JSON.parse(localStorage.getItem('user'));
+// УБРАЛИ currentUser отсюда, он будет определяться динамически
 
 async function loadComponent(elementId, filePath) {
     const element = document.getElementById(elementId);
@@ -18,11 +18,15 @@ async function loadComponent(elementId, filePath) {
         element.innerHTML = data;
     } catch (error) {
         console.error(`Ошибка при загрузке компонента ${filePath}:`, error);
-        element.innerHTML = `<p style="text-align:center; color:red;">Ошибка загрузки блока</p>`;
+        element.innerHTML = `<p style="text-align:center; color:red;">Ошибка загрузки</p>`;
     }
 }
 
-function initializeHeader() {
+// ИЗМЕНЕНИЕ: Теперь функция принимает user как аргумент
+function initializeHeader(user) {
+    // Эта переменная теперь локальная для функции
+    const currentUser = user; 
+    
     const addEventBtn = document.getElementById('add-event-modal-btn');
     const profileDropdown = document.getElementById('profile-dropdown');
     const loginBtn = document.getElementById('loginBtn');
@@ -45,7 +49,7 @@ function initializeHeader() {
             logoutBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 await supabaseClient.auth.signOut();
-                localStorage.removeItem('user');
+                localStorage.removeItem('user'); // На всякий случай
                 window.location.href = '/login.html';
             });
         }
@@ -79,21 +83,39 @@ function initializeHeader() {
     }
 }
 
-// --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
 document.addEventListener("DOMContentLoaded", async () => {
-    // Проверяем, на странице логина ли мы. Если да - ничего не делаем.
-    if (document.body.classList.contains('login-page-body')) {
-        document.dispatchEvent(new CustomEvent('headerLoaded'));
-        return; 
-    }
-
-    // Если нет, работаем как обычно.
+    // Мы больше не вызываем initializeHeader() здесь,
+    // но продолжаем загружать компоненты
     await loadComponent('main-header', 'header.html');
-    initializeHeader();
     await loadComponent('main-footer', 'footer.html');
     
-    document.dispatchEvent(new CustomEvent('headerLoaded'));
+    // "Кричим", что HTML-каркас готов.
+    // Это нужно, чтобы onAuthStateChange не сработал раньше, чем появится #main-header
+    document.dispatchEvent(new CustomEvent('htmlComponentsLoaded'));
 });
+
+// НОВЫЙ ПОДХОД: Слушаем изменения состояния аутентификации
+// Ждем, пока загрузятся HTML-компоненты
+document.addEventListener('htmlComponentsLoaded', () => {
+    // Теперь вешаем слушатель Supabase
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        const user = session ? session.user : null;
+        
+        // ВАЖНО: обновляем глобальную переменную для других скриптов
+        window.currentUser = user; 
+        
+        if (user) {
+          // Также сохраняем в localStorage, чтобы при F5 не было "мигания"
+          localStorage.setItem('user', JSON.stringify(user));
+        } else {
+          localStorage.removeItem('user');
+        }
+
+        // Вызываем настройку шапки с актуальным пользователем
+        initializeHeader(user);
+    });
+});
+
 
 function sanitizeHTML(text) {
     const temp = document.createElement('div');
