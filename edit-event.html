@@ -11,22 +11,20 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 <body>
-    
     <header>
         <div class="container header-container">
             <a href="/" class="header-logo-link"><img src="logo.png" alt="Логотип Free Events" class="header-logo"></a>
-            <div class="search-container" style="display: none;"></div>
+            <div class="search-container">
+                <input id="search-input" placeholder="Поиск...">
+                <button class="search-button"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg></button>
+            </div>
             <div class="header-actions">
                 <button id="add-event-modal-btn" class="add-event-btn" style="display: none;">+ Добавить</button>
-                <div class="theme-switch-wrapper">
-                    <label class="theme-switch" for="theme-toggle"><input type="checkbox" id="theme-toggle" /><div class="slider round"></div></label>
-                </div>
+                <div class="theme-switch-wrapper"><label class="theme-switch" for="theme-toggle"><input type="checkbox" id="theme-toggle" /><div class="slider round"></div></label></div>
                 <a href="/login.html" id="loginBtn" class="login-btn">Войти</a>
                 <div id="profile-dropdown" style="display: none;">
                     <div id="profile-trigger" class="profile-avatar"><span id="user-name-display">Профиль</span> <span class="arrow-down">▼</span></div>
-                    <div class="dropdown-content">
-                        <a href="/profile.html">Мой профиль</a><a href="/admin.html" id="admin-link" style="display: none;">Админка</a><a href="#" id="logoutBtn">Выйти</a>
-                    </div>
+                    <div class="dropdown-content"><a href="/profile.html">Мой профиль</a><a href="/admin.html" id="admin-link" style="display: none;">Админка</a><a href="#" id="logoutBtn">Выйти</a></div>
                 </div>
             </div>
         </div>
@@ -34,26 +32,14 @@
 
     <main class="container">
         <form id="event-form" class="form-grid-container">
-            <!-- ЛЕВАЯ КОЛОНКА -->
             <div class="main-column">
                 <div class="form-card-main">
                     <h2 id="form-title">Добавление нового события</h2>
-                    <div class="input-group">
-                        <label for="event-title">Название *</label>
-                        <input type="text" id="event-title" required placeholder="Например, Бесплатный вебинар по Python">
-                    </div>
-                    <div class="input-group">
-                        <label for="event-link">Ссылка на источник/регистрацию</label>
-                        <input type="url" id="event-link" placeholder="https://t.me/free_events/123">
-                    </div>
-                    <div class="input-group">
-                        <label for="event-description">Описание</label>
-                        <div id="editor-container"></div>
-                    </div>
+                    <div class="input-group"><label for="event-title">Название *</label><input type="text" id="event-title" required placeholder="Например, Бесплатный вебинар по Python"></div>
+                    <div class="input-group"><label for="event-link">Ссылка на источник/регистрацию</label><input type="url" id="event-link" placeholder="https://t.me/free_events/123"></div>
+                    <div class="input-group"><label for="event-description">Описание</label><div id="editor-container"></div></div>
                 </div>
             </div>
-
-            <!-- ПРАВАЯ КОЛОНКА -->
             <div class="side-column">
                 <div class="form-card-aside">
                     <h4>Публикация</h4>
@@ -62,31 +48,30 @@
                 </div>
                 <div class="form-card-aside">
                     <h4>Параметры</h4>
-                    <div class="input-group">
-                        <label for="event-date">Дата</label>
-                        <input type="date" id="event-date">
-                    </div>
-                    <div class="input-group">
-                        <label for="event-city">Город</label>
-                        <input type="text" id="event-city" placeholder="Онлайн">
-                    </div>
-                    <div class="input-group">
-                        <label for="event-category">Категория *</label>
-                        <select id="event-category" required></select>
-                    </div>
+                    <div class="input-group"><label for="event-date">Дата</label><input type="date" id="event-date"></div>
+                    <div class="input-group"><label for="event-city">Город</label><input type="text" id="event-city" placeholder="Онлайн"></div>
+                    <div class="input-group"><label for="event-category">Категория *</label><select id="event-category" required></select></div>
                 </div>
                 <div class="form-card-aside">
-    <h4>Изображение</h4>
-    <div class="input-group" style="margin-bottom: 0;"> <!-- Убираем нижний отступ -->
-         <label for="event-image-url">URL картинки</label>
-         <input type="url" id="event-image-url" placeholder="https://.../image.png">
-    </div>
+                    <h4>Изображение</h4>
+                    <div class="image-uploader" id="image-uploader">
+                        <div class="upload-area" id="upload-area">
+                            <img id="image-preview" src="" alt="Предпросмотр" style="display: none;">
+                            <div class="upload-instructions" id="upload-instructions">
+                                <p>Перетащите файл сюда или</p>
+                                <button type="button" class="submit-btn secondary">Выберите файл</button>
+                            </div>
+                        </div>
+                        <input type="file" id="image-file-input" accept="image/png, image/jpeg, image/webp" style="display: none;">
+                    </div>
+                    <input type="text" id="event-image-url" placeholder="Или вставьте URL" style="margin-top: 10px;">
                 </div>
             </div>
         </form>
     </main>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
     <script src="app.js"></script>
     <script src="edit-event.js"></script>
 </body>
