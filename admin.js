@@ -54,11 +54,14 @@ async function loadUnapprovedEvents() {
         eventCard.className = 'admin-event-card'; // Можешь добавить стили для этого класса в style.css
         
         eventCard.innerHTML = `
-            <h4>${sanitizeHTML(event.title)}</h4>
-            <p>${sanitizeHTML(event.description) || 'Нет описания.'}</p>
-            <p><a href="event.html?id=${event.id}" target="_blank">Посмотреть на детальной странице →</a></p>
-            <button onclick="approveEvent(${event.id}, this)">Одобрить</button>
-        `;
+    <h4>${sanitizeHTML(event.title)}</h4>
+    <p>${sanitizeHTML(event.description) || 'Нет описания.'}</p>
+    <p><a href="event.html?id=${event.id}" target="_blank">Посмотреть на детальной странице →</a></p>
+    <div class="admin-actions">
+        <button data-action="approve" data-event-id="${event.id}">Одобрить</button>
+        <button data-action="delete" data-event-id="${event.id}" class="danger-btn">Удалить</button>
+    </div>
+`;
         unapprovedContainer.appendChild(eventCard);
     });
 }
