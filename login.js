@@ -1,5 +1,5 @@
 // =================================================================
-// СКРИПТ ДЛЯ СТРАНИЦЫ ВХОДА - login.html (ПОЛНОСТЬЮ АВТОНОМНАЯ ВЕРСИЯ)
+// СКРИПТ ДЛЯ СТРАНИЦЫ ВХОДА - login.html (ИСПРАВЛЕННАЯ АВТОНОМНАЯ ВЕРСИЯ)
 // =================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 1. Инициализация Supabase (ТОЛЬКО для этой страницы) ---
     const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
     const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
-    // Используем имя 'supabase', как в твоем рабочем коде.
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    // ИСПРАВЛЕНО: Вызываем createClient из глобального объекта supabase
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // --- 2. Элементы страницы ---
     const loginForm = document.getElementById('login-form');
@@ -19,16 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleToLoginBtn = document.getElementById('toggle-to-login-btn');
     
     // --- 3. Проверка сессии ---
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
         if (session) {
             window.location.href = '/';
         }
     });
     
-    // --- 4. ТВОЙ РАБОЧИЙ КОД ---
-    // Обработчик входа через Google
+    // --- 4. Обработчик входа через Google ---
     async function signInWithGoogle() {
-        await supabase.auth.signInWithOAuth({
+        // Используем наш локально созданный supabaseClient
+        await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
             options: {
                 redirectTo: window.location.origin
@@ -52,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.style.display = 'block';
     });
     
-    // ... (код для регистрации и входа по email/паролю, использующий 'supabase')
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const registerMessage = document.getElementById('register-message');
@@ -65,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('register-password').value;
 
         try {
-            const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } });
+            const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } });
             if (error) throw error;
             if (data.user && data.user.identities.length === 0) {
                  registerMessage.textContent = '✅ Успешно! Проверьте вашу почту для подтверждения.';
@@ -91,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('login-password').value;
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) throw error;
             window.location.href = '/';
         } catch (error) {
