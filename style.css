@@ -294,9 +294,239 @@ body.dark-theme .card-description { color: #ccc; }
     margin-left: .5em;
 }
 /* Делаем шапку шире, если нет поиска */
-.hide-search .header-container {
-    justify-content: space-between;
 }
-.hide-search .header-logo-link {
-    flex-grow: 1; /* Позволяет лого занимать больше места */
+/* --- Стили для страницы создания/редактирования --- */
+.form-grid-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Левая колонка в 2 раза шире правой */
+    gap: 30px;
+    margin-top: 30px;
+}
+.main-column, .side-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.form-card-wide {
+    background-color: var(--card-background);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.form-card-wide h4 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+.submit-btn.secondary {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+.submit-btn.secondary:hover {
+    background-color: var(--input-background);
+}
+
+/* --- Стили для редактора Pell --- */
+#editor-container .pell {
+/* --- Стили для КАСТОМНОГО редактора Pell --- */
+.pell-actionbar-custom {
+    display: flex;
+    padding: 10px;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: none;
+    border-bottom: 1px solid var(--border-color);
+}
+#editor-container .pell-content {
+    background-color: var(--input-background);
+.pell-button-custom {
+    border: none;
+    cursor: pointer;
+    background-color: transparent;
+    color: var(--text-color);
+    min-height: 200px;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    width: 36px;
+    height: 36px;
+    margin-right: 5px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+#editor-container .pell-actionbar {
+    background-color: var(--card-background);
+    border-bottom: 1px solid var(--border-color);
+.pell-button-custom:hover {
+    background-color: var(--input-background);
+}
+#editor-container .pell-button-selected {
+    background-color: var(--primary-color-light);
+.pell-button-selected {
+    background-color: var(--primary-color-light) !important;
+    color: var(--primary-color) !important;
+}
+.pell-content { /* Этот класс остается без изменений */
+    min-height: 250px;
+    padding: 15px;
+    background: var(--input-background);
+    color: var(--text-color);
+    outline: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 900px) {
+    .form-grid-container {
+        grid-template-columns: 1fr; /* Все в одну колонку */
+    }
+}
+/* --- СТИЛИ ДЛЯ СТРАНИЦЫ РЕДАКТИРОВАНИЯ (ANTI-80s) --- */
+
+.form-grid-container {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); /* Левая колонка гибкая, но в 2 раза шире */
+    gap: 30px;
+    margin-top: 30px;
+    padding-bottom: 50px;
+}
+
+/* Стили для колонок */
+.main-column, .side-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px; /* Расстояние между блоками в колонках */
+}
+
+/* Главная карточка в левой колонке */
+.form-card-main {
+    background-color: var(--card-background);
+    padding: 32px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+}
+
+.form-card-main h2 {
+    margin-top: 0;
+    font-size: 28px;
+}
+
+/* Карточки в правой колонке (сайдбаре) */
+.form-card-aside {
+    background-color: var(--card-background);
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+}
+
+.form-card-aside h4 {
+    margin-top: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+}
+
+/* Общие стили для полей ввода */
+.input-group {
+    margin-bottom: 24px;
+}
+.input-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+.input-group input[type="text"],
+.input-group input[type="url"],
+.input-group input[type="date"],
+.input-group select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--input-background);
+    color: var(--text-color);
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-group input:focus, .input-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-light);
+}
+
+/* Стили для кнопок */
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+.submit-btn.primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+.submit-btn.secondary {
+    background-color: var(--input-background);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+.submit-btn.secondary:hover {
+    background-color: var(--border-color);
+}
+
+/* Предпросмотр картинки */
+#image-preview {
+    width: 100%;
+    margin-top: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+/* --- Стили для редактора Pell (улучшенные) --- */
+#editor-container .pell {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-background);
+    box-shadow: none;
+}
+#editor-container .pell-content {
+    min-height: 250px;
+    padding: 15px;
+    background: var(--input-background);
+    color: var(--text-color);
+    outline: none;
+}
+#editor-container .pell-actionbar {
+    background: var(--card-background);
+    border-bottom: 1px solid var(--border-color);
+}
+#editor-container .pell-button-selected {
+    background-color: var(--primary-color-light);
+}
+
+/* --- Адаптивность --- */
+@media (max-width: 900px) {
+    .form-grid-container {
+        grid-template-columns: 1fr; /* Одна колонка на мобилках */
+    }
+    .form-card-main {
+        padding: 24px;
+    }
 }
