@@ -328,25 +328,44 @@ body.dark-theme .card-description { color: #ccc; }
     background-color: var(--input-background);
 }
 
-/* --- Стили для редактора Pell --- */
-#editor-container .pell {
-    background-color: var(--card-background);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-shadow: none;
-}
-#editor-container .pell-content {
-    background-color: var(--input-background);
-    color: var(--text-color);
-    min-height: 200px;
-    padding: 15px;
-}
-#editor-container .pell-actionbar {
+/* --- Стили для КАСТОМНОГО редактора Pell --- */
+.pell-actionbar-custom {
+    display: flex;
+    padding: 10px;
     background-color: var(--card-background);
     border-bottom: 1px solid var(--border-color);
 }
-#editor-container .pell-button-selected {
-    background-color: var(--primary-color-light);
+.pell-button-custom {
+    border: none;
+    cursor: pointer;
+    background-color: transparent;
+    color: var(--text-color);
+    font-size: 16px;
+    font-weight: bold;
+    width: 36px;
+    height: 36px;
+    margin-right: 5px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+.pell-button-custom:hover {
+    background-color: var(--input-background);
+}
+.pell-button-selected {
+    background-color: var(--primary-color-light) !important;
+    color: var(--primary-color) !important;
+}
+.pell-content { /* Этот класс остается без изменений */
+    min-height: 250px;
+    padding: 15px;
+    background: var(--input-background);
+    color: var(--text-color);
+    outline: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 /* Адаптивность для мобильных */
