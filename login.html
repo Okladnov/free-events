@@ -8,71 +8,77 @@
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
-<body>
+<!-- ДОБАВЛЕНА МЕТКА 'login-page-body' -->
+<body class="login-page-body">
 
-    <!-- Шапка будет вставлена сюда скриптом -->
-    <header class="header" id="main-header"></header>
+    <!-- Используем старый, красивый макет модального окна -->
+    <div class="login-modal-container">
+        <div class="login-modal-card">
+            <div class="login-modal-image-side">
+                <img src="logo.png" alt="Логотип Free Events" class="login-modal-logo">
+                <h2>Добро пожаловать!</h2>
+                <p>Сообщество для поиска бесплатных событий.</p>
+            </div>
+            <div class="login-modal-form-side">
+                
+                <!-- Форма входа -->
+                <form id="login-form">
+                    <h2>Вход</h2>
+                    <p class="form-subtitle">Рады видеть вас снова!</p>
+                    <div class="google-btn-container">
+                        <button type="button" class="google-btn" id="google-login-btn-login">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+                            <span>Войти через Google</span>
+                        </button>
+                    </div>
+                    <div class="divider"><span>ИЛИ</span></div>
+                    <div class="input-group">
+                        <label for="login-email">Email</label>
+                        <input id="login-email" type="email" placeholder="you@example.com" required autocomplete="email">
+                    </div>
+                    <div class="input-group">
+                        <label for="login-password">Пароль</label>
+                        <input id="login-password" type="password" placeholder="••••••••" required autocomplete="current-password">
+                    </div>
+                    <p id="login-message" class="form-message"></p>
+                    <button type="submit" class="submit-btn primary">Войти</button>
+                    <button type="button" class="submit-btn secondary" id="toggle-to-register-btn">Создать новый аккаунт</button>
+                </form>
 
-    <main class="container">
-        <!-- Оборачиваем все в специальный контейнер для логина -->
-        <div class="login-container-normal">
-            
-            <!-- Форма входа -->
-            <form id="login-form" class="auth-form">
-                <h2>Вход</h2>
-                <p class="form-subtitle">Рады видеть вас снова!</p>
-                <button type="button" class="google-btn" id="google-login-btn-login">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
-                    <span>Войти через Google</span>
-                </button>
-                <div class="divider"><span>ИЛИ</span></div>
-                <div class="input-group">
-                    <label for="login-email">Email</label>
-                    <input id="login-email" type="email" placeholder="you@example.com" required autocomplete="email">
-                </div>
-                <div class="input-group">
-                    <label for="login-password">Пароль</label>
-                    <input id="login-password" type="password" placeholder="••••••••" required autocomplete="current-password">
-                </div>
-                <p id="login-message" class="form-message"></p>
-                <button type="submit" class="submit-btn primary">Войти</button>
-                <p class="toggle-form-text">Нет аккаунта? <a href="#" id="toggle-to-register-btn">Зарегистрироваться</a></p>
-            </form>
-
-            <!-- Форма регистрации (скрыта) -->
-            <form id="register-form" class="auth-form" style="display: none;">
-                <h2>Регистрация</h2>
-                <p class="form-subtitle">Присоединяйтесь к нашему сообществу!</p>
-                 <button type="button" class="google-btn" id="google-login-btn-register">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
-                    <span>Войти через Google</span>
-                </button>
-                <div class="divider"><span>ИЛИ</span></div>
-                <div class="input-group">
-                    <label for="register-name">Имя</label>
-                    <input id="register-name" type="text" placeholder="Ваше имя" required autocomplete="name">
-                </div>
-                <div class="input-group">
-                    <label for="register-email">Email</label>
-                    <input id="register-email" type="email" placeholder="you@example.com" required autocomplete="email">
-                </div>
-                <div class="input-group">
-                    <label for="register-password">Пароль</label>
-                    <input id="register-password" type="password" placeholder="••••••••" required autocomplete="new-password">
-                </div>
-                <p id="register-message" class="form-message"></p>
-                <button type="submit" class="submit-btn primary">Создать аккаунт</button>
-                <p class="toggle-form-text">Уже есть аккаунт? <a href="#" id="toggle-to-login-btn">Войти</a></p>
-            </form>
+                <!-- Форма регистрации (скрыта) -->
+                <form id="register-form" style="display: none;">
+                    <h2>Регистрация</h2>
+                    <p class="form-subtitle">Присоединяйтесь к нам!</p>
+                    <div class="google-btn-container">
+                        <button type="button" class="google-btn" id="google-login-btn-register">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+                            <span>Войти через Google</span>
+                        </button>
+                    </div>
+                    <div class="divider"><span>ИЛИ</span></div>
+                    <div class="input-group">
+                        <label for="register-name">Имя</label>
+                        <input id="register-name" type="text" placeholder="Ваше имя" required autocomplete="name">
+                    </div>
+                    <div class="input-group">
+                        <label for="register-email">Email</label>
+                        <input id="register-email" type="email" placeholder="you@example.com" required autocomplete="email">
+                    </div>
+                    <div class="input-group">
+                        <label for="register-password">Пароль</label>
+                        <input id="register-password" type="password" placeholder="••••••••" required autocomplete="new-password">
+                    </div>
+                    <p id="register-message" class="form-message"></p>
+                    <button type="submit" class="submit-btn primary">Создать аккаунт</button>
+                    <button type="button" class="submit-btn secondary" id="toggle-to-login-btn">Уже есть аккаунт? Войти</button>
+                </form>
+            </div>
         </div>
-    </main>
+    </div>
 
-    <!-- Подвал будет вставлен сюда скриптом -->
-    <footer class="footer" id="main-footer"></footer>
-
-    <!-- Подключаем и Supabase, и ОБА наших скрипта -->
+    <!-- УБРАЛИ script.js, ОСТАВИЛИ ТОЛЬКО login.js -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js"></script>
     <script src="login.js"></script>
+
 </body>
 </html>
