@@ -300,3 +300,63 @@ body.dark-theme .card-description { color: #ccc; }
 .hide-search .header-logo-link {
     flex-grow: 1; /* Позволяет лого занимать больше места */
 }
+/* --- Стили для страницы создания/редактирования --- */
+.form-grid-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Левая колонка в 2 раза шире правой */
+    gap: 30px;
+    margin-top: 30px;
+}
+.main-column, .side-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.form-card-wide {
+    background-color: var(--card-background);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.form-card-wide h4 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+.submit-btn.secondary {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+.submit-btn.secondary:hover {
+    background-color: var(--input-background);
+}
+
+/* --- Стили для редактора Pell --- */
+#editor-container .pell {
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: none;
+}
+#editor-container .pell-content {
+    background-color: var(--input-background);
+    color: var(--text-color);
+    min-height: 200px;
+    padding: 15px;
+}
+#editor-container .pell-actionbar {
+    background-color: var(--card-background);
+    border-bottom: 1px solid var(--border-color);
+}
+#editor-container .pell-button-selected {
+    background-color: var(--primary-color-light);
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 900px) {
+    .form-grid-container {
+        grid-template-columns: 1fr; /* Все в одну колонку */
+    }
+}
