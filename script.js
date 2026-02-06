@@ -250,8 +250,9 @@ async function loadEvents(isNewSearch = false) {
             if(orgPlaceholder) orgPlaceholder.classList.add('hidden');
         }
 
-        const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
-        const authorAvatar = event.profiles ? event.profiles.avatar_url : 'https://placehold.co/24x24/f0f2f5/ccc';
+        // Автор
+        const authorName = (event.profiles && event.profiles.full_name) ? event.profiles.full_name : 'Аноним';
+        const authorAvatar = (event.profiles && event.profiles.avatar_url) ? event.profiles.avatar_url : 'https://placehold.co/24x24/f0f2f5/ccc';
         cardClone.querySelector('.card-author-name').textContent = authorName;
         cardClone.querySelector('.card-author-avatar').src = authorAvatar;
 
