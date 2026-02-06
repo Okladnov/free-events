@@ -407,7 +407,7 @@ body.dark-theme .admin-event-card:hover {
 /* Фон и рамка всего меню */
 .profile-menu {
     padding: 8px;
-    background-color: var(--card-background); /* Фон всей плашки меню */
+    background-color: var(--card-background);
     border: 1px solid var(--border-color);
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     min-width: 200px;
@@ -415,20 +415,21 @@ body.dark-theme .admin-event-card:hover {
 }
 
 /* Стили для каждой ссылки в меню */
-.profile-menu a.profile-menu-item {
-    display: block !important; /* Убеждаемся, что это блочный элемент */
-    padding: 10px 12px !important;
-    font-size: 15px !important;
-    font-weight: 500 !important;
-    color: var(--text-color) !important;
-    background-color: transparent !important;
-    border-radius: 6px !important;
+.profile-menu .profile-menu-item {
+    display: block;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-color);
+    text-decoration: none;
+    background-color: transparent;
+    border-radius: 6px;
     transition: background-color 0.15s ease-in-out;
 }
 
 /* Простой эффект при наведении */
-.profile-menu a.profile-menu-item:hover {
-    background-color: var(--input-background) !important;
+.profile-menu .profile-menu-item:hover {
+    background-color: var(--input-background);
 }
 
 /* Разделитель */
