@@ -5,6 +5,7 @@
 // =================================================================
 // ГЛОБАЛЬНОЕ ПОДКЛЮЧЕНИЕ И НАСТРОЙКИ
 // =================================================================
+
 const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -16,6 +17,7 @@ let isAdmin = false;
 // =================================================================
 // ОБЩИЕ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // =================================================================
+
 function sanitizeHTML(text) {
     if (!text) return '';
     try {
@@ -35,6 +37,7 @@ function sanitizeForAttribute(text) {
 // =================================================================
 // ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ШАПКИ
 // =================================================================
+
 async function initializeHeader() {
     // Безопасно получаем все элементы шапки в одном месте
     const themeToggle = document.getElementById('theme-toggle');
@@ -63,36 +66,43 @@ async function initializeHeader() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     currentUser = session ? session.user : null;
 
-    // 3. Настройка UI в зависимости от сессии
+    // 3. Настройка UI в зависимости от сессии (НОВАЯ ЛОГИКА)
     if (currentUser) {
-        // Пользователь в системе: показываем нужное, скрываем лишнее
-        if (loginBtn) loginBtn.style.display = 'none';
-        if (addEventBtn) addEventBtn.style.display = 'block';
-        if (profileDropdown) profileDropdown.style.display = 'block';
+        // Пользователь в системе: ПОКАЗЫВАЕМ нужные элементы, убирая класс hidden
+        if (addEventBtn) addEventBtn.classList.remove('hidden');
+        if (profileDropdown) profileDropdown.classList.remove('hidden');
 
-        // Получаем и отображаем имя
-        const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single();
+        // Запускаем запросы на получение профиля и статуса админа ПАРАЛЛЕЛЬНО
+        const [profileResponse, adminResponse] = await Promise.all([
+            supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single(),
+            supabaseClient.rpc('is_admin')
+        ]);
+        
+        // Обрабатываем результат запроса профиля
+        if (profileResponse.error) {
+            console.error('Ошибка получения профиля:', profileResponse.error.message);
+        }
         if (userNameDisplay) {
+            const profile = profileResponse.data;
             const name = (profile && profile.full_name) ? profile.full_name : (currentUser.email ? currentUser.email.split('@')[0] : 'Профиль');
             userNameDisplay.textContent = name;
         }
 
-        // Проверяем, админ ли, и показываем ссылку
-        try {
-            const { data: adminStatus } = await supabaseClient.rpc('is_admin');
-            isAdmin = adminStatus;
-            if (isAdmin && adminLink) {
-                adminLink.style.display = 'block';
-            }
-        } catch (e) {
-            isAdmin = false; // Если rpc не сработал, считаем что не админ
+        // Обрабатываем результат запроса на админа
+        if (adminResponse.error) {
+            console.error('Ошибка проверки админа:', adminResponse.error.message);
+            isAdmin = false;
+        } else {
+            isAdmin = adminResponse.data;
+        }
+        
+        if (isAdmin && adminLink) {
+            adminLink.classList.remove('hidden');
         }
 
     } else {
-        // Пользователь - гость
-        if (loginBtn) loginBtn.style.display = 'block';
-        if (addEventBtn) addEventBtn.style.display = 'none';
-        if (profileDropdown) profileDropdown.style.display = 'none';
+        // Пользователь - гость: ПОКАЗЫВАЕМ только кнопку "Войти"
+        if (loginBtn) loginBtn.classList.remove('hidden');
     }
 
     // 4. Настройка обработчиков событий для шапки
@@ -109,6 +119,7 @@ async function initializeHeader() {
         };
     }
 
+    // Открытие/закрытие выпадающего меню профиля
     if (profileTrigger) {
         profileTrigger.onclick = (event) => {
             event.stopPropagation();
@@ -118,6 +129,7 @@ async function initializeHeader() {
         };
     }
     
+    // Закрытие меню по клику вне его
     document.addEventListener('click', (event) => {
         if (profileDropdown && !profileDropdown.contains(event.target)) {
             profileDropdown.classList.remove('open');
