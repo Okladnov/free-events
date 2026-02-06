@@ -1008,16 +1008,21 @@ input:checked + .theme-toggle-slider:before {
    ========================================= */
 
 .modal-overlay {
-  position: fixed; /* Чтобы было поверх всего контента */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* Полупрозрачный черный фон */
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Должно быть выше всех остальных элементов */
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  padding: 20px; /* ДОБАВЬ ЭТО: Отступы для мобильных, чтобы окно не прилипало к краям */
+  box-sizing: border-box; /* ДОБАВЬ ЭТО: Чтобы padding не ломал ширину */
+}
   
   /* Анимация появления */
   opacity: 0;
@@ -1087,4 +1092,24 @@ input:checked + .theme-toggle-slider:before {
 }
 .form-switcher-link button:hover {
   text-decoration: underline;
+}
+/* === ИСПРАВЛЕНИЕ ДЛЯ КАРТОЧКИ ВНУТРИ МОДАЛЬНОГО ОКНА (ДОБАВЬ ЭТОТ БЛОК) === */
+.modal-overlay .login-modal-card {
+  grid-template-columns: 1fr; /* Отменяем двухколоночный макет */
+  max-width: 480px;           /* Делаем окно немного уже, как и положено */
+  width: 100%;                /* Заставляем его занимать доступную ширину */
+}
+/* ========================================================================= */
+.login-modal-card {
+  position: relative;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 10px 30px var(--shadow-color-heavy);
+  border-radius: 16px;
+  background-color: var(--card-background);
+  transform: scale(0.9);
+  transition: transform 0.3s ease-in-out;
+}
+.modal-overlay:not(.hidden) .login-modal-card {
+  transform: scale(1);
 }
