@@ -1,5 +1,5 @@
 // =================================================================
-// app.js - ВЕРСИЯ С МОДАЛЬНЫМ ОКНОМ ВХОДА
+// app.js - ВЕРСИЯ С ИСПРАВЛЕНИЕМ ПЕРЕКЛЮЧАТЕЛЯ ТЕМЫ
 // =================================================================
 
 // =================================================================
@@ -28,7 +28,7 @@ function sanitizeHTML(text) {
 }
 
 // =================================================================
-// ЛОГИКА РАБОТЫ МОДАЛЬНОГО ОКНА (НОВЫЙ БЛОК)
+// ЛОГИКА РАБОТЫ МОДАЛЬНОГО ОКНА
 // =================================================================
 
 function setupLoginModal() {
@@ -39,48 +39,29 @@ function setupLoginModal() {
     const errorMessage = document.getElementById('modal-error-message');
 
     if (!loginModalOverlay || !loginBtn || !closeModalBtn || !loginForm) {
-        return; // Если каких-то элементов нет, ничего не делаем
+        return;
     }
 
-    // Открыть модальное окно
-    loginBtn.addEventListener('click', () => {
-        loginModalOverlay.classList.remove('hidden');
-    });
-
-    // Закрыть модальное окно (по крестику)
-    closeModalBtn.addEventListener('click', () => {
-        loginModalOverlay.classList.add('hidden');
-    });
-
-    // Закрыть модальное окно (по клику на темный фон)
+    loginBtn.addEventListener('click', () => loginModalOverlay.classList.remove('hidden'));
+    closeModalBtn.addEventListener('click', () => loginModalOverlay.classList.add('hidden'));
     loginModalOverlay.addEventListener('click', (event) => {
-        if (event.target === loginModalOverlay) {
-            loginModalOverlay.classList.add('hidden');
-        }
+        if (event.target === loginModalOverlay) loginModalOverlay.classList.add('hidden');
     });
 
-    // Обработка отправки формы входа
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const email = event.target.email.value;
-        errorMessage.style.display = 'none'; // Сначала прячем старую ошибку
+        errorMessage.style.display = 'none';
 
         try {
-            // Отправляем "магическую ссылку" для входа
             const { error } = await supabaseClient.auth.signInWithOtp({
                 email: email,
-                options: {
-                  emailRedirectTo: window.location.origin, // Куда вернется пользователь после клика в письме
-                },
+                options: { emailRedirectTo: window.location.origin },
             });
 
-            if (error) {
-                throw error; // Если Supabase вернул ошибку, пробрасываем ее в catch
-            }
-
-            // Успех!
+            if (error) throw error;
+            
             loginForm.innerHTML = `<p>Отлично! Мы отправили ссылку для входа на <strong>${email}</strong>. Пожалуйста, проверьте вашу почту.</p>`;
-
         } catch (error) {
             console.error('Ошибка входа:', error.message);
             errorMessage.textContent = `Ошибка: ${error.message}`;
@@ -94,7 +75,6 @@ function setupLoginModal() {
 // =================================================================
 
 async function initializeHeader() {
-    // Получаем элементы
     const themeToggle = document.getElementById('theme-toggle');
     const loginBtn = document.getElementById('loginBtn');
     const addEventBtn = document.getElementById('add-event-modal-btn');
@@ -106,7 +86,15 @@ async function initializeHeader() {
 
     // 1. Настройка темы
     if (themeToggle) {
-        // ... (код темы не изменился)
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            themeToggle.checked = true;
+        }
+        themeToggle.addEventListener('change', function() {
+            document.body.classList.toggle('dark-theme', this.checked);
+            localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+        });
     }
 
     // 2. Проверка сессии пользователя
@@ -118,31 +106,46 @@ async function initializeHeader() {
         if (addEventBtn) addEventBtn.classList.remove('hidden');
         if (profileDropdown) profileDropdown.classList.remove('hidden');
 
-        // ... (код получения профиля и админа не изменился)
+        const [profileResponse, adminResponse] = await Promise.all([
+            supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single(),
+            supabaseClient.rpc('is_admin')
+        ]);
+        
+        if (profileResponse.error) console.error('Ошибка получения профиля:', profileResponse.error.message);
+        if (userNameDisplay) {
+            const profile = profileResponse.data;
+            const name = (profile && profile.full_name) ? profile.full_name : (currentUser.email ? currentUser.email.split('@')[0] : 'Профиль');
+            userNameDisplay.textContent = name;
+        }
+
+        isAdmin = adminResponse.data;
+        if (adminResponse.error) {
+            console.error('Ошибка проверки админа:', adminResponse.error.message);
+            isAdmin = false;
+        }
+        if (isAdmin && adminLink) adminLink.classList.remove('hidden');
 
     } else {
-        // Теперь мы просто показываем кнопку "Войти", которая откроет модальное окно
         if (loginBtn) loginBtn.classList.remove('hidden');
     }
 
     // 4. Настройка обработчиков
-    if (logoutBtn) {
-        logoutBtn.onclick = async () => {
-            await supabaseClient.auth.signOut();
-            window.location.reload();
-        };
-    }
-    if (addEventBtn) {
-        addEventBtn.onclick = () => window.location.href = '/edit-event.html';
-    }
-    if (profileTrigger) {
-        // ... (код выпадающего меню не изменился)
-    }
+    if (logoutBtn) logoutBtn.onclick = async () => { await supabaseClient.auth.signOut(); window.location.reload(); };
+    if (addEventBtn) addEventBtn.onclick = () => window.location.href = '/edit-event.html';
+    if (profileTrigger) profileTrigger.onclick = (event) => { event.stopPropagation(); profileDropdown.classList.toggle('open'); };
+    
+    document.addEventListener('click', (event) => {
+        if (profileDropdown && !profileDropdown.contains(event.target)) profileDropdown.classList.remove('open');
+    });
 
-    // 5. ВАЖНО: Инициализируем логику модального окна
+    // 5. Инициализируем логику модального окна
     setupLoginModal();
 }
 
-// Запускаем инициализацию шапки при загрузке DOM
-// (в script.js мы делаем это в событии DOMContentLoaded, здесь можно оставить так)
-initializeHeader();
+// =================================================================
+// ТОЧКА ВХОДА ДЛЯ APP.JS (ИСПРАВЛЕНИЕ)
+// =================================================================
+// Запускаем весь наш код только тогда, когда страница полностью загружена.
+document.addEventListener('DOMContentLoaded', () => {
+    initializeHeader();
+});
