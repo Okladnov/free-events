@@ -396,71 +396,62 @@ body.dark-theme .admin-event-card:hover {
 .score-hot { color: #ff8c00; }  /* Оранжевый */
 .score-fire { color: #ff0000; } /* Красный */
 /* =====================================================================
-   9. НОВЫЕ СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ (ТОЧНО ФИНАЛ)
+   9. НОВЫЕ СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ ("ПУЛЕНЕПРОБИВАЕМАЯ" ВЕРСИЯ)
    ===================================================================== */
 
 /* Фон и рамка всего меню */
-.profile-menu {
-    padding: 8px;
-    background-color: var(--card-background); /* Фон всей плашки меню */
-    border: 1px solid var(--border-color);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.2);
-    min-width: 240px;
-    border-radius: 12px;
+#profile-menu {
+    padding: 8px !important;
+    background-color: var(--card-background) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.2) !important;
+    min-width: 240px !important;
+    border-radius: 12px !important;
 }
 
-/* === ИСПРАВЛЕНО: Стили для КАЖДОЙ ссылки в меню === */
-.profile-menu a.profile-menu-item {
+/* Стили для КАЖДОЙ ссылки в меню */
+#profile-menu a.profile-menu-item {
     display: flex !important;
-    align-items: center;
-    gap: 12px;
+    align-items: center !important;
+    gap: 12px !important;
     padding: 10px 12px !important;
     font-size: 15px !important;
-    font-weight: 500;
-    color: var(--text-color) !important;       /* Используем базовый цвет текста */
-    background-color: transparent !important;   /* Фон по умолчанию ПРОЗРАЧНЫЙ */
+    font-weight: 500 !important;
+    color: var(--text-color) !important;
+    background-color: transparent !important;
     border-radius: 8px !important;
-    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out !important;
 }
 
-/* === ИСПРАВЛЕНО: ЭФФЕКТ ПРИ НАВЕДЕНИИ === */
-.profile-menu a.profile-menu-item:hover {
-    /* Фон становится светло-серым, как у кнопки с ником (var(--input-background)) */
+/* Эффект при наведении */
+#profile-menu a.profile-menu-item:hover {
     background-color: var(--input-background) !important;
-    /* Текст становится оранжевым */
     color: var(--primary-color) !important;
 }
 
-/* Стили для иконок */
-.profile-menu a.profile-menu-item svg {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-    transition: color 0.15s ease-in-out;
+/* === "ПУЛЕНЕПРОБИВАЕМЫЕ" СТИЛИ ДЛЯ ИКОНОК === */
+#profile-menu a.profile-menu-item svg {
+    width: 20px !important;      /* Жестко задаем ширину */
+    height: 20px !important;     /* Жестко задаем высоту */
+    min-width: 20px !important;  /* Предотвращаем сжатие */
+    flex-shrink: 0 !important;
+    transition: color 0.15s ease-in-out !important;
 }
 
 /* Задаем цвета иконкам */
-.profile-menu a.profile-menu-item .icon-profile {
-    color: #8A8A8E; /* Серый */
-}
-.profile-menu a.profile-menu-item .icon-favorites {
-    color: #FF2D55; /* Розово-красный */
-}
-.profile-menu a.profile-menu-item .icon-admin {
-    color: #5856D6; /* Фиолетовый */
-}
-.profile-menu a.profile-menu-item .icon-logout {
-    color: #FF3B30; /* Ярко-красный */
-}
+#profile-menu .icon-profile { color: #8A8A8E !important; }
+#profile-menu .icon-favorites { color: #FF2D55 !important; }
+#profile-menu .icon-admin { color: #5856D6 !important; }
+#profile-menu .icon-logout { color: #FF3B30 !important; }
 
-/* При наведении на пункт меню, цвет иконки тоже становится оранжевым */
-.profile-menu a.profile-menu-item:hover svg {
-    color: var(--primary-color);
+/* При наведении цвет иконки становится оранжевым */
+#profile-menu a.profile-menu-item:hover svg {
+    color: var(--primary-color) !important;
 }
 
 /* Разделитель */
-.menu-separator {
-    height: 1px;
-    background-color: var(--border-color);
-    margin: 8px 0;
+#profile-menu .menu-separator {
+    height: 1px !important;
+    background-color: var(--border-color) !important;
+    margin: 8px 0 !important;
 }
