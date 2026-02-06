@@ -1,5 +1,39 @@
 // =================================================================
-// ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ШАПКИ (ФИНАЛЬНАЯ, ПРОВЕРЕННАЯ ВЕРСИЯ)
+// app.js - ПОЛНАЯ, ФИНАЛЬНАЯ ИСПРАВЛЕННАЯ ВЕРСИЯ
+// =================================================================
+
+// =================================================================
+// ГЛОБАЛЬНОЕ ПОДКЛЮЧЕНИЕ И НАСТРОЙКИ
+// =================================================================
+const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
+const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Глобальные переменные, которые будут доступны на всех страницах
+let currentUser = null;
+let isAdmin = false;
+
+// =================================================================
+// ОБЩИЕ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// =================================================================
+function sanitizeHTML(text) {
+    if (!text) return '';
+    try {
+        // Используем DOMPurify, если он доступен
+        return DOMPurify.sanitize(text, { ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'a', 'blockquote'] });
+    } catch(e) {
+        // Если DOMPurify не загружен, просто возвращаем текст (фолбэк)
+        return text;
+    }
+}
+
+function sanitizeForAttribute(text) {
+    if (!text) return '';
+    return text.toString().replace(/"/g, '&quot;');
+}
+
+// =================================================================
+// ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ШАПКИ (САМАЯ ПОСЛЕДНЯЯ ВЕРСИЯ)
 // =================================================================
 async function initializeHeader() {
     const themeToggle = document.getElementById('theme-toggle');
@@ -43,6 +77,7 @@ async function initializeHeader() {
             
             if (adminLink) adminLink.style.display = 'none';
 
+            // ГАРАНТИРОВАННО СОДЕРЖИТ "ИЗБРАННОЕ"
             let menuHtml = `
                 <a href="/profile.html" class="profile-menu-item">
                     <svg class="icon-profile" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
