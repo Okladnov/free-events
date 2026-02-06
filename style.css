@@ -1,5 +1,5 @@
 /* ===================================================================
-   STYLE.CSS - ИСПРАВЛЕННАЯ И УПОРЯДОЧЕННАЯ ВЕРСИЯ
+   STYLE.CSS - ФИНАЛЬНАЯ ВЕРСИЯ
    =================================================================== */
 
 /* =========================================
@@ -48,7 +48,6 @@ body.dark-theme {
   --shadow-color: rgba(0, 0, 0, 0.2);
   --shadow-color-heavy: rgba(0, 0, 0, 0.25);
   --header-logo-filter: invert(1) brightness(1.5);
-
   /* -- Цвета для темной темы (если нужно) -- */
   --primary-color-light: #522a0d;
 }
@@ -71,7 +70,6 @@ body {
    2. УТИЛИТЫ (Вспомогательные классы)
    ========================================= */
 
-/* Универсальный класс для скрытия элементов. Используется в JS */
 .hidden {
   display: none !important;
 }
@@ -79,11 +77,12 @@ body {
 /* =========================================
    3. КОМПОНЕНТЫ: КНОПКИ
    ========================================= */
+
 .btn {
   display: inline-block;
   padding: 0 16px;
   height: 40px;
-  line-height: 40px; /* Используем line-height для вертикального выравнивания текста */
+  line-height: 40px;
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
@@ -93,7 +92,6 @@ body {
   white-space: nowrap;
   box-sizing: border-box;
 }
-
 .btn--primary {
   background-color: var(--primary-color);
   color: var(--text-color-inverted);
@@ -103,7 +101,6 @@ body {
   background-color: var(--primary-color-hover);
   border-color: var(--primary-color-hover);
 }
-
 .btn--outline-primary {
   background-color: transparent;
   color: var(--primary-color);
@@ -124,7 +121,6 @@ body {
   border-bottom: 1px solid var(--border-color);
   transition: background-color 0.3s, border-color 0.3s;
 }
-
 .header-container {
   display: flex;
   justify-content: space-between;
@@ -132,7 +128,6 @@ body {
   gap: 20px;
   width: 100%;
 }
-
 .header-logo {
   height: 40px;
   width: auto;
@@ -140,14 +135,12 @@ body {
   filter: var(--header-logo-filter);
   transition: filter 0.3s;
 }
-
 .search-wrapper {
   position: relative;
   display: flex;
   align-items: center;
   flex-grow: 1;
 }
-
 .search-wrapper input {
   width: 100%;
   height: 40px;
@@ -163,7 +156,6 @@ body {
 .search-wrapper input:focus {
   outline: none;
 }
-
 .search-button {
   position: absolute;
   right: 3px;
@@ -183,18 +175,15 @@ body {
   stroke: var(--icon-color);
   transition: stroke 0.3s;
 }
-
 .auth-block {
   display: flex;
   align-items: center;
   gap: 15px;
   margin-left: auto;
 }
-
 .profile-dropdown {
   position: relative;
 }
-
 .profile-trigger {
   display: flex;
   align-items: center;
@@ -209,7 +198,6 @@ body {
   color: var(--text-color);
   transition: background-color 0.3s;
 }
-
 .profile-menu {
   display: none;
   position: absolute;
@@ -226,7 +214,6 @@ body {
 .profile-dropdown.open .profile-menu {
   display: block;
 }
-
 .profile-menu a {
   display: block;
   padding: 10px 12px;
@@ -238,19 +225,16 @@ body {
 .profile-menu a:hover {
   background-color: var(--input-background);
 }
-
 .menu-separator {
   height: 1px;
   background-color: var(--border-color);
   margin: 8px 0;
 }
-
 .header-theme-switcher {
   display: flex;
   align-items: center;
   margin-left: 10px;
 }
-
 .theme-toggle-label {
   position: relative;
   display: inline-block;
@@ -262,7 +246,6 @@ body {
   width: 0;
   height: 0;
 }
-
 .theme-toggle-slider {
   position: absolute;
   cursor: pointer;
@@ -270,7 +253,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc; /* Этот цвет можно оставить, он не сильно зависит от темы */
+  background-color: #ccc;
   transition: .4s;
   border-radius: 24px;
 }
@@ -285,7 +268,6 @@ body {
   transition: .4s;
   border-radius: 50%;
 }
-
 input:checked + .theme-toggle-slider {
   background-color: var(--primary-color);
 }
@@ -297,272 +279,73 @@ input:checked + .theme-toggle-slider:before {
    5. ГЛАВНАЯ СТРАНИЦА: ФИЛЬТРЫ И КАРТОЧКИ
    ========================================= */
 
-.filters-section {
-  padding: 20px 0 15px 0;
-  margin: 0 20px 20px 20px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.pills-container {
-  display: flex;
-  overflow-x: auto;
-  gap: 10px;
-  padding-bottom: 5px;
-  scrollbar-width: none;
-}
-.pills-container::-webkit-scrollbar {
-  display: none;
-}
-
-.category-pill {
-  flex-shrink: 0;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-color);
-  background-color: var(--input-background);
-  border: 1px solid var(--input-background);
-  border-radius: 18px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-.category-pill.active {
-  background-color: var(--primary-color);
-  color: var(--text-color-inverted);
-  border-color: var(--primary-color);
-}
-
-#events {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.event-card-v3 {
-  display: flex;
-  flex-direction: column;
-  background-color: var(--card-background);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 12px;
-  transition: box-shadow 0.2s, border-color 0.2s;
-}
-.event-card-v3:hover {
-  box-shadow: 0 4px 16px var(--shadow-color);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  color: var(--text-color-subtle);
-  margin-bottom: 12px;
-  padding: 0 4px;
-}
-
-.card-body {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-
-.card-image-link {
-  display: block;
-  width: 120px;
-  height: 120px;
-  flex-shrink: 0;
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: var(--input-background);
-}
-.card-image-link img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.card-content {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  min-width: 0;
-}
-
-.card-organization {
-  font-size: 13px;
-  font-weight: bold;
-  color: var(--text-color-subtle);
-  text-decoration: none;
-  margin-bottom: 4px;
-}
-.card-organization:hover {
-  color: var(--primary-color);
-}
-.card-organization-placeholder {
-  height: 19px;
-  margin-bottom: 4px;
-}
-
-.card-title-link {
-  text-decoration: none;
-  color: var(--text-color);
-}
-.card-title-link h3 {
-  margin: 0 0 8px;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.card-description {
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text-color-secondary);
-  margin: 0 0 8px;
-}
-
-.card-author {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: auto;
-  font-size: 13px;
-  color: var(--text-color-subtle);
-}
-.card-author img {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid var(--border-color);
-  padding-top: 12px;
-}
-
-.card-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.action-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  color: var(--text-color-subtle);
-  padding: 4px;
-}
-.action-btn svg {
-  width: 20px;
-  height: 20px;
-  fill: var(--text-color-subtle);
-  transition: fill 0.2s, transform 0.2s;
-}
-.action-btn:hover svg {
-  fill: var(--primary-color);
-}
-.action-btn.active svg {
-  fill: var(--danger-color);
-  transform: scale(1.1);
-}
-/* Заменяем .card-main-link на универсальный класс .btn */
-.card-main-link.btn {
-  height: auto; /* Сбрасываем высоту для маленьких кнопок */
-  line-height: normal;
-  padding: 8px 16px;
-  font-size: 14px;
-}
-
-#pagination-controls {
-  text-align: center;
-  margin-top: 30px;
-}
-/* Заменяем #load-more-btn на универсальный класс .btn */
-#load-more-btn.btn {
-  padding: 12px 24px;
-  font-size: 16px;
-}
-
-.footer {
-  text-align: center;
-  padding: 30px 20px;
-  font-size: 14px;
-  color: var(--text-color-subtle);
-}
+.filters-section { padding: 20px 0 15px 0; margin: 0 20px 20px 20px; border-bottom: 1px solid var(--border-color); }
+.pills-container { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; scrollbar-width: none; }
+.pills-container::-webkit-scrollbar { display: none; }
+.category-pill { flex-shrink: 0; padding: 8px 16px; font-size: 14px; font-weight: 600; color: var(--text-color); background-color: var(--input-background); border: 1px solid var(--input-background); border-radius: 18px; cursor: pointer; transition: all 0.2s ease-in-out; }
+.category-pill.active { background-color: var(--primary-color); color: var(--text-color-inverted); border-color: var(--primary-color); }
+#events { display: flex; flex-direction: column; gap: 16px; }
+.event-card-v3 { display: flex; flex-direction: column; background-color: var(--card-background); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; transition: box-shadow 0.2s, border-color 0.2s; }
+.event-card-v3:hover { box-shadow: 0 4px 16px var(--shadow-color); }
+.card-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-color-subtle); margin-bottom: 12px; padding: 0 4px; }
+.card-body { display: flex; gap: 16px; margin-bottom: 12px; }
+.card-image-link { display: block; width: 120px; height: 120px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background-color: var(--input-background); }
+.card-image-link img { width: 100%; height: 100%; object-fit: cover; }
+.card-content { display: flex; flex-direction: column; flex-grow: 1; min-width: 0; }
+.card-organization { font-size: 13px; font-weight: bold; color: var(--text-color-subtle); text-decoration: none; margin-bottom: 4px; }
+.card-organization:hover { color: var(--primary-color); }
+.card-organization-placeholder { height: 19px; margin-bottom: 4px; }
+.card-title-link { text-decoration: none; color: var(--text-color); }
+.card-title-link h3 { margin: 0 0 8px; font-size: 18px; font-weight: 600; line-height: 1.4; }
+.card-description { font-size: 14px; line-height: 1.5; color: var(--text-color-secondary); margin: 0 0 8px; }
+.card-author { display: flex; align-items: center; gap: 8px; margin-top: auto; font-size: 13px; color: var(--text-color-subtle); }
+.card-author img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+.card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; }
+.card-actions { display: flex; align-items: center; gap: 16px; }
+.action-btn { display: flex; align-items: center; gap: 8px; background: none; border: none; cursor: pointer; font-size: 14px; color: var(--text-color-subtle); padding: 4px; }
+.action-btn svg { width: 20px; height: 20px; fill: var(--text-color-subtle); transition: fill 0.2s, transform 0.2s; }
+.action-btn:hover svg { fill: var(--primary-color); }
+.action-btn.active svg { fill: var(--danger-color); transform: scale(1.1); }
+.card-main-link.btn { height: auto; line-height: normal; padding: 8px 16px; font-size: 14px; }
+#pagination-controls { text-align: center; margin-top: 30px; }
+#load-more-btn.btn { padding: 12px 24px; font-size: 16px; }
+.footer { text-align: center; padding: 30px 20px; font-size: 14px; color: var(--text-color-subtle); }
 
 /* =========================================
-   6. СТРАНИЦА ПРОФИЛЯ
+   6. ПРОЧИЕ СТРАНИЦЫ (Профиль, Редактирование, Админка)
    ========================================= */
 
-.profile-layout-container {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 30px;
-  align-items: start;
-  padding-top: 40px;
-  padding-bottom: 40px;
-}
-.profile-page-card {
-  margin: 0;
-  position: sticky;
-  top: 20px;
-}
-.profile-activity-card {
-  margin: 0;
-}
+/* --- Профиль --- */
+.profile-layout-container { display: grid; grid-template-columns: 320px 1fr; gap: 30px; align-items: start; padding-top: 40px; padding-bottom: 40px; }
+.profile-page-card { margin: 0; position: sticky; top: 20px; }
+.profile-activity-card { margin: 0; }
+
+/* --- Формы (Редактирование, Админка) --- */
+.form-grid-container { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 30px; margin-top: 30px; padding-bottom: 50px; }
+.main-column, .side-column { display: flex; flex-direction: column; gap: 24px; }
+.form-card-main, .form-card-aside { background-color: var(--card-background); padding: 24px; border-radius: 16px; border: 1px solid var(--border-color); }
+.form-card-main { padding: 32px; }
+.form-card-aside h4 { margin-top: 0; font-size: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px; font-weight: 600; }
+.input-group { margin-bottom: 24px; }
+.input-group label { display: block; font-size: 14px; margin-bottom: 8px; font-weight: 500; }
+.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--input-background); color: var(--text-color); font-size: 15px; box-sizing: border-box; }
+.input-group input:focus, .input-group select:focus, .input-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px var(--primary-color-light); }
+.form-message { color: var(--text-color-secondary); font-size: 14px; margin-top: 15px; }
+
+/* --- Админка --- */
+.admin-actions button { padding: 8px 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background-color 0.2s, opacity 0.2s; color: var(--text-color-inverted); }
+.admin-actions button:disabled { opacity: 0.6; cursor: not-allowed; }
+.admin-actions button[data-action="approve"] { background-color: var(--success-color); }
+.admin-actions button[data-action="approve"]:hover:not(:disabled) { background-color: var(--success-color-hover); }
+.admin-actions button[data-action="delete"] { background-color: var(--danger-color); }
+.admin-actions button[data-action="delete"]:hover:not(:disabled) { background-color: var(--danger-color-hover); }
+.error-message { color: var(--danger-color); text-align: center; font-size: 16px; font-weight: 500; margin-top: 20px; }
+
 
 /* =========================================
-   7. СТРАНИЦА ЛОГИНА
+   7. ОБЩИЕ СТИЛИ ДЛЯ ФОРМ ВХОДА/РЕГИСТРАЦИИ
    ========================================= */
 
-.login-page-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: var(--background-color);
-  padding: 20px;
-}
-.login-modal-card {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  max-width: 800px;
-  width: 100%;
-  background-color: var(--card-background);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px var(--shadow-color-heavy);
-  overflow: hidden;
-}
-.login-modal-image-side {
-  background-color: var(--input-background);
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-.login-modal-logo {
-  width: 80px;
-  height: auto;
-  margin-bottom: 20px;
-}
-.login-modal-image-side h2 {
-  margin-top: 0;
-  color: var(--text-color);
-}
-.login-modal-image-side p {
-  color: var(--text-color-subtle);
-}
 .login-modal-form-side {
   padding: 40px;
 }
@@ -576,26 +359,6 @@ input:checked + .theme-toggle-slider:before {
   margin-bottom: 30px;
   color: var(--text-color-subtle);
 }
-.login-modal-form-side .input-group {
-  margin-bottom: 20px;
-}
-.login-modal-form-side .input-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  font-size: 14px;
-}
-.login-modal-form-side .input-group input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background-color: var(--input-background);
-  color: var(--text-color);
-  font-size: 15px;
-  box-sizing: border-box;
-}
-
 .google-btn-container {
   margin-bottom: 20px;
 }
@@ -605,7 +368,7 @@ input:checked + .theme-toggle-slider:before {
   justify-content: center;
   width: 100%;
   padding: 10px;
-  background-color: #ffffff; /* Оставляем белым, это стиль бренда Google */
+  background-color: #ffffff;
   color: #333;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -637,372 +400,9 @@ input:checked + .theme-toggle-slider:before {
   flex: 1;
   border-bottom: 1px solid var(--border-color);
 }
-.divider:not(:empty)::before {
-  margin-right: .5em;
-}
-.divider:not(:empty)::after {
-  margin-left: .5em;
-}
+.divider:not(:empty)::before { margin-right: .5em; }
+.divider:not(:empty)::after { margin-left: .5em; }
 
-/* =========================================
-   8. СТРАНИЦА РЕДАКТИРОВАНИЯ (Формы)
-   ========================================= */
-
-.form-grid-container {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: 30px;
-  margin-top: 30px;
-  padding-bottom: 50px;
-}
-.main-column,
-.side-column {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-.form-card-main,
-.form-card-aside {
-  background-color: var(--card-background);
-  padding: 24px;
-  border-radius: 16px;
-  border: 1px solid var(--border-color);
-}
-.form-card-main {
-  padding: 32px;
-}
-.form-card-aside h4 {
-  margin-top: 0;
-  font-size: 16px;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 12px;
-  margin-bottom: 20px;
-  font-weight: 600;
-}
-.input-group {
-  margin-bottom: 24px;
-}
-.input-group label {
-  display: block;
-  font-size: 14px;
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-.input-group input,
-.input-group select,
-.input-group textarea {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background-color: var(--input-background);
-  color: var(--text-color);
-  font-size: 15px;
-  box-sizing: border-box;
-}
-.input-group input:focus,
-.input-group select:focus,
-.input-group textarea:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px var(--primary-color-light);
-}
-
-.form-message {
-  color: var(--text-color-secondary);
-  font-size: 14px;
-  margin-top: 15px;
-}
-
-/* Редактор Pell */
-.pell-actionbar-custom {
-  display: flex;
-  padding: 10px;
-  background-color: var(--card-background);
-  border-bottom: 1px solid var(--border-color);
-}
-.pell-button-custom {
-  border: none;
-  cursor: pointer;
-  background: transparent;
-  color: var(--text-color);
-  font-size: 16px;
-  width: 36px;
-  height: 36px;
-  margin-right: 5px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.pell-button-custom:hover {
-  background-color: var(--input-background);
-}
-.pell-button-selected {
-  background-color: var(--primary-color-light) !important;
-  color: var(--primary-color) !important;
-}
-.pell-content {
-  min-height: 250px;
-  padding: 15px;
-  background: var(--input-background);
-  color: var(--text-color);
-  outline: none;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-}
-
-/* Загрузчик изображений */
-.image-uploader {
-  position: relative;
-}
-.upload-area {
-  border: 2px dashed var(--border-color);
-  border-radius: 12px;
-  min-height: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.2s;
-}
-.upload-area:hover,
-.upload-area.active {
-  border-color: var(--primary-color);
-}
-.upload-instructions p {
-  margin: 0 0 10px 0;
-}
-#image-preview {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-/* =========================================
-   9. СТРАНИЦА АДМИНКИ
-   ========================================= */
-
-.admin-event-card {
-  background-color: var(--card-background);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 15px 20px;
-  margin-bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  transition: box-shadow 0.2s, transform 0.2s;
-}
-.admin-event-card:hover {
-  box-shadow: 0 4px 16px var(--shadow-color);
-  transform: translateY(-2px);
-}
-.admin-event-card h4 {
-  margin: 0;
-  font-size: 18px;
-  color: var(--text-color);
-}
-.admin-event-card p {
-  margin: 0;
-  font-size: 14px;
-  color: var(--text-color-secondary);
-}
-.admin-event-card a {
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: 500;
-}
-.admin-event-card a:hover {
-  text-decoration: underline;
-}
-.admin-actions {
-  margin-top: 10px;
-  display: flex;
-  gap: 10px;
-}
-.admin-actions button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s, opacity 0.2s;
-  color: var(--text-color-inverted);
-}
-.admin-actions button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.admin-actions button[data-action="approve"] {
-  background-color: var(--success-color);
-}
-.admin-actions button[data-action="approve"]:hover:not(:disabled) {
-  background-color: var(--success-color-hover);
-}
-.admin-actions button[data-action="delete"] {
-  background-color: var(--danger-color);
-}
-.admin-actions button[data-action="delete"]:hover:not(:disabled) {
-  background-color: var(--danger-color-hover);
-}
-.error-message {
-  color: var(--danger-color);
-  text-align: center;
-  font-size: 16px;
-  font-weight: 500;
-  margin-top: 20px;
-}
-
-/* =========================================
-   10. СТРАНИЦА СОБЫТИЯ: КОММЕНТАРИИ, РЕЙТИНГ
-   ========================================= */
-
-.comments-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.comment {
-  display: flex;
-  gap: 12px;
-  padding: 15px 0;
-  border-bottom: 1px solid var(--border-color);
-}
-.comment:last-child {
-  border-bottom: none;
-}
-.comment-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-.comment-body {
-  flex-grow: 1;
-}
-.comment-header {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 5px;
-}
-.comment-author {
-  font-weight: 600;
-  color: var(--text-color);
-}
-.comment-date {
-  font-size: 12px;
-  color: var(--text-color-subtle);
-}
-.comment p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text-color);
-}
-.comment-form {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 1px solid var(--border-color);
-}
-.comment-form input {
-  flex-grow: 1;
-  padding: 10px 15px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background-color: var(--input-background);
-  color: var(--text-color);
-  font-size: 15px;
-}
-.comment-form input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-}
-.comment-form button {
-  background-color: var(--primary-color);
-  color: var(--text-color-inverted);
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-.comment-form button:hover:not(:disabled) {
-  background-color: var(--primary-color-hover);
-}
-.comment-form button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.vote {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.vote button {
-  background: none;
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
-  font-weight: bold;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.vote button:hover:not(:disabled) {
-  background-color: var(--input-background);
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-.vote button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.score {
-  font-weight: bold;
-  font-size: 16px;
-}
-.score-cold { color: var(--info-cold); }
-.score-hot { color: var(--info-hot); }
-.score-fire { color: var(--info-fire); }
-
-/* =========================================
-   11. АДАПТИВНОСТЬ
-   ========================================= */
-
-@media (max-width: 900px) {
-  .form-grid-container { grid-template-columns: 1fr; }
-  .profile-layout-container { grid-template-columns: 1fr; }
-  .profile-page-card { position: static; }
-}
-
-@media (max-width: 768px) {
-  .header-container { flex-wrap: wrap; justify-content: space-between; }
-  .search-wrapper { width: 100%; margin-top: 10px; order: 3; } /* Изменил search-container на search-wrapper */
-  .auth-block { order: 2; } /* Изменил header-actions на auth-block */
-  .header-title { order: 1; } /* Изменил header-logo-link на header-title */
-  .login-modal-card { grid-template-columns: 1fr; }
-  .login-modal-image-side { display: none; }
-}
-
-@media (max-width: 600px) {
-  .card-body { flex-direction: column; }
-  .card-image-link { width: 100%; height: 180px; }
-}
 /* =========================================
    12. МОДАЛЬНОЕ ОКНО
    ========================================= */
@@ -1018,31 +418,26 @@ input:checked + .theme-toggle-slider:before {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-  padding: 20px; /* ДОБАВЬ ЭТО: Отступы для мобильных, чтобы окно не прилипало к краям */
-  box-sizing: border-box; /* ДОБАВЬ ЭТО: Чтобы padding не ломал ширину */
-}
-  
-  /* Анимация появления */
+  padding: 20px;
+  box-sizing: border-box;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
 }
-
-/* Когда у оверлея нет класса .hidden, он становится видимым */
 .modal-overlay:not(.hidden) {
   opacity: 1;
 }
 
-/* Стили для самой карточки-окна, взяты со страницы логина */
-.login-modal-card {
-  position: relative; /* Нужно для позиционирования кнопки закрытия */
-  max-width: 450px; /* Сделаем его поуже для модального окна */
-  width: 90%;
-  box-shadow: 0 10px 30px var(--shadow-color-heavy);
-  border-radius: 16px;
+/* ОБЩИЕ СТИЛИ ДЛЯ КАРТОЧКИ ВНУТРИ МОДАЛЬНОГО ОКНА */
+.modal-overlay .login-modal-card {
+  display: grid;
+  grid-template-columns: 1fr; /* ГЛАВНОЕ ИСПРАВЛЕНИЕ: всегда ОДНА колонка */
+  position: relative;
+  width: 100%;
+  max-width: 480px;
   background-color: var(--card-background);
-  
+  border-radius: 16px;
+  box-shadow: 0 10px 30px var(--shadow-color-heavy);
+  overflow: hidden;
   /* Анимация "вылета" */
   transform: scale(0.9);
   transition: transform 0.3s ease-in-out;
@@ -1051,7 +446,6 @@ input:checked + .theme-toggle-slider:before {
   transform: scale(1);
 }
 
-/* Кнопка закрытия (крестик) */
 .modal-close-btn {
   position: absolute;
   top: 10px;
@@ -1068,13 +462,6 @@ input:checked + .theme-toggle-slider:before {
   color: var(--text-color);
 }
 
-/* Чтобы на мобильных устройствах форма не прилипала к краям */
-@media (max-width: 600px) {
-    .login-modal-card {
-        width: 95%;
-    }
-}
-/* Стили для переключателей в модальном окне */
 .form-switcher-link {
   text-align: center;
   font-size: 14px;
@@ -1088,28 +475,28 @@ input:checked + .theme-toggle-slider:before {
   font-weight: bold;
   padding: 0;
   cursor: pointer;
-  font-size: inherit; /* Наследует размер шрифта у родителя */
+  font-size: inherit;
 }
 .form-switcher-link button:hover {
   text-decoration: underline;
 }
-/* === ИСПРАВЛЕНИЕ ДЛЯ КАРТОЧКИ ВНУТРИ МОДАЛЬНОГО ОКНА (ДОБАВЬ ЭТОТ БЛОК) === */
-.modal-overlay .login-modal-card {
-  grid-template-columns: 1fr; /* Отменяем двухколоночный макет */
-  max-width: 480px;           /* Делаем окно немного уже, как и положено */
-  width: 100%;                /* Заставляем его занимать доступную ширину */
+
+/* =========================================
+   13. АДАПТИВНОСТЬ
+   ========================================= */
+
+@media (max-width: 900px) {
+  .profile-layout-container { grid-template-columns: 1fr; }
+  .profile-page-card { position: static; }
+  .form-grid-container { grid-template-columns: 1fr; }
 }
-/* ========================================================================= */
-.login-modal-card {
-  position: relative;
-  max-width: 450px;
-  width: 90%;
-  box-shadow: 0 10px 30px var(--shadow-color-heavy);
-  border-radius: 16px;
-  background-color: var(--card-background);
-  transform: scale(0.9);
-  transition: transform 0.3s ease-in-out;
+@media (max-width: 768px) {
+  .header-container { flex-wrap: wrap; justify-content: space-between; }
+  .search-wrapper { width: 100%; margin-top: 10px; order: 3; }
+  .auth-block { order: 2; }
+  .header-title { order: 1; }
 }
-.modal-overlay:not(.hidden) .login-modal-card {
-  transform: scale(1);
+@media (max-width: 600px) {
+  .card-body { flex-direction: column; }
+  .card-image-link { width: 100%; height: 180px; }
 }
