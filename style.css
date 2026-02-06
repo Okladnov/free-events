@@ -396,62 +396,44 @@ body.dark-theme .admin-event-card:hover {
 .score-hot { color: #ff8c00; }  /* Оранжевый */
 .score-fire { color: #ff0000; } /* Красный */
 /* =====================================================================
-   9. НОВЫЕ СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ ("ПУЛЕНЕПРОБИВАЕМАЯ" ВЕРСИЯ)
+   9. СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ (ПРОСТАЯ, НАДЕЖНАЯ ВЕРСИЯ)
    ===================================================================== */
 
-/* Фон и рамка всего меню */
-#profile-menu {
-    padding: 8px !important;
-    background-color: var(--card-background) !important;
-    border: 1px solid var(--border-color) !important;
-    box-shadow: 0 12px 24px rgba(0,0,0,0.2) !important;
-    min-width: 240px !important;
-    border-radius: 12px !important;
+/* Скрываем старую ссылку админа, если она есть */
+#admin-link {
+    display: none !important;
 }
 
-/* Стили для КАЖДОЙ ссылки в меню */
-#profile-menu a.profile-menu-item {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
+/* Фон и рамка всего меню */
+.profile-menu {
+    padding: 8px;
+    background-color: var(--card-background); /* Фон всей плашки меню */
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    min-width: 200px;
+    border-radius: 8px;
+}
+
+/* Стили для каждой ссылки в меню */
+.profile-menu a.profile-menu-item {
+    display: block !important; /* Убеждаемся, что это блочный элемент */
     padding: 10px 12px !important;
     font-size: 15px !important;
     font-weight: 500 !important;
     color: var(--text-color) !important;
     background-color: transparent !important;
-    border-radius: 8px !important;
-    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out !important;
+    border-radius: 6px !important;
+    transition: background-color 0.15s ease-in-out;
 }
 
-/* Эффект при наведении */
-#profile-menu a.profile-menu-item:hover {
+/* Простой эффект при наведении */
+.profile-menu a.profile-menu-item:hover {
     background-color: var(--input-background) !important;
-    color: var(--primary-color) !important;
-}
-
-/* === "ПУЛЕНЕПРОБИВАЕМЫЕ" СТИЛИ ДЛЯ ИКОНОК === */
-#profile-menu a.profile-menu-item svg {
-    width: 20px !important;      /* Жестко задаем ширину */
-    height: 20px !important;     /* Жестко задаем высоту */
-    min-width: 20px !important;  /* Предотвращаем сжатие */
-    flex-shrink: 0 !important;
-    transition: color 0.15s ease-in-out !important;
-}
-
-/* Задаем цвета иконкам */
-#profile-menu .icon-profile { color: #8A8A8E !important; }
-#profile-menu .icon-favorites { color: #FF2D55 !important; }
-#profile-menu .icon-admin { color: #5856D6 !important; }
-#profile-menu .icon-logout { color: #FF3B30 !important; }
-
-/* При наведении цвет иконки становится оранжевым */
-#profile-menu a.profile-menu-item:hover svg {
-    color: var(--primary-color) !important;
 }
 
 /* Разделитель */
-#profile-menu .menu-separator {
-    height: 1px !important;
-    background-color: var(--border-color) !important;
-    margin: 8px 0 !important;
+.profile-menu .menu-separator {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 8px 0;
 }
