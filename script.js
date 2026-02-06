@@ -17,15 +17,10 @@ let currentCategoryId = null;
 // =================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Эта функция из app.js настроит шапку, проверит пользователя и т.д.
-    initializeHeader().then(() => {
-        // Загружаем события только после того, как узнали, кто пользователь
-        loadEvents(true);
-    });
-    
-    // Настраиваем обработчики, специфичные для этой страницы
+    // Шапка инициализируется сама в app.js
+    // Нам нужно просто загрузить события и настроить локальные обработчики
+    loadEvents(true);
     setupIndexPageListeners();
-    // Загружаем и "оживляем" категории
     loadAndDisplayCategories();
     setupCategoryListeners();
 });
