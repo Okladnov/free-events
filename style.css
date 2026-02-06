@@ -1069,3 +1069,22 @@ input:checked + .theme-toggle-slider:before {
         width: 95%;
     }
 }
+/* Стили для переключателей в модальном окне */
+.form-switcher-link {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 20px;
+  color: var(--text-color-secondary);
+}
+.form-switcher-link button {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-weight: bold;
+  padding: 0;
+  cursor: pointer;
+  font-size: inherit; /* Наследует размер шрифта у родителя */
+}
+.form-switcher-link button:hover {
+  text-decoration: underline;
+}
