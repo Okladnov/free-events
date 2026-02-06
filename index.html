@@ -89,13 +89,18 @@
             <!-- КОНЕЦ НОВЫХ ЭЛЕМЕНТОВ -->
             
             <form id="login-form">
-                <div class="input-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required placeholder="you@example.com">
-                </div>
-                <p id="modal-error-message" class="error-message" style="display: none;"></p>
-                <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Получить ссылку для входа</button>
-            </form>
+    <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required placeholder="you@example.com">
+    </div>
+    <!-- Новое поле для пароля -->
+    <div class="input-group">
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" required placeholder="••••••••">
+    </div>
+    <p id="modal-error-message" class="error-message" style="display: none;"></p>
+    <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Войти</button>
+</form>
         </div>
     </div>
 </div>
