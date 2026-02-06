@@ -48,26 +48,42 @@ function setupLoginModal() {
         if (event.target === loginModalOverlay) loginModalOverlay.classList.add('hidden');
     });
 
-    loginForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const email = event.target.email.value;
-        errorMessage.style.display = 'none';
+loginForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = event.target.email.value;
+    const password = event.target.password.value; // Берем пароль из нового поля
+    errorMessage.style.display = 'none';
 
-        try {
-            const { error } = await supabaseClient.auth.signInWithOtp({
-                email: email,
-                options: { emailRedirectTo: window.location.origin },
-            });
+    try {
+        // Используем новую функцию для входа по паролю
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
 
-            if (error) throw error;
-            
-            loginForm.innerHTML = `<p>Отлично! Мы отправили ссылку для входа на <strong>${email}</strong>. Пожалуйста, проверьте вашу почту.</p>`;
-        } catch (error) {
-            console.error('Ошибка входа:', error.message);
-            errorMessage.textContent = `Ошибка: ${error.message}`;
-            errorMessage.style.display = 'block';
+        if (error) {
+            // Если Supabase вернул ошибку (неверный пароль и т.д.), показываем ее
+            throw error;
         }
-    });
+
+        // ЕСЛИ ВХОД УСПЕШЕН
+        if (data.user) {
+            // Просто перезагружаем страницу. 
+            // Наш initializeHeader() при загрузке увидит активную сессию и покажет профиль.
+            window.location.reload();
+        }
+
+    } catch (error) {
+        console.error('Ошибка входа:', error.message);
+        // Показываем пользователю понятную ошибку
+        if (error.message.includes("Invalid login credentials")) {
+            errorMessage.textContent = 'Неверный email или пароль.';
+        } else {
+            errorMessage.textContent = `Ошибка: ${error.message}`;
+        }
+        errorMessage.style.display = 'block';
+    }
+});
 }
 
 // =================================================================
