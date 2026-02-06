@@ -68,7 +68,7 @@
 </footer>
 
 <!-- ======================================================================= -->
-<!-- РАЗМЕТКА МОДАЛЬНОГО ОКНА ВХОДА                                          -->
+<!-- РАЗМЕТКА МОДАЛЬНОГО ОКНА ВХОДА (ОБНОВЛЕННАЯ)                             -->
 <!-- ======================================================================= -->
 <div id="login-modal-overlay" class="modal-overlay hidden">
     <div class="login-modal-card">
@@ -77,25 +77,28 @@
             <h2>Вход в аккаунт</h2>
             <p class="form-subtitle">Получите доступ к избранному и созданию событий</p>
 
-            <!-- Тут будет логика для входа через Google, если нужна -->
+            <!-- НОВЫЕ ЭЛЕМЕНТЫ -->
+            <div class="google-btn-container">
+                <button id="google-login-btn" class="google-btn">
+                    <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo">
+                    <span>Продолжить с Google</span>
+                </button>
+            </div>
+
+            <div class="divider">или</div>
+            <!-- КОНЕЦ НОВЫХ ЭЛЕМЕНТОВ -->
             
             <form id="login-form">
                 <div class="input-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" required placeholder="you@example.com">
                 </div>
-                <!-- Можно добавить поле для пароля, если нужен вход по паролю -->
-                <!-- <div class="input-group">
-                    <label for="password">Пароль</label>
-                    <input type="password" id="password" name="password" required>
-                </div> -->
                 <p id="modal-error-message" class="error-message" style="display: none;"></p>
-                <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Войти по Email</button>
+                <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Получить ссылку для входа</button>
             </form>
         </div>
     </div>
 </div>
-
 
 <!-- ======================================================================= -->
 <!-- ШАБЛОНЫ ДЛЯ JAVASCRIPT                                                  -->
