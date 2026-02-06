@@ -261,7 +261,7 @@ async function loadEvents(isNewSearch = false) {
 }
 
 // =================================================================
-// ЗАГРУЗКА КАТЕГОРИЙ (без изменений)
+// ЗАГРУЗКА И ОБРАБОТКА КАТЕГОРИЙ (НОВЫЙ СПОСОБ)
 // =================================================================
 async function loadAndDisplayCategories() {
     const { data, error } = await supabaseClient.from('categories').select('*').order('name');
@@ -269,14 +269,57 @@ async function loadAndDisplayCategories() {
         console.error('Ошибка загрузки категорий:', error);
         return;
     }
-    
-    const categoryPillsContainer = document.getElementById('category-pills-container');
-    if (!categoryPillsContainer) return;
-    
-    let categoryPillsHtml = '<button class="category-pill active" onclick="resetFilters()">Все</button>';
+
+    const container = document.getElementById('category-pills-container');
+    const template = document.getElementById('category-pill-template');
+    if (!container || !template) return;
+
+    container.innerHTML = ''; // Очищаем старые кнопки
+
+    // 1. Создаем кнопку "Все"
+    const allButtonClone = template.content.cloneNode(true);
+    const allButton = allButtonClone.querySelector('.category-pill');
+    allButton.textContent = 'Все';
+    allButton.classList.add('active'); // Делаем ее активной по умолчанию
+    allButton.dataset.categoryId = 'all'; // специальный ID для "всех"
+    container.appendChild(allButtonClone);
+
+    // 2. Создаем кнопки для каждой категории из базы данных
     (data || []).forEach(category => {
-        categoryPillsHtml += `<button class="category-pill" onclick="setCategoryFilter(${category.id})">${sanitizeHTML(category.name)}</button>`;
+        const categoryClone = template.content.cloneNode(true);
+        const categoryButton = categoryClone.querySelector('.category-pill');
+        categoryButton.textContent = category.name;
+        categoryButton.dataset.categoryId = category.id; // Используем data-атрибут вместо onclick
+        container.appendChild(categoryClone);
     });
-    
-    categoryPillsContainer.innerHTML = categoryPillsHtml;
+}
+
+function setupCategoryListeners() {
+    const container = document.getElementById('category-pills-container');
+    if (!container) return;
+
+    // Вешаем ОДИН обработчик на ВЕСЬ контейнер с кнопками
+    container.addEventListener('click', (event) => {
+        // Проверяем, что кликнули именно по кнопке с классом .category-pill
+        if (event.target.classList.contains('category-pill')) {
+            const clickedButton = event.target;
+            
+            // Сначала убираем класс 'active' со всех кнопок в контейнере
+            container.querySelectorAll('.category-pill').forEach(pill => pill.classList.remove('active'));
+            // А потом добавляем класс 'active' только той, по которой кликнули
+            clickedButton.classList.add('active');
+
+            const categoryId = clickedButton.dataset.categoryId;
+            
+            // В зависимости от ID, либо сбрасываем фильтр, либо устанавливаем его
+            if (categoryId === 'all') {
+                currentCategoryId = null; // сброс
+            } else {
+                currentCategoryId = categoryId; // установка
+            }
+
+            // Перезагружаем события с новым фильтром
+            loadEvents(true);
+        }
+    });
 }
