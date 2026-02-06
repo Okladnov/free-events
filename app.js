@@ -28,62 +28,110 @@ function sanitizeHTML(text) {
 }
 
 // =================================================================
-// ЛОГИКА РАБОТЫ МОДАЛЬНОГО ОКНА
+// ЛОГИКА РАБОТЫ МОДАЛЬНОГО ОКНА (ПОЛНОСТЬЮ НОВАЯ ВЕРСИЯ)
 // =================================================================
 
 function setupLoginModal() {
-    const loginModalOverlay = document.getElementById('login-modal-overlay');
-    const loginBtn = document.getElementById('loginBtn');
-    const closeModalBtn = document.getElementById('modal-close-btn');
+    // === Получаем все элементы ===
+    const overlay = document.getElementById('login-modal-overlay');
+    const openBtn = document.getElementById('loginBtn');
+    const closeBtn = document.getElementById('modal-close-btn');
+
+    // Элементы переключения
+    const loginView = document.getElementById('login-view');
+    const signupView = document.getElementById('signup-view');
+    const showSignupBtn = document.getElementById('show-signup-view-btn');
+    const showLoginBtn = document.getElementById('show-login-view-btn');
+
+    // Формы
     const loginForm = document.getElementById('login-form');
-    const errorMessage = document.getElementById('modal-error-message');
+    const signupForm = document.getElementById('signup-form');
+    const googleLoginBtn = document.getElementById('google-login-btn');
+    
+    // Сообщения об ошибках
+    const loginErrorMsg = document.getElementById('login-error-message');
+    const signupErrorMsg = document.getElementById('signup-error-message');
 
-    if (!loginModalOverlay || !loginBtn || !closeModalBtn || !loginForm) {
-        return;
-    }
+    if (!overlay || !openBtn) return; // Базовая проверка
 
-    loginBtn.addEventListener('click', () => loginModalOverlay.classList.remove('hidden'));
-    closeModalBtn.addEventListener('click', () => loginModalOverlay.classList.add('hidden'));
-    loginModalOverlay.addEventListener('click', (event) => {
-        if (event.target === loginModalOverlay) loginModalOverlay.classList.add('hidden');
+    // === Логика открытия/закрытия окна ===
+    openBtn.addEventListener('click', () => overlay.classList.remove('hidden'));
+    closeBtn.addEventListener('click', () => overlay.classList.add('hidden'));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.add('hidden'); });
+
+    // === Логика переключения между входом и регистрацией ===
+    showSignupBtn.addEventListener('click', () => {
+        loginView.classList.add('hidden');
+        signupView.classList.remove('hidden');
+    });
+    showLoginBtn.addEventListener('click', () => {
+        signupView.classList.add('hidden');
+        loginView.classList.remove('hidden');
     });
 
-loginForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const email = event.target.email.value;
-    const password = event.target.password.value; // Берем пароль из нового поля
-    errorMessage.style.display = 'none';
+    // === Обработка форм ===
 
-    try {
-        // Используем новую функцию для входа по паролю
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password,
-        });
+    // Вход через Google
+    googleLoginBtn.addEventListener('click', async () => {
+        await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
+    });
 
-        if (error) {
-            // Если Supabase вернул ошибку (неверный пароль и т.д.), показываем ее
-            throw error;
+    // Вход по Email и Паролю
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = e.target.email.value;
+        const password = e.target.password.value;
+        loginErrorMsg.style.display = 'none';
+
+        try {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            if (data.user) window.location.reload();
+        } catch (error) {
+            loginErrorMsg.textContent = 'Неверный email или пароль.';
+            loginErrorMsg.style.display = 'block';
+        }
+    });
+
+    // Регистрация
+    signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = e.target.email.value;
+        const name = e.target.name.value;
+        const password = e.target.password.value;
+        const passwordRepeat = e.target['password-repeat'].value;
+        signupErrorMsg.style.display = 'none';
+
+        // 1. Проверка, совпадают ли пароли
+        if (password !== passwordRepeat) {
+            signupErrorMsg.textContent = 'Пароли не совпадают.';
+            signupErrorMsg.style.display = 'block';
+            return; // Прерываем выполнение
         }
 
-        // ЕСЛИ ВХОД УСПЕШЕН
-        if (data.user) {
-            // Просто перезагружаем страницу. 
-            // Наш initializeHeader() при загрузке увидит активную сессию и покажет профиль.
-            window.location.reload();
-        }
+        try {
+            // 2. Отправляем запрос на регистрацию в Supabase
+            const { data, error } = await supabaseClient.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    // Передаем дополнительные данные, которые запишутся в профиль
+                    data: { 
+                        full_name: name 
+                    }
+                }
+            });
 
-    } catch (error) {
-        console.error('Ошибка входа:', error.message);
-        // Показываем пользователю понятную ошибку
-        if (error.message.includes("Invalid login credentials")) {
-            errorMessage.textContent = 'Неверный email или пароль.';
-        } else {
-            errorMessage.textContent = `Ошибка: ${error.message}`;
+            if (error) throw error;
+
+            // 3. Показываем сообщение об успехе
+            signupView.innerHTML = `<div class="login-modal-form-side"><p>Отлично! Мы отправили ссылку для подтверждения на <strong>${email}</strong>. Перейдите по ней, чтобы активировать аккаунт.</p></div>`;
+
+        } catch (error) {
+            signupErrorMsg.textContent = `Ошибка регистрации: ${error.message}`;
+            signupErrorMsg.style.display = 'block';
         }
-        errorMessage.style.display = 'block';
-    }
-});
+    });
 }
 
 // =================================================================
