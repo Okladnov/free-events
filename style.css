@@ -396,20 +396,20 @@ body.dark-theme .admin-event-card:hover {
 .score-hot { color: #ff8c00; }  /* Оранжевый */
 .score-fire { color: #ff0000; } /* Красный */
 /* =====================================================================
-   9. НОВЫЕ СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ (САМАЯ ФИНАЛЬНАЯ ВЕРСИЯ)
+   9. НОВЫЕ СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ (ТОЧНО ФИНАЛ)
    ===================================================================== */
 
 /* Фон и рамка всего меню */
 .profile-menu {
     padding: 8px;
-    background-color: var(--card-background); /* ИСПОЛЬЗУЕМ ПЕРЕМЕННУЮ ДЛЯ ФОНА */
+    background-color: var(--card-background); /* Фон всей плашки меню */
     border: 1px solid var(--border-color);
     box-shadow: 0 12px 24px rgba(0,0,0,0.2);
     min-width: 240px;
     border-radius: 12px;
 }
 
-/* Стили для КАЖДОЙ ссылки в меню */
+/* === ИСПРАВЛЕНО: Стили для КАЖДОЙ ссылки в меню === */
 .profile-menu a.profile-menu-item {
     display: flex !important;
     align-items: center;
@@ -417,21 +417,21 @@ body.dark-theme .admin-event-card:hover {
     padding: 10px 12px !important;
     font-size: 15px !important;
     font-weight: 500;
-    color: var(--text-color) !important; /* Используем базовый цвет текста */
+    color: var(--text-color) !important;       /* Используем базовый цвет текста */
+    background-color: transparent !important;   /* Фон по умолчанию ПРОЗРАЧНЫЙ */
     border-radius: 8px !important;
-    background-color: transparent !important; /* Фон по умолчанию ПРОЗРАЧНЫЙ */
     transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
 }
 
 /* === ИСПРАВЛЕНО: ЭФФЕКТ ПРИ НАВЕДЕНИИ === */
 .profile-menu a.profile-menu-item:hover {
-    /* Фон становится светло-серым, как у кнопки с ником */
+    /* Фон становится светло-серым, как у кнопки с ником (var(--input-background)) */
     background-color: var(--input-background) !important;
-    /* Текст становится чуть ярче */
+    /* Текст становится оранжевым */
     color: var(--primary-color) !important;
 }
 
-/* "Жесткие" стили для иконок */
+/* Стили для иконок */
 .profile-menu a.profile-menu-item svg {
     width: 20px;
     height: 20px;
@@ -453,7 +453,7 @@ body.dark-theme .admin-event-card:hover {
     color: #FF3B30; /* Ярко-красный */
 }
 
-/* При наведении на пункт меню, меняем цвет иконки на основной */
+/* При наведении на пункт меню, цвет иконки тоже становится оранжевым */
 .profile-menu a.profile-menu-item:hover svg {
     color: var(--primary-color);
 }
