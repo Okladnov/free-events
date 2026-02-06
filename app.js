@@ -1,5 +1,5 @@
 // =================================================================
-// ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ШАПКИ (САМАЯ ПОСЛЕДНЯЯ ВЕРСИЯ)
+// ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ШАПКИ (ФИНАЛЬНАЯ, ПРОВЕРЕННАЯ ВЕРСИЯ)
 // =================================================================
 async function initializeHeader() {
     const themeToggle = document.getElementById('theme-toggle');
@@ -43,7 +43,6 @@ async function initializeHeader() {
             
             if (adminLink) adminLink.style.display = 'none';
 
-            // === ГАРАНТИРОВАННО СОДЕРЖИТ "ИЗБРАННОЕ" ===
             let menuHtml = `
                 <a href="/profile.html" class="profile-menu-item">
                     <svg class="icon-profile" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
