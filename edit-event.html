@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добавить событие</title>
+    <title>Редактирование события</title>
     
     <!-- Стили -->
     <link rel="stylesheet" href="style.css">
@@ -15,28 +15,44 @@
 </head>
 <body>
 
-    <!-- ==================== ШАПКА ==================== -->
-    <header>
+    <!-- =================================================================== -->
+    <!-- ШАПКА (СКОПИРОВАНА С ГЛАВНОЙ СТРАНИЦЫ ДЛЯ ЕДИНООБРАЗИЯ)           -->
+    <!-- =================================================================== -->
+    <header class="header">
         <div class="container header-container">
-            <a href="/" class="header-logo-link"><img src="logo.png" alt="Логотип Free Events" class="header-logo"></a>
-            <div class="search-container">
-                <input id="search-input" placeholder="Поиск...">
-                <button class="search-button"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg></button>
+            <div class="header-title">
+                <a href="/">
+                    <img src="logo.png" alt="Логотип Free Events" class="header-logo">
+                </a>
             </div>
-            <div class="header-actions">
-                <button id="add-event-modal-btn" class="add-event-btn" style="display: none;">+ Добавить</button>
-                <div class="theme-switch-wrapper">
-                    <label class="theme-switch" for="theme-toggle"><input type="checkbox" id="theme-toggle" /><div class="slider round"></div></label>
-                </div>
-                <a href="/login.html" id="loginBtn" class="login-btn">Войти</a>
-                <div id="profile-dropdown" style="display: none;">
-                    <div id="profile-trigger" class="profile-avatar"><span id="user-name-display">Профиль</span> <span class="arrow-down">▼</span></div>
-                    <div class="dropdown-content">
+            <div class="search-wrapper">
+                <input id="search-input" placeholder="Поиск...">
+                <button class="search-button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="var(--icon-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21L16.65 16.65" stroke="var(--icon-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+            <div class="header-theme-switcher">
+                <label class="theme-toggle-label">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="theme-toggle-slider"></span>
+                </label>
+            </div>
+            <div class="auth-block">
+                <button class="btn btn--primary hidden" id="add-event-modal-btn">Добавить событие</button>
+                <div class="profile-dropdown hidden" id="profile-dropdown">
+                    <button class="profile-trigger" id="profile-trigger">
+                        <span id="user-name-display"></span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="profile-menu" id="profile-menu">
                         <a href="/profile.html">Мой профиль</a>
-                        <a href="/admin.html" id="admin-link" style="display: none;">Админка</a>
+                        <a href="/favorites.html">Мое избранное</a>
+                        <a href="/admin.html" id="admin-link" class="hidden">Панель модерации</a>
+                        <div class="menu-separator"></div>
                         <a href="#" id="logoutBtn">Выйти</a>
                     </div>
                 </div>
+                <button id="loginBtn" class="btn btn--outline-primary hidden">Войти</button>
             </div>
         </div>
     </header>
@@ -44,7 +60,6 @@
     <!-- ==================== ОСНОВНОЙ КОНТЕНТ ==================== -->
     <main class="container">
         <form id="event-form" class="form-grid-container">
-
             <!-- ЛЕВАЯ КОЛОНКА -->
             <div class="main-column">
                 <div class="form-card-main">
@@ -63,13 +78,12 @@
                     </div>
                 </div>
             </div>
-
             <!-- ПРАВАЯ КОЛОНКА -->
             <div class="side-column">
                 <div class="form-card-aside">
                     <h4>Публикация</h4>
                     <p id="form-message" class="form-message"></p>
-                    <button type="submit" class="submit-btn primary">Опубликовать</button>
+                    <button type="submit" class="btn btn--primary" style="width: 100%;">Опубликовать</button>
                 </div>
                 <div class="form-card-aside">
                     <h4>Параметры</h4>
@@ -93,7 +107,7 @@
                             <img id="image-preview" src="" alt="Предпросмотр" style="display: none;">
                             <div class="upload-instructions" id="upload-instructions">
                                 <p>Перетащите файл сюда или</p>
-                                <button type="button" class="submit-btn secondary">Выберите файл</button>
+                                <button type="button" id="select-file-btn" class="btn btn--outline-primary">Выберите файл</button>
                             </div>
                         </div>
                         <input type="file" id="image-file-input" accept="image/png, image/jpeg, image/webp" style="display: none;">
@@ -104,6 +118,72 @@
         </form>
     </main>
     
+    <!-- ======================================================================= -->
+    <!-- МОДАЛЬНОЕ ОКНО (СКОПИРОВАНО С ГЛАВНОЙ СТРАНИЦЫ)                          -->
+    <!-- ======================================================================= -->
+    <div id="login-modal-overlay" class="modal-overlay hidden">
+        <div class="login-modal-card">
+            <button id="modal-close-btn" class="modal-close-btn">&times;</button>
+            <div id="login-view">
+                <div class="login-modal-form-side">
+                    <h2>Вход в аккаунт</h2>
+                    <p class="form-subtitle">Получите доступ к избранному и созданию событий</p>
+                    <div class="google-btn-container">
+                        <button id="google-login-btn" class="google-btn">
+                            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo">
+                            <span>Продолжить с Google</span>
+                        </button>
+                    </div>
+                    <div class="divider">или</div>
+                    <form id="login-form">
+                        <div class="input-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" name="email" required placeholder="you@example.com">
+                        </div>
+                        <div class="input-group">
+                            <label for="login-password">Пароль</label>
+                            <input type="password" id="login-password" name="password" required placeholder="••••••••">
+                        </div>
+                        <p id="login-error-message" class="error-message" style="display: none;"></p>
+                        <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Войти</button>
+                    </form>
+                    <p class="form-switcher-link">
+                        Нет аккаунта? <button id="show-signup-view-btn">Создать новый</button>
+                    </p>
+                </div>
+            </div>
+            <div id="signup-view" class="hidden">
+                <div class="login-modal-form-side">
+                    <h2>Регистрация</h2>
+                    <p class="form-subtitle">Присоединяйтесь к нашему сообществу!</p>
+                    <form id="signup-form">
+                        <div class="input-group">
+                            <label for="signup-email">Email</label>
+                            <input type="email" id="signup-email" name="email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-name">Имя пользователя</label>
+                            <input type="text" id="signup-name" name="name" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-password">Пароль</label>
+                            <input type="password" id="signup-password" name="password" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-password-repeat">Повторите пароль</label>
+                            <input type="password" id="signup-password-repeat" name="password-repeat" required>
+                        </div>
+                        <p id="signup-error-message" class="error-message" style="display: none;"></p>
+                        <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Зарегистрироваться</button>
+                    </form>
+                    <p class="form-switcher-link">
+                        Уже есть аккаунт? <button id="show-login-view-btn">Войти</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== СКРИПТЫ ==================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
