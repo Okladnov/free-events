@@ -60,7 +60,10 @@
     <!-- ==================== ОСНОВНОЙ КОНТЕНТ ==================== -->
     <main class="container">
         <form id="event-form" class="form-grid-container">
-            <!-- ЛЕВАЯ КОЛОНКА -->
+            <!-- 
+                Теперь main-column и side-column идут друг за другом, 
+                а CSS (form-grid-container) сделает их в одну колонку.
+            -->
             <div class="main-column">
                 <div class="form-card-main">
                     <h2 id="form-title">Добавление нового события</h2>
@@ -74,11 +77,12 @@
                     </div>
                     <div class="input-group">
                         <label for="event-description">Описание</label>
+                        <!-- Здесь будет инициализирован Pell -->
                         <div id="editor-container"></div>
                     </div>
                 </div>
             </div>
-            <!-- ПРАВАЯ КОЛОНКА -->
+
             <div class="side-column">
                 <div class="form-card-aside">
                     <h4>Публикация</h4>
