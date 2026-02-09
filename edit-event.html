@@ -59,64 +59,56 @@
 
     <!-- ==================== ОСНОВНОЙ КОНТЕНТ ==================== -->
     <main class="container">
-        <!-- form-grid-container теперь имеет ОДНУ колонку благодаря style.css -->
+        <!-- form-grid-container теперь выступает как единая карточка -->
         <form id="event-form" class="form-grid-container">
-            <!-- Весь контент теперь в одной "логической" колонке -->
-            <div class="main-column">
-                <div class="form-card-main">
-                    <h2 id="form-title">Добавление нового события</h2>
-                    <div class="input-group">
-                        <label for="event-title">Название *</label>
-                        <input type="text" id="event-title" required placeholder="Например, Бесплатный вебинар по Python">
-                    </div>
-                    <div class="input-group">
-                        <label for="event-link">Ссылка на источник/регистрацию</label>
-                        <input type="url" id="event-link" placeholder="https://t.me/free_events/123">
-                    </div>
-                    <div class="input-group">
-                        <label for="event-description">Описание</label>
-                        <!-- Здесь будет инициализирован Pell -->
-                        <div id="editor-container"></div>
-                    </div>
-                </div>
+            <h2 id="form-title">Добавление нового события</h2>
 
-                <!-- Блоки из "side-column" перемещены сюда, чтобы они шли последовательно -->
-                <div class="form-card-aside">
-                    <h4>Публикация</h4>
-                    <p id="form-message" class="form-message"></p>
-                    <button type="submit" class="btn btn--primary" style="width: 100%;">Опубликовать</button>
-                </div>
-                <div class="form-card-aside">
-                    <h4>Параметры</h4>
-                    <div class="input-group">
-                        <label for="event-date">Дата</label>
-                        <input type="date" id="event-date">
-                    </div>
-                    <div class="input-group">
-                        <label for="event-city">Город</label>
-                        <input type="text" id="event-city" placeholder="Онлайн">
-                    </div>
-                    <div class="input-group">
-                        <label for="event-category">Категория *</label>
-                        <select id="event-category" required></select>
-                    </div>
-                </div>
-                <div class="form-card-aside">
-                    <h4>Изображение</h4>
-                    <div class="image-uploader" id="image-uploader">
-                        <div class="upload-area" id="upload-area">
-                            <img id="image-preview" src="" alt="Предпросмотр" style="display: none;">
-                            <div class="upload-instructions" id="upload-instructions">
-                                <p>Перетащите файл сюда или</p>
-                                <button type="button" id="select-file-btn" class="btn btn--outline-primary">Выберите файл</button>
-                            </div>
-                        </div>
-                        <input type="file" id="image-file-input" accept="image/png, image/jpeg, image/webp" style="display: none;">
-                    </div>
-                    <input type="text" id="event-image-url" placeholder="Или вставьте URL" style="margin-top: 10px;">
-                </div>
+            <!-- Основные данные события -->
+            <div class="input-group">
+                <label for="event-title">Название *</label>
+                <input type="text" id="event-title" required placeholder="Например, Бесплатный вебинар по Python">
             </div>
-            <!-- side-column теперь удален, его содержимое перенесено в main-column -->
+            <div class="input-group">
+                <label for="event-link">Ссылка на источник/регистрацию</label>
+                <input type="url" id="event-link" placeholder="https://t.me/free_events/123">
+            </div>
+            <div class="input-group">
+                <label for="event-description">Описание</label>
+                <div id="editor-container"></div>
+            </div>
+
+            <!-- Раздел "Параметры" -->
+            <h4>Параметры</h4>
+            <div class="input-group">
+                <label for="event-date">Дата</label>
+                <input type="date" id="event-date">
+            </div>
+            <div class="input-group">
+                <label for="event-city">Город</label>
+                <input type="text" id="event-city" placeholder="Онлайн">
+            </div>
+            <div class="input-group">
+                <label for="event-category">Категория *</label>
+                <select id="event-category" required></select>
+            </div>
+
+            <!-- Раздел "Изображение" -->
+            <h4>Изображение</h4>
+            <div class="image-uploader" id="image-uploader">
+                <div class="upload-area" id="upload-area">
+                    <img id="image-preview" src="" alt="Предпросмотр" style="display: none;">
+                    <div class="upload-instructions" id="upload-instructions">
+                        <p class="upload-text">Перетащите файл сюда или</p>
+                        <button type="button" id="select-file-btn" class="btn btn--outline-primary">Выберите файл</button>
+                    </div>
+                </div>
+                <!-- Стилизуем этот input, как обычный -->
+                <input type="text" id="event-image-url" placeholder="Или вставьте URL" class="input-group-input event-image-url-input">
+            </div>
+
+            <!-- Сообщение об ошибке/успехе и кнопка "Опубликовать" -->
+            <p id="form-message" class="form-message"></p>
+            <button type="submit" class="btn btn--primary" style="width: 100%;">Опубликовать</button>
         </form>
     </main>
     
