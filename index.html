@@ -96,7 +96,7 @@
                     </div>
                     <div class="input-group">
                         <label for="password">Пароль</label>
-                        <input type="password" id="login-password" name="password" required placeholder="••••••••">
+                        <input type="password" id="login-password" name="password" required placeholder="••••••••" autocomplete="current-password">
                     </div>
                     <p id="login-error-message" class="error-message" style="display: none;"></p>
                     <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Войти</button>
@@ -125,11 +125,11 @@
                     </div>
                     <div class="input-group">
                         <label for="signup-password">Пароль</label>
-                        <input type="password" id="signup-password" name="password" required>
+                        <input type="password" id="signup-password" name="password" required autocomplete="new-password">
                     </div>
                     <div class="input-group">
                         <label for="signup-password-repeat">Повторите пароль</label>
-                        <input type="password" id="signup-password-repeat" name="password-repeat" required>
+                        <input type="password" id="signup-password-repeat" name="password-repeat" required autocomplete="new-password">
                     </div>
                     <p id="signup-error-message" class="error-message" style="display: none;"></p>
                     <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Зарегистрироваться</button>
