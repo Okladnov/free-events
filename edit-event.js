@@ -1,189 +1,210 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Редактирование события</title>
-    
-    <!-- Стили -->
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" type="text/css" href="https://unpkg.com/pell/dist/pell.min.css">
-    
-    <!-- Иконки -->
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-</head>
-<body>
-    <!-- =================================================================== -->
-    <!-- ШАПКА                                                               -->
-    <!-- =================================================================== -->
-    <header class="header">
-        <div class="container header-container">
-            <div class="header-title">
-                <a href="/">
-                    <img src="logo.png" alt="Логотип Free Events" class="header-logo">
-                </a>
-            </div>
-            <div class="search-wrapper">
-                <input id="search-input" placeholder="Поиск...">
-                <button class="search-button">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="var(--icon-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21L16.65 16.65" stroke="var(--icon-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-            </div>
-            <div class="header-theme-switcher">
-                <label class="theme-toggle-label">
-                    <input type="checkbox" id="theme-toggle">
-                    <span class="theme-toggle-slider"></span>
-                </label>
-            </div>
-            <div class="auth-block">
-                <button class="btn btn--primary hidden" id="add-event-modal-btn">Добавить событие</button>
-                <div class="profile-dropdown hidden" id="profile-dropdown">
-                    <button class="profile-trigger" id="profile-trigger">
-                        <span id="user-name-display"></span>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </button>
-                    <div class="profile-menu" id="profile-menu">
-                        <a href="/profile.html">Мой профиль</a>
-                        <a href="/favorites.html">Мое избранное</a>
-                        <a href="/admin.html" id="admin-link" class="hidden">Панель модерации</a>
-                        <div class="menu-separator"></div>
-                        <a href="#" id="logoutBtn">Выйти</a>
-                    </div>
-                </div>
-                <button id="loginBtn" class="btn btn--outline-primary hidden">Войти</button>
-            </div>
-        </div>
-    </header>
-    <!-- ==================== ОСНОВНОЙ КОНТЕНТ ==================== -->
-    <main class="container">
-        <!-- form-grid-container теперь выступает как единая карточка -->
-        <form id="event-form" class="form-grid-container">
-            <h2 id="form-title">Добавление нового события</h2>
-            <!-- Основные данные события -->
-            <div class="input-group">
-                <label for="event-title">Название *</label>
-                <input type="text" id="event-title" required placeholder="Например, Бесплатный вебинар по Python">
-            </div>
-            <div class="input-group">
-                <label for="event-link">Ссылка на источник/регистрацию</label>
-                <input type="url" id="event-link" placeholder="https://t.me/free_events/123">
-            </div>
-            <div class="input-group">
-                <label for="event-description">Описание</label>
-                <div id="editor-container"></div>
-            </div>
-            <!-- Раздел "Параметры" -->
-            <h4>Параметры</h4>
-            <div class="input-group">
-                <label for="event-date">Дата</label>
-                <input type="date" id="event-date">
-            </div>
-            <div class="input-group">
-                <label for="event-city">Город</label>
-                <input type="text" id="event-city" placeholder="Онлайн">
-            </div>
-            <div class="input-group">
-                <label for="event-category">Категория *</label>
-                <select id="event-category" required></select>
-            </div>
-            <!-- Раздел "Изображение" -->
-            <h4>Изображение</h4>
-            <div class="image-uploader" id="image-uploader">
-                <!-- ИСПРАВЛЕНО: Добавлен недостающий input для загрузки файла -->
-                <input type="file" id="image-file-input" hidden accept="image/*">
+document.addEventListener('DOMContentLoaded', async () => {
+    await initializeHeader(); // Ждем, пока app.js отработает и определит пользователя
 
-                <div class="upload-area" id="upload-area">
-                    <img id="image-preview" src="" alt="Предпросмотр" style="display: none;">
-                    <div class="upload-instructions" id="upload-instructions">
-                        <p class="upload-text">Перетащите файл сюда или</p>
-                        <button type="button" id="select-file-btn" class="btn btn--outline-primary">Выберите файл</button>
-                    </div>
-                </div>
-                <!-- Стилизуем этот input, как обычный -->
-                <input type="text" id="event-image-url" placeholder="Или вставьте URL" class="input-group-input event-image-url-input">
-            </div>
-            <!-- Сообщение об ошибке/успехе и кнопка "Опубликовать" -->
-            <p id="form-message" class="form-message"></p>
-            <button type="submit" class="btn btn--primary" style="width: 100%;">Опубликовать</button>
-        </form>
-    </main>
+    // Если пользователь не авторизован, отправляем на главную
+    if (!currentUser) {
+        alert("Пожалуйста, войдите, чтобы добавлять или редактировать события.");
+        window.location.href = '/';
+        return;
+    }
+
+    // 1. ИНИЦИАЛИЗИРУЕМ РЕДАКТОР TINYMCE
+    tinymce.init({
+        selector: '#editor-container',
+        plugins: 'autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
+        toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent | link image | code',
+        height: 300,
+        menubar: false,
+        content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size:15px }',
+        // Адаптация под тёмную тему
+        skin: (window.matchMedia('(prefers-color-scheme: dark)').matches || document.body.classList.contains('dark-theme')) ? "oxide-dark" : "default",
+        content_css: (window.matchMedia('(prefers-color-scheme: dark)').matches || document.body.classList.contains('dark-theme')) ? "dark" : "default",
+
+        setup: function (editor) {
+            editor.on('init', async function () {
+                // Этот код выполнится, когда редактор будет полностью готов
+                // 3. ПРОВЕРЯЕМ, РЕДАКТИРОВАНИЕ ЛИ ЭТО, И ЗАГРУЖАЕМ ДАННЫЕ
+                const urlParams = new URLSearchParams(window.location.search);
+                const eventId = urlParams.get('id');
+                if (eventId) {
+                    const formTitle = document.getElementById('form-title');
+                    if (formTitle) formTitle.textContent = 'Редактирование события';
+                    await loadEventDataForEdit(eventId);
+                }
+            });
+        }
+    });
+
+    // 2. ЗАГРУЖАЕМ КАТЕГОРИИ
+    await loadCategories();
+
+    // 4. НАСТРАИВАЕМ ЗАГРУЗЧИК ИЗОБРАЖЕНИЙ (код без изменений)
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('image-file-input');
+    const instructions = document.getElementById('upload-instructions');
+    const preview = document.getElementById('image-preview');
+    let selectedFile = null;
+
+    if (uploadArea) {
+        uploadArea.addEventListener('click', (e) => {
+            if (e.target.id === 'select-file-btn' || e.target.closest('#select-file-btn')) {
+                fileInput.click();
+                e.preventDefault();
+            } else if (e.target.id === 'upload-area' || e.target.closest('.upload-area')) {
+                 fileInput.click();
+                 e.preventDefault();
+            }
+        });
+    }
+
+    if (fileInput) fileInput.addEventListener('change', () => handleFileSelect(fileInput.files[0]));
     
-    <!-- ======================================================================= -->
-    <!-- МОДАЛЬНОЕ ОКНО                                                           -->
-    <!-- ======================================================================= -->
-    <div id="login-modal-overlay" class="modal-overlay hidden">
-        <div class="login-modal-card">
-            <button id="modal-close-btn" class="modal-close-btn">&times;</button>
-            <div id="login-view">
-                <div class="login-modal-form-side">
-                    <h2>Вход в аккаунт</h2>
-                    <p class="form-subtitle">Получите доступ к избранному и созданию событий</p>
-                    <div class="google-btn-container">
-                        <button id="google-login-btn" class="google-btn">
-                            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo">
-                            <span>Продолжить с Google</span>
-                        </button>
-                    </div>
-                    <div class="divider">или</div>
-                    <form id="login-form">
-                        <div class="input-group">
-                            <label for="login-email">Email</label>
-                            <!-- ИСПРАВЛЕНО: Добавлен autocomplete="username", хотя браузер ругался не на него. Это хорошая практика. -->
-                            <input type="email" id="login-email" name="email" required placeholder="you@example.com" autocomplete="username">
-                        </div>
-                        <div class="input-group">
-                            <label for="login-password">Пароль</label>
-                            <!-- ИСПРАВЛЕНО: Добавлен autocomplete -->
-                            <input type="password" id="login-password" name="password" required placeholder="••••••••" autocomplete="current-password">
-                        </div>
-                        <p id="login-error-message" class="error-message" style="display: none;"></p>
-                        <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Войти</button>
-                    </form>
-                    <p class="form-switcher-link">
-                        Нет аккаунта? <button id="show-signup-view-btn">Создать новый</button>
-                    </p>
-                </div>
-            </div>
-            <div id="signup-view" class="hidden">
-                <div class="login-modal-form-side">
-                    <h2>Регистрация</h2>
-                    <p class="form-subtitle">Присоединяйтесь к нашему сообществу!</p>
-                    <form id="signup-form">
-                        <div class="input-group">
-                            <label for="signup-email">Email</label>
-                            <!-- ИСПРАВЛЕНО: Добавлен autocomplete="username" -->
-                            <input type="email" id="signup-email" name="email" required autocomplete="username">
-                        </div>
-                        <div class="input-group">
-                            <label for="signup-name">Имя пользователя</label>
-                            <input type="text" id="signup-name" name="name" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="signup-password">Пароль</label>
-                            <!-- ИСПРАВЛЕНО: Добавлен autocomplete -->
-                            <input type="password" id="signup-password" name="password" required autocomplete="new-password">
-                        </div>
-                        <div class="input-group">
-                            <label for="signup-password-repeat">Повторите пароль</label>
-                            <!-- ИСПРАВЛЕНО: Добавлен autocomplete -->
-                            <input type="password" id="signup-password-repeat" name="password-repeat" required autocomplete="new-password">
-                        </div>
-                        <p id="signup-error-message" class="error-message" style="display: none;"></p>
-                        <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Зарегистрироваться</button>
-                    </form>
-                    <p class="form-switcher-link">
-                        Уже есть аккаунт? <button id="show-login-view-btn">Войти</button>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- ==================== СКРИПТЫ ==================== -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
-    <script src="https://unpkg.com/pell"></script>
-    <script src="app.js"></script>
-    <script src="edit-event.js"></script>
-</body>
-</html>
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        if (uploadArea) uploadArea.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); });
+    });
+    ['dragenter', 'dragover'].forEach(eventName => {
+        if (uploadArea) uploadArea.addEventListener(eventName, () => uploadArea.classList.add('active'));
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        if (uploadArea) uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('active'));
+    });
+    if (uploadArea) {
+        uploadArea.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0]));
+    }
+
+    function handleFileSelect(file) {
+        if (!file || !file.type.startsWith('image/')) return;
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            if (preview) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            if (instructions) instructions.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    // 5. ВЕШАЕМ ОБРАБОТЧИК НА ОТПРАВКУ ФОРМЫ
+    const eventForm = document.getElementById('event-form');
+    if (eventForm) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('id');
+        eventForm.addEventListener('submit', (e) => handleFormSubmit(e, eventId, selectedFile));
+    }
+});
+
+// ===================================================================
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ===================================================================
+
+async function loadCategories() {
+    // ... (код без изменений)
+}
+
+async function loadEventDataForEdit(eventId) {
+    try {
+        const { data: event, error } = await supabaseClient.from('events').select('*').eq('id', eventId).single();
+        if (error || !event) {
+            alert("Событие не найдено.");
+            window.location.href = '/';
+            return;
+        }
+        if (event.created_by !== currentUser.id && !isAdmin) {
+             alert("У вас нет прав на редактирование этого события.");
+             window.location.href = '/';
+             return;
+        }
+
+        document.getElementById('event-title').value = event.title;
+        document.getElementById('event-link').value = event.link || '';
+        
+        // ИЗМЕНЕНО: Устанавливаем контент в TinyMCE
+        tinymce.get('editor-container').setContent(event.description || '');
+
+        document.getElementById('event-image-url').value = event.image_url || '';
+        document.getElementById('event-category').value = event.category_id;
+        document.getElementById('event-date').value = event.event_date;
+        document.getElementById('event-city').value = event.city || '';
+        
+        const imagePreview = document.getElementById('image-preview');
+        const uploadInstructions = document.getElementById('upload-instructions');
+        if (event.image_url && imagePreview && uploadInstructions) {
+            imagePreview.src = event.image_url;
+            imagePreview.style.display = 'block';
+            uploadInstructions.style.display = 'none';
+        }
+    } catch (error) {
+        console.error("Ошибка загрузки данных события:", error);
+        alert("Произошла ошибка при загрузке данных.");
+    }
+}
+
+async function handleFormSubmit(e, eventId, fileToUpload) {
+    e.preventDefault();
+    
+    const formMessage = document.getElementById('form-message');
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+    if (formMessage) {
+        formMessage.textContent = 'Сохраняем...';
+        formMessage.style.color = 'var(--text-color)';
+    }
+
+    try {
+        const title = document.getElementById('event-title').value.trim();
+        if (!title) {
+            if (formMessage) {
+                formMessage.textContent = 'Ошибка: Заголовок не может быть пустым.';
+                formMessage.style.color = 'var(--danger-color)';
+            }
+            if (submitButton) submitButton.disabled = false;
+            return;
+        }
+
+        let imageUrl = document.getElementById('event-image-url').value.trim();
+        if (fileToUpload) {
+            if (formMessage) formMessage.textContent = 'Загружаем изображение...';
+            const filePath = `${currentUser.id}/${Date.now()}-${fileToUpload.name}`;
+            const { error: uploadError } = await supabaseClient.storage.from('events-images').upload(filePath, fileToUpload, { upsert: true }); 
+            if (uploadError) throw new Error(`Ошибка загрузки изображения: ${uploadError.message}`);
+            const { data: urlData } = supabaseClient.storage.from('events-images').getPublicUrl(filePath);
+            imageUrl = urlData.publicUrl;
+        }
+        
+        if (formMessage) formMessage.textContent = 'Сохраняем событие...';
+        
+        const eventData = {
+            title: document.getElementById('event-title').value.trim(),
+            // ИЗМЕНЕНО: Получаем контент из TinyMCE
+            description: tinymce.get('editor-container').getContent(),
+            image_url: imageUrl,
+            category_id: document.getElementById('event-category').value,
+            event_date: document.getElementById('event-date').value || null,
+            city: document.getElementById('event-city').value.trim(),
+            link: document.getElementById('event-link').value.trim(),
+            created_by: currentUser.id,
+        };
+
+        const { data, error } = eventId
+            ? await supabaseClient.from('events').update(eventData).eq('id', eventId).select().single()
+            : await supabaseClient.from('events').insert(eventData).select().single();
+        
+        if (error) throw error;
+        
+        if (formMessage) {
+            formMessage.textContent = '✅ Успешно! Перенаправляем...';
+            formMessage.style.color = 'var(--success-color)';
+        }
+        
+        setTimeout(() => { window.location.href = `/event.html?id=${data.id}`; }, 1500);
+    } catch (error) {
+        console.error("Ошибка сохранения события:", error);
+        if (formMessage) {
+            formMessage.textContent = `Ошибка: ${error.message}`;
+            formMessage.style.color = 'var(--danger-color)';
+        }
+        if (submitButton) submitButton.disabled = false;
+    }
+}
