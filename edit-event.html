@@ -14,7 +14,6 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 <body>
-
     <!-- =================================================================== -->
     <!-- ШАПКА                                                               -->
     <!-- =================================================================== -->
@@ -56,13 +55,11 @@
             </div>
         </div>
     </header>
-
     <!-- ==================== ОСНОВНОЙ КОНТЕНТ ==================== -->
     <main class="container">
         <!-- form-grid-container теперь выступает как единая карточка -->
         <form id="event-form" class="form-grid-container">
             <h2 id="form-title">Добавление нового события</h2>
-
             <!-- Основные данные события -->
             <div class="input-group">
                 <label for="event-title">Название *</label>
@@ -76,7 +73,6 @@
                 <label for="event-description">Описание</label>
                 <div id="editor-container"></div>
             </div>
-
             <!-- Раздел "Параметры" -->
             <h4>Параметры</h4>
             <div class="input-group">
@@ -91,10 +87,10 @@
                 <label for="event-category">Категория *</label>
                 <select id="event-category" required></select>
             </div>
-
             <!-- Раздел "Изображение" -->
             <h4>Изображение</h4>
             <div class="image-uploader" id="image-uploader">
+                <input type="file" id="image-file-input" hidden accept="image/*">
                 <div class="upload-area" id="upload-area">
                     <img id="image-preview" src="" alt="Предпросмотр" style="display: none;">
                     <div class="upload-instructions" id="upload-instructions">
@@ -102,10 +98,8 @@
                         <button type="button" id="select-file-btn" class="btn btn--outline-primary">Выберите файл</button>
                     </div>
                 </div>
-                <!-- Стилизуем этот input, как обычный -->
                 <input type="text" id="event-image-url" placeholder="Или вставьте URL" class="input-group-input event-image-url-input">
             </div>
-
             <!-- Сообщение об ошибке/успехе и кнопка "Опубликовать" -->
             <p id="form-message" class="form-message"></p>
             <button type="submit" class="btn btn--primary" style="width: 100%;">Опубликовать</button>
@@ -132,11 +126,11 @@
                     <form id="login-form">
                         <div class="input-group">
                             <label for="login-email">Email</label>
-                            <input type="email" id="login-email" name="email" required placeholder="you@example.com">
+                            <input type="email" id="login-email" name="email" required placeholder="you@example.com" autocomplete="username">
                         </div>
                         <div class="input-group">
                             <label for="login-password">Пароль</label>
-                            <input type="password" id="login-password" name="password" required placeholder="••••••••">
+                            <input type="password" id="login-password" name="password" required placeholder="••••••••" autocomplete="current-password">
                         </div>
                         <p id="login-error-message" class="error-message" style="display: none;"></p>
                         <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Войти</button>
@@ -153,7 +147,7 @@
                     <form id="signup-form">
                         <div class="input-group">
                             <label for="signup-email">Email</label>
-                            <input type="email" id="signup-email" name="email" required>
+                            <input type="email" id="signup-email" name="email" required autocomplete="username">
                         </div>
                         <div class="input-group">
                             <label for="signup-name">Имя пользователя</label>
@@ -161,11 +155,11 @@
                         </div>
                         <div class="input-group">
                             <label for="signup-password">Пароль</label>
-                            <input type="password" id="signup-password" name="password" required>
+                            <input type="password" id="signup-password" name="password" required autocomplete="new-password">
                         </div>
                         <div class="input-group">
                             <label for="signup-password-repeat">Повторите пароль</label>
-                            <input type="password" id="signup-password-repeat" name="password-repeat" required>
+                            <input type="password" id="signup-password-repeat" name="password-repeat" required autocomplete="new-password">
                         </div>
                         <p id="signup-error-message" class="error-message" style="display: none;"></p>
                         <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Зарегистрироваться</button>
@@ -177,11 +171,11 @@
             </div>
         </div>
     </div>
-
     <!-- ==================== СКРИПТЫ ==================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
-    <script src="https://unpkg.com/pell"></script>
+    <!-- ИСПРАВЛЕНО: Указан точный путь к JS-файлу -->
+    <script src="https://unpkg.com/pell/dist/pell.min.js"></script>
     <script src="app.js"></script>
     <script src="edit-event.js"></script>
 </body>
