@@ -1,3 +1,9 @@
+// ===================================================================
+// edit-event.js - ЕДИНАЯ РАБОЧАЯ ВЕРСИЯ С РЕДАКТОРОМ PELL
+// ===================================================================
+
+let pellEditor = null; // Делаем редактор глобальным, чтобы к нему можно было обратиться
+
 document.addEventListener('DOMContentLoaded', async () => {
     await initializeHeader(); // Ждем, пока app.js отработает и определит пользователя
 
@@ -8,67 +14,61 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // 1. ИНИЦИАЛИЗИРУЕМ РЕДАКТОР TINYMCE
-    tinymce.init({
-        selector: '#editor-container',
-        plugins: 'autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
-        toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent | link image | code',
-        height: 300,
-        menubar: false,
-        content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size:15px }',
-        // Адаптация под тёмную тему
-        skin: (window.matchMedia('(prefers-color-scheme: dark)').matches || document.body.classList.contains('dark-theme')) ? "oxide-dark" : "default",
-        content_css: (window.matchMedia('(prefers-color-scheme: dark)').matches || document.body.classList.contains('dark-theme')) ? "dark" : "default",
-
-        setup: function (editor) {
-            editor.on('init', async function () {
-                // Этот код выполнится, когда редактор будет полностью готов
-                // 3. ПРОВЕРЯЕМ, РЕДАКТИРОВАНИЕ ЛИ ЭТО, И ЗАГРУЖАЕМ ДАННЫЕ
-                const urlParams = new URLSearchParams(window.location.search);
-                const eventId = urlParams.get('id');
-                if (eventId) {
-                    const formTitle = document.getElementById('form-title');
-                    if (formTitle) formTitle.textContent = 'Редактирование события';
-                    await loadEventDataForEdit(eventId);
-                }
-            });
+    // 1. ИНИЦИАЛИЗИРУЕМ РЕДАКТОР PELL
+    pellEditor = pell.init({
+        element: document.getElementById('editor-container'),
+        onChange: html => {},
+        defaultParagraphSeparator: 'p',
+        actions: [
+            { name: 'bold', icon: '<b>B</b>', result: () => pell.exec('bold') },
+            { name: 'italic', icon: '<i>I</i>', result: () => pell.exec('italic') },
+            { name: 'underline', icon: '<u>U</u>', result: () => pell.exec('underline') },
+            { name: 'link', icon: '🔗', result: () => { const url = window.prompt('Введите URL'); if (url) pell.exec('createLink', url); } }
+        ],
+        classes: {
+            actionbar: 'pell-actionbar',
+            button: 'pell-button',
+            content: 'pell-content',
+            selected: 'pell-button-selected'
         }
     });
 
     // 2. ЗАГРУЖАЕМ КАТЕГОРИИ
     await loadCategories();
 
-    // 4. НАСТРАИВАЕМ ЗАГРУЗЧИК ИЗОБРАЖЕНИЙ (код без изменений)
+    // 3. НАСТРАИВАЕМ ЗАГРУЗЧИК ИЗОБРАЖЕНИЙ
     const uploadArea = document.getElementById('upload-area');
     const fileInput = document.getElementById('image-file-input');
     const instructions = document.getElementById('upload-instructions');
     const preview = document.getElementById('image-preview');
     let selectedFile = null;
-
+    
     if (uploadArea) {
         uploadArea.addEventListener('click', (e) => {
-            if (e.target.id === 'select-file-btn' || e.target.closest('#select-file-btn')) {
+            if (fileInput && (e.target.id === 'select-file-btn' || e.target.closest('#select-file-btn'))) {
                 fileInput.click();
-                e.preventDefault();
-            } else if (e.target.id === 'upload-area' || e.target.closest('.upload-area')) {
+                e.preventDefault(); 
+            } else if (fileInput) {
                  fileInput.click();
                  e.preventDefault();
             }
         });
     }
 
-    if (fileInput) fileInput.addEventListener('change', () => handleFileSelect(fileInput.files[0]));
+    if (fileInput) {
+        fileInput.addEventListener('change', () => handleFileSelect(fileInput.files[0]));
+    }
     
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        if (uploadArea) uploadArea.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); });
-    });
-    ['dragenter', 'dragover'].forEach(eventName => {
-        if (uploadArea) uploadArea.addEventListener(eventName, () => uploadArea.classList.add('active'));
-    });
-    ['dragleave', 'drop'].forEach(eventName => {
-        if (uploadArea) uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('active'));
-    });
     if (uploadArea) {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); });
+        });
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.add('active'));
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('active'));
+        });
         uploadArea.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0]));
     }
 
@@ -81,16 +81,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                 preview.src = e.target.result;
                 preview.style.display = 'block';
             }
-            if (instructions) instructions.style.display = 'none';
+            if (instructions) {
+                instructions.style.display = 'none';
+            }
         };
         reader.readAsDataURL(file);
     }
     
+    // 4. ПРОВЕРЯЕМ, РЕДАКТИРОВАНИЕ ЛИ ЭТО, И ЗАГРУЖАЕМ ДАННЫЕ
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('id');
+    if (eventId) {
+        const formTitle = document.getElementById('form-title');
+        if (formTitle) formTitle.textContent = 'Редактирование события';
+        await loadEventDataForEdit(eventId);
+    }
+
     // 5. ВЕШАЕМ ОБРАБОТЧИК НА ОТПРАВКУ ФОРМЫ
     const eventForm = document.getElementById('event-form');
     if (eventForm) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const eventId = urlParams.get('id');
         eventForm.addEventListener('submit', (e) => handleFormSubmit(e, eventId, selectedFile));
     }
 });
@@ -100,7 +109,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ===================================================================
 
 async function loadCategories() {
-    // ... (код без изменений)
+    const categorySelect = document.getElementById('event-category');
+    if (!categorySelect) return;
+    try {
+        const { data, error } = await supabaseClient.from('categories').select('*').order('name');
+        if (error) throw error;
+        categorySelect.innerHTML = data.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+    } catch (error) {
+        console.error("Ошибка загрузки категорий:", error);
+    }
 }
 
 async function loadEventDataForEdit(eventId) {
@@ -120,14 +137,15 @@ async function loadEventDataForEdit(eventId) {
         document.getElementById('event-title').value = event.title;
         document.getElementById('event-link').value = event.link || '';
         
-        // ИЗМЕНЕНО: Устанавливаем контент в TinyMCE
-        tinymce.get('editor-container').setContent(event.description || '');
-
+        if (pellEditor && pellEditor.content) {
+            pellEditor.content.innerHTML = event.description || '';
+        }
+        
         document.getElementById('event-image-url').value = event.image_url || '';
         document.getElementById('event-category').value = event.category_id;
         document.getElementById('event-date').value = event.event_date;
         document.getElementById('event-city').value = event.city || '';
-        
+
         const imagePreview = document.getElementById('image-preview');
         const uploadInstructions = document.getElementById('upload-instructions');
         if (event.image_url && imagePreview && uploadInstructions) {
@@ -162,8 +180,9 @@ async function handleFormSubmit(e, eventId, fileToUpload) {
             if (submitButton) submitButton.disabled = false;
             return;
         }
-
+        
         let imageUrl = document.getElementById('event-image-url').value.trim();
+
         if (fileToUpload) {
             if (formMessage) formMessage.textContent = 'Загружаем изображение...';
             const filePath = `${currentUser.id}/${Date.now()}-${fileToUpload.name}`;
@@ -177,8 +196,7 @@ async function handleFormSubmit(e, eventId, fileToUpload) {
         
         const eventData = {
             title: document.getElementById('event-title').value.trim(),
-            // ИЗМЕНЕНО: Получаем контент из TinyMCE
-            description: tinymce.get('editor-container').getContent(),
+            description: pellEditor ? pellEditor.content.innerHTML : '',
             image_url: imageUrl,
             category_id: document.getElementById('event-category').value,
             event_date: document.getElementById('event-date').value || null,
@@ -199,6 +217,7 @@ async function handleFormSubmit(e, eventId, fileToUpload) {
         }
         
         setTimeout(() => { window.location.href = `/event.html?id=${data.id}`; }, 1500);
+
     } catch (error) {
         console.error("Ошибка сохранения события:", error);
         if (formMessage) {
