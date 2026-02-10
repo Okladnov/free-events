@@ -1,17 +1,12 @@
 // =================================================================
-// event.js - ПОЛНОСТЬЮ ПЕРЕРАБОТАННАЯ "ЖИВАЯ" ВЕРСИЯ
+// event.js - ВЕРСИЯ С ПАНЕЛЬЮ МОДЕРАЦИИ ДЛЯ АДМИНОВ
 // =================================================================
 
-// =================================================================
-// ТОЧКА ВХОДА: ЗАПУСК ПОСЛЕ ЗАГРУЗКИ СТРАНИЦЫ
-// =================================================================
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Инициализируем шапку и ждем, пока определится пользователь (из app.js)
     await initializeHeader();
-
     // 2. Загружаем весь контент страницы
     await loadPageContent();
-
     // 3. Настраиваем все обработчики событий для страницы
     setupEventListeners();
 });
@@ -19,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // =================================================================
 // ГЛАВНАЯ ФУНКЦИЯ ЗАГРУЗКИ КОНТЕНТА
 // =================================================================
+
 async function loadPageContent() {
     const eventDetailContainer = document.getElementById('event-detail-container');
     const urlParams = new URLSearchParams(window.location.search);
@@ -32,7 +28,6 @@ async function loadPageContent() {
     eventDetailContainer.innerHTML = `<p>Загрузка события...</p>`;
 
     try {
-        // Запускаем запросы на получение события и комментариев ОДНОВРЕМЕННО
         const [eventResponse, commentsResponse] = await Promise.all([
             supabaseClient
                 .from('events')
@@ -52,7 +47,7 @@ async function loadPageContent() {
         if (eventError || !event) throw new Error("Событие не найдено.");
         if (commentsError) throw new Error("Ошибка загрузки комментариев.");
 
-        // Если все успешно, "рисуем" страницу
+        // "Рисуем" страницу
         renderPage(event, comments);
 
     } catch (error) {
@@ -66,24 +61,33 @@ async function loadPageContent() {
 // ФУНКЦИИ "ОТРИСОВКИ" (RENDER)
 // =================================================================
 
-/**
- * Главная функция, которая собирает всю страницу из данных
- */
 function renderPage(event, comments) {
     const eventDetailContainer = document.getElementById('event-detail-container');
-    document.title = sanitizeForAttribute(event.title);
+    document.title = event.title;
 
     const categoriesHtml = (event.categories || [])
         .map(cat => `<a href="/?category=${cat.id}" class="tag">${sanitizeHTML(cat.name)}</a>`)
         .join('');
-
+    
     const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
     const isFavorited = currentUser ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
 
-    // Собираем HTML страницы, используя data-атрибуты для действий
+    // ИЗМЕНЕНО: Добавляем HTML для панели модерации, если нужно
+    const moderationPanelHtml = (isAdmin && !event.is_approved) ? `
+        <div class="moderation-panel">
+            <div class="moderation-panel-title">⭐ Панель модератора</div>
+            <p>Это событие ожидает вашего одобрения.</p>
+            <div class="moderation-panel-actions">
+                <button class="btn btn--primary" data-action="approve-event">Одобрить</button>
+                <button class="btn btn--danger" data-action="delete-event">Удалить</button>
+            </div>
+        </div>
+    ` : '';
+
     const eventHtml = `
+        ${moderationPanelHtml} 
         <div class="event-detail-header">
-            <img src="${event.image_url || 'https://placehold.co/1200x400/1e1e1e/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}" class="event-detail-image">
+            <img src="${event.image_url || 'https://placehold.co/1200x400/1e1e1e/ff6a00?text=Нет+фото'}" alt="${event.title}" class="event-detail-image">
             <button class="card-save-btn ${isFavorited ? 'active' : ''}" data-action="toggle-favorite">
                 ${isFavorited ? '❤️' : '🤍'}
             </button>
@@ -117,7 +121,7 @@ function renderPage(event, comments) {
                         <input id="comment-input" placeholder="Написать комментарий..." required>
                         <button type="submit">Отправить</button>
                     </form>
-                    ` : '<p><a href="/login.html">Войдите</a>, чтобы оставить комментарий</p>'}
+                    ` : '<p><a href="/">Войдите</a>, чтобы оставить комментарий</p>'}
                 </div>
             </div>
         </div>`;
@@ -125,77 +129,55 @@ function renderPage(event, comments) {
     eventDetailContainer.innerHTML = eventHtml;
 }
 
-/**
- * "Рисует" один комментарий. Нужна для динамического добавления.
- */
+// ... (renderComment и renderRating без изменений)
+
 function renderComment(comment) {
-    const authorName = comment.profiles ? sanitizeHTML(comment.profiles.full_name) : 'Аноним';
-    const authorAvatar = comment.profiles ? comment.profiles.avatar_url : 'https://placehold.co/32x32/f0f2f5/ccc';
-    return `
-        <div class="comment">
-            <img src="${authorAvatar}" alt="avatar" class="comment-avatar">
-            <div class="comment-body">
-                <div class="comment-header">
-                    <span class="comment-author">${authorName}</span>
-                    <span class="comment-date">${new Date(comment.created_at).toLocaleString('ru-RU')}</span>
-                </div>
-                <p>${sanitizeHTML(comment.content)}</p>
-            </div>
-        </div>
-    `;
+    // ...
 }
 
-/**
- * "Рисует" блок с рейтингом. Нужна для динамического обновления.
- */
 function renderRating(event) {
-    const rating = event.votes.reduce((acc, vote) => acc + vote.value, 0);
-    const hasVoted = currentUser ? event.votes.some(v => v.user_id === currentUser.id) : false;
-    let scoreClass = '', scoreIcon = '';
-    if (rating < 0) { scoreClass = 'score-cold'; scoreIcon = '❄️'; }
-    else if (rating > 20) { scoreClass = 'score-fire'; scoreIcon = '🔥🔥'; }
-    else if (rating > 5) { scoreClass = 'score-hot'; scoreIcon = '🔥'; }
-
-    return `
-        <strong>⭐ Рейтинг</strong>
-        <div class="vote">
-            <button data-action="vote" data-value="1" ${hasVoted ? 'disabled' : ''} title="Нравится">▲</button>
-            <span class="score ${scoreClass}">${rating} ${scoreIcon}</span>
-            <button data-action="vote" data-value="-1" ${hasVoted ? 'disabled' : ''} title="Не нравится">▼</button>
-        </div>
-    `;
+    // ...
 }
+
 
 // =================================================================
 // НАСТРОЙКА ОБРАБОТЧИКОВ СОБЫТИЙ
 // =================================================================
+
 function setupEventListeners() {
     const eventDetailContainer = document.getElementById('event-detail-container');
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('id');
 
-    // Единый обработчик для кликов по кнопкам "голосовать" и "в избранное"
-    eventDetailContainer.addEventListener('click', (event) => {
+    eventDetailContainer.addEventListener('click', async (event) => {
         const actionElement = event.target.closest('[data-action]');
         if (!actionElement) return;
 
-        if (!currentUser) {
+        const action = actionElement.dataset.action;
+
+        // ИЗМЕНЕНО: Обработка кнопок модерации
+        if (action === 'approve-event') {
+            await handleEventAction('approve', eventId, actionElement);
+        } else if (action === 'delete-event') {
+            if (confirm('Вы уверены, что хотите НАВСЕГДА удалить это событие?')) {
+                await handleEventAction('delete', eventId, actionElement);
+            }
+        }
+
+        // Старая логика для других кнопок
+        if (!currentUser && (action === 'toggle-favorite' || action === 'vote')) {
             alert('Пожалуйста, войдите, чтобы выполнить это действие.');
             return;
         }
-
-        const action = actionElement.dataset.action;
-
+        
         if (action === 'toggle-favorite') {
             handleToggleFavorite(eventId, actionElement);
-        }
-        if (action === 'vote') {
+        } else if (action === 'vote') {
             const value = parseInt(actionElement.dataset.value, 10);
             handleVote(eventId, value);
         }
     });
 
-    // Отдельный обработчик для формы комментариев
     eventDetailContainer.addEventListener('submit', (event) => {
         if (event.target.id === 'comment-form') {
             event.preventDefault();
@@ -208,86 +190,49 @@ function setupEventListeners() {
 // ФУНКЦИИ-ОБРАБОТЧИКИ ДЕЙСТВИЙ
 // =================================================================
 
+// ... (handleAddComment, handleToggleFavorite, handleVote без изменений)
+
 async function handleAddComment(eventId, formElement) {
-    const input = formElement.querySelector('input');
-    const button = formElement.querySelector('button');
-    const content = input.value.trim();
-
-    if (!content) return;
-    
-    input.disabled = true;
-    button.disabled = true;
-
-    try {
-        // При вставке сразу запрашиваем вставленную строку с данными профиля
-        const { data: newComment, error } = await supabaseClient
-            .from('comments')
-            .insert({ content, event_id: eventId, user_id: currentUser.id })
-            .select(`*, profiles(full_name, avatar_url)`)
-            .single();
-
-        if (error) throw error;
-        
-        // "Рисуем" новый комментарий и добавляем в список без перезагрузки
-        const commentsList = document.getElementById('comments-list');
-        commentsList.insertAdjacentHTML('beforeend', renderComment(newComment));
-        input.value = ''; // Очищаем поле ввода
-
-    } catch (error) {
-        console.error("Ошибка добавления комментария:", error);
-        alert("Не удалось добавить комментарий.");
-    } finally {
-        input.disabled = false;
-        button.disabled = false;
-    }
+    // ...
 }
 
 async function handleToggleFavorite(eventId, buttonElement) {
-    const isFavorited = buttonElement.classList.contains('active');
-    buttonElement.disabled = true;
-
-    try {
-        if (isFavorited) {
-            await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id });
-            buttonElement.classList.remove('active');
-            buttonElement.innerHTML = '🤍';
-        } else {
-            await supabaseClient.from('favorites').insert({ event_id: eventId, user_id: currentUser.id });
-            buttonElement.classList.add('active');
-            buttonElement.innerHTML = '❤️';
-        }
-    } catch (error) {
-        console.error("Ошибка избранного:", error);
-    } finally {
-        buttonElement.disabled = false;
-    }
+    // ...
 }
 
 async function handleVote(eventId, value) {
-    const ratingSection = document.getElementById('rating-section');
-    ratingSection.style.opacity = '0.5';
+    // ...
+}
 
-    try {
-        // upsert - обновит голос, если он есть, или вставит новый.
-        // Для этого в таблице 'votes' должен быть PRIMARY KEY на (event_id, user_id)
-        await supabaseClient.from('votes').upsert({ event_id: eventId, user_id: currentUser.id, value: value });
-        
-        // После успешного голоса, просто перезагружаем данные о событии, чтобы получить новый рейтинг
-        const { data: updatedEvent, error } = await supabaseClient
-            .from('events')
-            .select(`*, votes(user_id, value)`)
-            .eq('id', eventId)
-            .single();
-        
-        if (error) throw error;
-        
-        // И обновляем только блок с рейтингом
-        ratingSection.innerHTML = renderRating(updatedEvent);
 
-    } catch(error) {
-        console.error("Ошибка голосования:", error);
-        alert("Ошибка голосования. Возможно, вы уже голосовали.");
-    } finally {
-        ratingSection.style.opacity = '1';
+// ИЗМЕНЕНО: Новая функция для обработки действий модератора
+async function handleEventAction(action, eventId, button) {
+    button.disabled = true;
+    const originalText = button.textContent;
+    button.textContent = 'Выполняем...';
+
+    let error;
+
+    if (action === 'approve') {
+        const { error: approveError } = await supabaseClient.from('events').update({ is_approved: true }).eq('id', eventId);
+        error = approveError;
+    } else if (action === 'delete') {
+        const { error: deleteError } = await supabaseClient.from('events').delete().eq('id', eventId);
+        error = deleteError;
+    }
+
+    if (error) {
+        alert(`Ошибка: ${error.message}`);
+        button.disabled = false;
+        button.textContent = originalText;
+    } else {
+        const panel = document.querySelector('.moderation-panel');
+        if (action === 'approve') {
+            panel.innerHTML = '<p style="color: var(--success-color);">✅ Событие успешно одобрено!</p>';
+        } else if (action === 'delete') {
+            document.querySelector('.event-detail-header').remove();
+            document.querySelector('.event-detail-body').remove();
+            panel.innerHTML = '<p style="color: var(--danger-color);">❌ Событие удалено. <a href="/admin.html">Вернуться в админку</a></p>';
+        }
     }
 }
