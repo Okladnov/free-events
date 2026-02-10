@@ -7,7 +7,6 @@
     
     <!-- Стили -->
     <link rel="stylesheet" href="style.css">
-    <!-- Возвращаем стили для простого редактора (Pell) -->
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/pell/dist/pell.min.css">
     
     <!-- Иконки -->
@@ -70,11 +69,10 @@
             </div>
             <div class="input-group">
                 <label for="event-description">Описание</label>
-                <!-- Возвращаем div для Pell -->
                 <div id="editor-container"></div>
             </div>
+            
             <h4>Параметры</h4>
-            <!-- ИЗМЕНЕНО: Поля обернуты в div.form-row -->
             <div class="form-row">
                 <div class="input-group">
                     <label for="event-date">Дата</label>
@@ -89,6 +87,7 @@
                     <select id="event-category" required></select>
                 </div>
             </div>
+
             <h4>Изображение</h4>
             <div class="image-uploader" id="image-uploader">
                 <input type="file" id="image-file-input" hidden accept="image/*">
@@ -174,7 +173,6 @@
     <!-- ==================== СКРИПТЫ ==================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
-    <!-- Возвращаем Pell и удаляем tinymce.min.js -->
     <script src="https://unpkg.com/pell/dist/pell.min.js"></script>
     <script src="app.js"></script>
     <script src="edit-event.js"></script>
