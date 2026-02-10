@@ -1,9 +1,5 @@
 // =================================================================
-// script.js - ФИНАЛЬНАЯ, ОТРЕФАКТОРЕННАЯ ВЕРСИЯ
-// =================================================================
-
-// =================================================================
-// НАСТРОЙКИ СТРАНИЦЫ
+// script.js - ФИНАЛЬНАЯ РАБОЧАЯ ВЕРСИЯ
 // =================================================================
 
 const eventsContainer = document.getElementById("events");
@@ -12,22 +8,12 @@ const PAGE_SIZE = 9;
 let currentPage = 0;
 let currentCategoryId = null;
 
-// =================================================================
-// ТОЧКА ВХОДА: КОД ЗАПУСКАЕТСЯ ПОСЛЕ ЗАГРУЗКИ СТРАНИЦЫ
-// =================================================================
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Шапка инициализируется сама в app.js
-    // Нам нужно просто загрузить события и настроить локальные обработчики
     loadEvents(true);
     setupIndexPageListeners();
     loadAndDisplayCategories();
     setupCategoryListeners();
 });
-
-// =================================================================
-// ОБРАБОТЧИКИ СОБЫТИЙ ДЛЯ ГЛАВНОЙ СТРАНИЦЫ (С ДЕЛЕГИРОВАНИЕМ)
-// =================================================================
 
 function setupIndexPageListeners() {
     const searchInput = document.getElementById('search-input');
@@ -42,19 +28,17 @@ function setupIndexPageListeners() {
         };
     }
 
-    // ЕДИНЫЙ ОБРАБОТЧИК КЛИКОВ ДЛЯ ВСЕХ КАРТОЧЕК
     if (eventsContainer) {
         eventsContainer.addEventListener('click', async (event) => {
             const target = event.target;
             const actionElement = target.closest('[data-action]');
-            
             if (!actionElement) return;
 
             const action = actionElement.dataset.action;
             const card = target.closest('.event-card-v3');
             const eventId = card ? card.dataset.eventId : null;
 
-            if (actionElement.tagName === 'BUTTON') {
+            if (actionElement.tagName === 'BUTTON' || actionElement.tagName === 'A' && actionElement.href.endsWith('#')) {
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -76,17 +60,12 @@ function setupIndexPageListeners() {
     }
 }
 
-// =================================================================
-// ЛОКАЛЬНЫЕ ФУНКЦИИ-ОБРАБОТЧИКИ (ДЕЙСТВИЯ С КАРТОЧКАМИ)
-// =================================================================
-
 async function deleteEventHandler(eventId, cardElement) {
     if (!confirm('Вы уверены, что хотите удалить это событие?')) return;
     cardElement.style.opacity = '0.5';
     const { error } = await supabaseClient.from('events').delete().eq('id', eventId);
-
     if (error) {
-        alert('Ошибка удаления. Убедитесь, что у вас есть права, и проверьте консоль.');
+        alert('Ошибка удаления.');
         console.error('Ошибка удаления:', error.message);
         cardElement.style.opacity = '1';
     } else {
@@ -99,35 +78,23 @@ async function toggleFavoriteHandler(eventId, buttonElement) {
         alert('Пожалуйста, войдите, чтобы добавлять в избранное.');
         return;
     }
-    
     buttonElement.disabled = true;
     const isFavorited = buttonElement.classList.contains('active');
     
-    let error;
-    if (isFavorited) {
-        const { error: deleteError } = await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id });
-        error = deleteError;
-    } else {
-        const { error: insertError } = await supabaseClient.from('favorites').insert({ event_id: eventId, user_id: currentUser.id });
-        error = insertError;
-    }
+    const { error } = isFavorited
+        ? await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id })
+        : await supabaseClient.from('favorites').insert({ event_id: eventId, user_id: currentUser.id });
     
     if (!error) {
         buttonElement.classList.toggle('active');
     } else {
         console.error('Ошибка избранного:', error.message);
     }
-    
     buttonElement.disabled = false;
 }
 
-// =================================================================
-// ЛОГИКА РАБОТЫ С КАТЕГОРИЯМИ
-// =================================================================
-
 async function loadAndDisplayCategories() {
     const { data, error } = await supabaseClient.from('categories').select('*').order('name');
-
     if (error) {
         console.error('Ошибка загрузки категорий:', error);
         return;
@@ -171,10 +138,6 @@ function setupCategoryListeners() {
     });
 }
 
-// =================================================================
-// ЗАГРУЗКА СОБЫТИЙ (С ИСПОЛЬЗОВАНИЕМ <TEMPLATE>)
-// =================================================================
-
 async function loadEvents(isNewSearch = false) {
     if (isNewSearch) {
         currentPage = 0;
@@ -185,13 +148,13 @@ async function loadEvents(isNewSearch = false) {
     const from = currentPage * PAGE_SIZE;
     const to = from + PAGE_SIZE;
 
+    // ИЗМЕНЕНО: Запрос стал намного проще
     let query = supabaseClient
         .from('events_with_comment_count')
         .select(`
             *,
             organizations(name),
-            categories!inner!events_category_id_fkey(id, name),
-            profiles:created_by(full_name, avatar_url),
+            categories!inner(id, name),
             favorites(user_id)
         `, { count: 'exact' })
         .eq('is_approved', true);
@@ -201,7 +164,7 @@ async function loadEvents(isNewSearch = false) {
     }
 
     if (currentCategoryId) {
-        query = query.eq('categories!events_category_id_fkey.id', currentCategoryId);
+        query = query.eq('categories.id', currentCategoryId);
     }
 
     const { data: events, error, count } = await query
@@ -214,12 +177,9 @@ async function loadEvents(isNewSearch = false) {
         return;
     }
 
-    if (isNewSearch && eventsContainer) {
-        eventsContainer.innerHTML = "";
-    }
-
-    if ((!events || events.length === 0) && eventsContainer) {
-        if (isNewSearch) eventsContainer.innerHTML = '<p>Событий по вашему запросу не найдено.</p>';
+    if (isNewSearch) eventsContainer.innerHTML = "";
+    if ((!events || events.length === 0) && isNewSearch) {
+        eventsContainer.innerHTML = '<p>Событий по вашему запросу не найдено.</p>';
         if(paginationControls) paginationControls.innerHTML = '';
         return;
     }
@@ -239,9 +199,7 @@ async function loadEvents(isNewSearch = false) {
         cardClone.querySelector('.card-description').textContent = `${(event.description || '').substring(0, 100)}...`;
         
         const image = cardClone.querySelector('.card-image');
-        if (event.image_url) {
-            image.src = event.image_url;
-        }
+        if (event.image_url) image.src = event.image_url;
         image.alt = event.title;
         
         const orgLink = cardClone.querySelector('.card-organization');
@@ -253,8 +211,9 @@ async function loadEvents(isNewSearch = false) {
             if(orgPlaceholder) orgPlaceholder.classList.add('hidden');
         }
 
-        const authorName = (event.profiles && event.profiles.full_name) ? event.profiles.full_name : 'Аноним';
-        const authorAvatar = (event.profiles && event.profiles.avatar_url) ? event.profiles.avatar_url : 'https://placehold.co/24x24/f0f2f5/ccc';
+        // ИЗМЕНЕНО: Получаем данные автора напрямую из event
+        const authorName = event.full_name || 'Аноним';
+        const authorAvatar = event.avatar_url || 'https://placehold.co/24x24/f0f2f5/ccc';
         cardClone.querySelector('.card-author-name').textContent = authorName;
         cardClone.querySelector('.card-author-avatar').src = authorAvatar;
         
@@ -274,9 +233,7 @@ async function loadEvents(isNewSearch = false) {
     });
 
     const existingLoadMoreBtn = document.getElementById('load-more-btn');
-    if (existingLoadMoreBtn) {
-        existingLoadMoreBtn.remove();
-    }
+    if (existingLoadMoreBtn) existingLoadMoreBtn.remove();
     
     if ((events.length + from < count) && paginationControls) {
         const loadMoreBtn = document.createElement('button');
