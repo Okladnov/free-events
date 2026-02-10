@@ -114,6 +114,16 @@ body {
   color: var(--text-color-inverted);
 }
 
+.btn--danger {
+  background-color: var(--danger-color);
+  color: var(--text-color-inverted);
+  border-color: var(--danger-color);
+}
+.btn--danger:hover {
+    background-color: var(--danger-color-hover);
+    border-color: var(--danger-color-hover);
+}
+
 /* =========================================
    4. ШАПКА
    ========================================= */
@@ -382,6 +392,27 @@ input:checked + .theme-toggle-slider:before {
 .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--input-background); color: var(--text-color); font-size: 15px; box-sizing: border-box; }
 .input-group input:focus, .input-group select:focus, .input-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px var(--primary-color-light); }
 .form-message { color: var(--text-color-secondary); font-size: 14px; margin-top: 15px; }
+
+.moderation-panel {
+    background-color: var(--primary-color-light);
+    color: var(--text-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+.moderation-panel-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 8px;
+}
+.moderation-panel p {
+    margin: 0 0 16px;
+}
+.moderation-panel-actions {
+    display: flex;
+    gap: 12px;
+}
 
 /* =========================================
    7. ОБЩИЕ СТИЛИ ДЛЯ ФОРМ ВХОДА/РЕГИСТРАЦИИ
