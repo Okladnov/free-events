@@ -74,17 +74,20 @@
                 <div id="editor-container"></div>
             </div>
             <h4>Параметры</h4>
-            <div class="input-group">
-                <label for="event-date">Дата</label>
-                <input type="date" id="event-date">
-            </div>
-            <div class="input-group">
-                <label for="event-city">Город</label>
-                <input type="text" id="event-city" placeholder="Онлайн">
-            </div>
-            <div class="input-group">
-                <label for="event-category">Категория *</label>
-                <select id="event-category" required></select>
+            <!-- ИЗМЕНЕНО: Поля обернуты в div.form-row -->
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="event-date">Дата</label>
+                    <input type="date" id="event-date">
+                </div>
+                <div class="input-group">
+                    <label for="event-city">Город</label>
+                    <input type="text" id="event-city" placeholder="Онлайн">
+                </div>
+                <div class="input-group">
+                    <label for="event-category">Категория *</label>
+                    <select id="event-category" required></select>
+                </div>
             </div>
             <h4>Изображение</h4>
             <div class="image-uploader" id="image-uploader">
