@@ -38,7 +38,7 @@ function setupIndexPageListeners() {
             const card = target.closest('.event-card-v3');
             const eventId = card ? card.dataset.eventId : null;
 
-            if (actionElement.tagName === 'BUTTON' || actionElement.tagName === 'A' && actionElement.href.endsWith('#')) {
+            if (actionElement.tagName === 'BUTTON' || (actionElement.tagName === 'A' && actionElement.href.endsWith('#'))) {
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -148,15 +148,10 @@ async function loadEvents(isNewSearch = false) {
     const from = currentPage * PAGE_SIZE;
     const to = from + PAGE_SIZE;
 
-    // ИЗМЕНЕНО: Запрос стал намного проще
+    // ИСПРАВЛЕНО: Обращаемся к новому представлению 'events_with_details'
     let query = supabaseClient
-        .from('events_with_comment_count')
-        .select(`
-            *,
-            organizations(name),
-            categories!inner(id, name),
-            favorites(user_id)
-        `, { count: 'exact' })
+        .from('events_with_details')
+        .select(`*, favorites(user_id)`, { count: 'exact' })
         .eq('is_approved', true);
 
     if (searchTerm) {
@@ -164,7 +159,7 @@ async function loadEvents(isNewSearch = false) {
     }
 
     if (currentCategoryId) {
-        query = query.eq('categories.id', currentCategoryId);
+        query = query.eq('category_id', currentCategoryId);
     }
 
     const { data: events, error, count } = await query
@@ -177,11 +172,14 @@ async function loadEvents(isNewSearch = false) {
         return;
     }
 
-    if (isNewSearch) eventsContainer.innerHTML = "";
-    if ((!events || events.length === 0) && isNewSearch) {
+    if (isNewSearch && (!events || events.length === 0)) {
         eventsContainer.innerHTML = '<p>Событий по вашему запросу не найдено.</p>';
         if(paginationControls) paginationControls.innerHTML = '';
         return;
+    }
+    
+    if (isNewSearch) {
+        eventsContainer.innerHTML = "";
     }
     
     const cardTemplate = document.getElementById('event-card-template');
@@ -204,14 +202,13 @@ async function loadEvents(isNewSearch = false) {
         
         const orgLink = cardClone.querySelector('.card-organization');
         const orgPlaceholder = cardClone.querySelector('.card-organization-placeholder');
-        if (event.organizations) {
-            orgLink.textContent = event.organizations.name;
+        if (event.organization_name) {
+            orgLink.textContent = event.organization_name;
             orgLink.href = `/?org=${event.organization_id}`;
             orgLink.classList.remove('hidden');
             if(orgPlaceholder) orgPlaceholder.classList.add('hidden');
         }
 
-        // ИЗМЕНЕНО: Получаем данные автора напрямую из event
         const authorName = event.full_name || 'Аноним';
         const authorAvatar = event.avatar_url || 'https://placehold.co/24x24/f0f2f5/ccc';
         cardClone.querySelector('.card-author-name').textContent = authorName;
@@ -219,7 +216,7 @@ async function loadEvents(isNewSearch = false) {
         
         cardClone.querySelector('.comment-count').textContent = event.comment_count;
         
-        const isFavorited = currentUser ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
+        const isFavorited = currentUser && event.favorites ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
         if (isFavorited) {
             cardClone.querySelector('[data-action="toggle-favorite"]').classList.add('active');
         }
