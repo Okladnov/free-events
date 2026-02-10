@@ -7,6 +7,8 @@
     
     <!-- Стили -->
     <link rel="stylesheet" href="style.css">
+    <!-- Возвращаем стили для простого редактора (Pell) -->
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/pell/dist/pell.min.css">
     
     <!-- Иконки -->
     <link rel="icon" href="/favicon.ico" sizes="any">
@@ -56,10 +58,8 @@
     </header>
     <!-- ==================== ОСНОВНОЙ КОНТЕНТ ==================== -->
     <main class="container">
-        <!-- form-grid-container теперь выступает как единая карточка -->
         <form id="event-form" class="form-grid-container">
             <h2 id="form-title">Добавление нового события</h2>
-            <!-- Основные данные события -->
             <div class="input-group">
                 <label for="event-title">Название *</label>
                 <input type="text" id="event-title" required placeholder="Например, Бесплатный вебинар по Python">
@@ -70,9 +70,9 @@
             </div>
             <div class="input-group">
                 <label for="event-description">Описание</label>
-                <textarea id="editor-container"></textarea>
+                <!-- Возвращаем div для Pell -->
+                <div id="editor-container"></div>
             </div>
-            <!-- Раздел "Параметры" -->
             <h4>Параметры</h4>
             <div class="input-group">
                 <label for="event-date">Дата</label>
@@ -86,7 +86,6 @@
                 <label for="event-category">Категория *</label>
                 <select id="event-category" required></select>
             </div>
-            <!-- Раздел "Изображение" -->
             <h4>Изображение</h4>
             <div class="image-uploader" id="image-uploader">
                 <input type="file" id="image-file-input" hidden accept="image/*">
@@ -99,14 +98,13 @@
                 </div>
                 <input type="text" id="event-image-url" placeholder="Или вставьте URL" class="input-group-input event-image-url-input">
             </div>
-            <!-- Сообщение об ошибке/успехе и кнопка "Опубликовать" -->
             <p id="form-message" class="form-message"></p>
             <button type="submit" class="btn btn--primary" style="width: 100%;">Опубликовать</button>
         </form>
     </main>
     
     <!-- ======================================================================= -->
-    <!-- МОДАЛЬНОЕ ОКНО (ПОЛНАЯ ВЕРСИЯ)                                          -->
+    <!-- МОДАЛЬНОЕ ОКНО                                                          -->
     <!-- ======================================================================= -->
     <div id="login-modal-overlay" class="modal-overlay hidden">
         <div class="login-modal-card">
@@ -173,7 +171,8 @@
     <!-- ==================== СКРИПТЫ ==================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
-    <script src="tinymce.min.js"></script>
+    <!-- Возвращаем Pell и удаляем tinymce.min.js -->
+    <script src="https://unpkg.com/pell/dist/pell.min.js"></script>
     <script src="app.js"></script>
     <script src="edit-event.js"></script>
 </body>
