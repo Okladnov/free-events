@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupIndexPageListeners() {
     const searchInput = document.getElementById('search-input');
     const searchButton = document.querySelector('.search-button');
+
     if (searchButton) {
         searchButton.onclick = () => loadEvents(true);
     }
@@ -57,6 +58,7 @@ function setupIndexPageListeners() {
                 event.preventDefault();
                 event.stopPropagation();
             }
+
             if (!eventId) return;
 
             switch (action) {
@@ -81,8 +83,8 @@ function setupIndexPageListeners() {
 async function deleteEventHandler(eventId, cardElement) {
     if (!confirm('Вы уверены, что хотите удалить это событие?')) return;
     cardElement.style.opacity = '0.5';
-
     const { error } = await supabaseClient.from('events').delete().eq('id', eventId);
+
     if (error) {
         alert('Ошибка удаления. Убедитесь, что у вас есть права, и проверьте консоль.');
         console.error('Ошибка удаления:', error.message);
@@ -120,21 +122,22 @@ async function toggleFavoriteHandler(eventId, buttonElement) {
 }
 
 // =================================================================
-// ЛОГИКА РАБОТЫ С КАТЕГОРИЯМИ (НОВЫЙ СПОСОБ)
+// ЛОГИКА РАБОТЫ С КАТЕГОРИЯМИ
 // =================================================================
 
 async function loadAndDisplayCategories() {
     const { data, error } = await supabaseClient.from('categories').select('*').order('name');
+
     if (error) {
         console.error('Ошибка загрузки категорий:', error);
         return;
     }
+
     const container = document.getElementById('category-pills-container');
     const template = document.getElementById('category-pill-template');
     if (!container || !template) return;
     container.innerHTML = ''; 
 
-    // 1. Создаем кнопку "Все"
     const allButtonClone = template.content.cloneNode(true);
     const allButton = allButtonClone.querySelector('.category-pill');
     allButton.textContent = 'Все';
@@ -142,7 +145,6 @@ async function loadAndDisplayCategories() {
     allButton.dataset.categoryId = 'all';
     container.appendChild(allButtonClone);
 
-    // 2. Создаем кнопки для каждой категории
     (data || []).forEach(category => {
         const categoryClone = template.content.cloneNode(true);
         const categoryButton = categoryClone.querySelector('.category-pill');
@@ -155,7 +157,6 @@ async function loadAndDisplayCategories() {
 function setupCategoryListeners() {
     const container = document.getElementById('category-pills-container');
     if (!container) return;
-
     container.addEventListener('click', (event) => {
         if (event.target.classList.contains('category-pill')) {
             const clickedButton = event.target;
@@ -180,21 +181,27 @@ async function loadEvents(isNewSearch = false) {
         if(eventsContainer) eventsContainer.innerHTML = '<p>Загрузка событий...</p>';
         if(paginationControls) paginationControls.innerHTML = '';
     }
-
     const searchTerm = document.getElementById('search-input').value.trim();
     const from = currentPage * PAGE_SIZE;
     const to = from + PAGE_SIZE;
 
     let query = supabaseClient
         .from('events_with_comment_count')
-        .select(`*, organizations(name), categories!inner(id, name), profiles(full_name, avatar_url), favorites(user_id)`, { count: 'exact' })
+        .select(`
+            *,
+            organizations(name),
+            categories!inner!events_category_id_fkey(id, name),
+            profiles:created_by(full_name, avatar_url),
+            favorites(user_id)
+        `, { count: 'exact' })
         .eq('is_approved', true);
 
     if (searchTerm) {
         query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
     }
+
     if (currentCategoryId) {
-        query = query.eq('categories.id', currentCategoryId);
+        query = query.eq('categories!events_category_id_fkey.id', currentCategoryId);
     }
 
     const { data: events, error, count } = await query
@@ -203,7 +210,7 @@ async function loadEvents(isNewSearch = false) {
 
     if (error) {
         console.error("Ошибка загрузки событий:", error);
-        if (isNewSearch && eventsContainer) eventsContainer.innerHTML = "<p>Ошибка загрузки событий.</p>";
+        if (isNewSearch && eventsContainer) eventsContainer.innerHTML = `<p>Ошибка загрузки событий: ${error.message}</p>`;
         return;
     }
 
@@ -223,7 +230,6 @@ async function loadEvents(isNewSearch = false) {
     events.forEach(event => {
         const cardClone = cardTemplate.content.cloneNode(true);
         const cardRoot = cardClone.querySelector('.event-card-v3');
-
         cardRoot.dataset.eventId = event.id;
         const eventUrl = `event.html?id=${event.id}`;
         cardClone.querySelectorAll('[data-action="go-to-event"]').forEach(el => el.href = eventUrl);
@@ -231,11 +237,13 @@ async function loadEvents(isNewSearch = false) {
         cardClone.querySelector('.card-date').textContent = `Опубликовано ${new Date(event.created_at).toLocaleDateString()}`;
         cardClone.querySelector('.card-title').textContent = event.title;
         cardClone.querySelector('.card-description').textContent = `${(event.description || '').substring(0, 100)}...`;
-
+        
         const image = cardClone.querySelector('.card-image');
-        if (event.image_url) image.src = event.image_url;
+        if (event.image_url) {
+            image.src = event.image_url;
+        }
         image.alt = event.title;
-
+        
         const orgLink = cardClone.querySelector('.card-organization');
         const orgPlaceholder = cardClone.querySelector('.card-organization-placeholder');
         if (event.organizations) {
@@ -245,18 +253,18 @@ async function loadEvents(isNewSearch = false) {
             if(orgPlaceholder) orgPlaceholder.classList.add('hidden');
         }
 
-        // Автор
         const authorName = (event.profiles && event.profiles.full_name) ? event.profiles.full_name : 'Аноним';
         const authorAvatar = (event.profiles && event.profiles.avatar_url) ? event.profiles.avatar_url : 'https://placehold.co/24x24/f0f2f5/ccc';
         cardClone.querySelector('.card-author-name').textContent = authorName;
         cardClone.querySelector('.card-author-avatar').src = authorAvatar;
-
+        
         cardClone.querySelector('.comment-count').textContent = event.comment_count;
+        
         const isFavorited = currentUser ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
         if (isFavorited) {
             cardClone.querySelector('[data-action="toggle-favorite"]').classList.add('active');
         }
-
+        
         if (isAdmin) {
             cardClone.querySelector('[data-action="edit"]').classList.remove('hidden');
             cardClone.querySelector('[data-action="delete"]').classList.remove('hidden');
@@ -266,15 +274,16 @@ async function loadEvents(isNewSearch = false) {
     });
 
     const existingLoadMoreBtn = document.getElementById('load-more-btn');
-    if (existingLoadMoreBtn) existingLoadMoreBtn.remove();
+    if (existingLoadMoreBtn) {
+        existingLoadMoreBtn.remove();
+    }
     
     if ((events.length + from < count) && paginationControls) {
         const loadMoreBtn = document.createElement('button');
         loadMoreBtn.id = 'load-more-btn';
         loadMoreBtn.textContent = 'Загрузить еще';
-        loadMoreBtn.classList.add('btn', 'btn--primary'); // Используем наши новые классы для кнопок
+        loadMoreBtn.classList.add('btn', 'btn--primary');
         loadMoreBtn.onclick = () => { currentPage++; loadEvents(false); };
         paginationControls.appendChild(loadMoreBtn);
     }
 }
-
