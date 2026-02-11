@@ -179,8 +179,6 @@ async function initializeHeader() {
     }
 
     if (logoutBtn) logoutBtn.onclick = async () => { await supabaseClient.auth.signOut(); window.location.reload(); };
-    if (addEventBtn) addEventBtn.onclick = () => window.location.href = '/edit-event.html';
-    
     if (profileTrigger) {
       profileTrigger.onclick = (event) => { 
         event.stopPropagation(); 
