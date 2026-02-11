@@ -101,7 +101,7 @@ function renderPage(event, comments) {
                         <div class="meta-item">
                             <span>🗓️</span>
                             <strong>Дата:</strong>
-                            <span>${event.event_date ? new Date(event.event_date).toLocaleDateString('ru-RU', {day: 'numeric', month: 'long'}) : 'Не указана'}</span>
+                            <span>${event.event_date ? new Date(event.event_date).toLocaleString('ru-RU', {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'}) : 'Не указана'}</span>
                         </div>
                         ${event.organization_name ? `
                         <div class="meta-item">
