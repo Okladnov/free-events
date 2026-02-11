@@ -73,8 +73,12 @@ function setupLoginModal() {
 
     // Вход через Google
     googleLoginBtn.addEventListener('click', async () => {
-        await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
-    });
+        await supabaseClient.auth.signInWithOAuth({ 
+    provider: 'google',
+    options: {
+        redirectTo: window.location.origin
+    }
+});
 
     // Вход по Email и Паролю
     loginForm.addEventListener('submit', async (e) => {
