@@ -1,9 +1,5 @@
 // =================================================================
-// favorites.js - ФИНАЛЬНАЯ, ИСПРАВЛЕННАЯ ВЕРСИЯ
-// =================================================================
-
-// =================================================================
-// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ СТРАНИЦЫ
+// favorites.js - ФИНАЛЬНАЯ ВЕРСИЯ С КАРТОЧКАМИ КАК НА ГЛАВНОЙ
 // =================================================================
 
 const eventsContainer = document.getElementById("events");
@@ -12,34 +8,17 @@ const PAGE_SIZE = 9;
 let currentPage = 0;
 let totalFavoritesCount = 0;
 
-// ИСПРАВЛЕНО: Добавляем недостающую функцию
-function sanitizeForAttribute(text) {
-    if (!text) return '';
-    return String(text).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
-// =================================================================
-// ТОЧКА ВХОДА
-// =================================================================
-
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Используем ГОТОВУЮ функцию из app.js. Она сама определит пользователя.
     await initializeHeader();
 
-    // 2. Если пользователя нет, показываем сообщение и выходим.
     if (!currentUser) {
         eventsContainer.innerHTML = '<p>Пожалуйста, <a href="/">войдите в свой аккаунт</a>, чтобы увидеть избранные события.</p>';
         return;
     }
 
-    // 3. Загружаем страницу и настраиваем обработчики.
     await loadFavoritesPage(true);
     setupFavoritesEventListeners();
 });
-
-// =================================================================
-// ЗАГРУЗКА И ОТОБРАЖЕНИЕ
-// =================================================================
 
 async function loadFavoritesPage(isInitialLoad = false) {
     if (isInitialLoad) {
@@ -50,7 +29,6 @@ async function loadFavoritesPage(isInitialLoad = false) {
 
     const from = currentPage * PAGE_SIZE;
 
-    // ИСПРАВЛЕНО: Запрашиваем сначала ID, потом сами события
     const { data: favoriteIds, error: favError, count } = await supabaseClient
         .from('favorites')
         .select('event_id', { count: 'exact' })
@@ -77,8 +55,8 @@ async function loadFavoritesPage(isInitialLoad = false) {
     const eventIds = favoriteIds.map(fav => fav.event_id);
     
     const { data: events, error } = await supabaseClient
-        .from('events_with_details') // Используем наше рабочее "супер-представление"
-        .select('*')
+        .from('events_with_details')
+        .select(`*, favorites(user_id)`) // Добавляем favorites, чтобы правильно отображать статус
         .in('id', eventIds);
 
     if (error) {
@@ -87,39 +65,59 @@ async function loadFavoritesPage(isInitialLoad = false) {
     }
 
     if (isInitialLoad) {
-        eventsContainer.innerHTML = ''; // Очищаем "загрузку"
+        eventsContainer.innerHTML = '';
     }
     
+    const cardTemplate = document.getElementById('event-card-template');
+    if (!cardTemplate) {
+        console.error("Шаблон #event-card-template не найден!");
+        return;
+    }
+
     events.forEach(event => {
-        eventsContainer.insertAdjacentHTML('beforeend', renderFavoriteCard(event));
+        const cardClone = cardTemplate.content.cloneNode(true);
+        const cardRoot = cardClone.querySelector('.event-card-v3');
+        cardRoot.dataset.eventId = event.id;
+        const eventUrl = `event.html?id=${event.id}`;
+        cardClone.querySelectorAll('[data-action="go-to-event"]').forEach(el => el.href = eventUrl);
+        
+        cardClone.querySelector('.card-date').textContent = `Опубликовано ${new Date(event.created_at).toLocaleDateString()}`;
+        cardClone.querySelector('.card-title').textContent = event.title;
+        cardClone.querySelector('.card-description').textContent = `${(event.description || '').substring(0, 100)}...`;
+        
+        const image = cardClone.querySelector('.card-image');
+        if (event.image_url) image.src = event.image_url;
+        image.alt = event.title;
+        
+        const orgLink = cardClone.querySelector('.card-organization');
+        if (event.organization_name) {
+            orgLink.textContent = event.organization_name;
+            orgLink.href = `/?org=${event.organization_id}`;
+            orgLink.classList.remove('hidden');
+        }
+
+        const authorName = event.full_name || 'Аноним';
+        const authorAvatar = event.avatar_url || 'https://placehold.co/24x24/f0f2f5/ccc';
+        cardClone.querySelector('.card-author-name').textContent = authorName;
+        cardClone.querySelector('.card-author-avatar').src = authorAvatar;
+        
+        cardClone.querySelector('.comment-count').textContent = event.comment_count;
+        
+        // Все события на этой странице - избранные, поэтому кнопка всегда активна
+        const favoriteButton = cardClone.querySelector('[data-action="toggle-favorite"]');
+        if (favoriteButton) {
+            favoriteButton.classList.add('active');
+        }
+        
+        if (currentUser.id === event.created_by || isAdmin) {
+            cardClone.querySelector('[data-action="edit"]').classList.remove('hidden');
+            cardClone.querySelector('[data-action="delete"]').classList.remove('hidden');
+        }
+        
+        eventsContainer.appendChild(cardClone);
     });
-    
+
     updatePagination();
-}
-
-function renderFavoriteCard(event) {
-    const dateHtml = event.event_date ? new Date(event.event_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) : 'Дата не указана';
-    const categoriesHtml = event.category_name ? `<span class="tag">${sanitizeHTML(event.category_name)}</span>` : '';
-
-    return `
-      <div class="event-card-new" data-event-id="${event.id}">
-        <a href="event.html?id=${event.id}" class="event-card-new-image-link">
-          <img src="${event.image_url || 'https://placehold.co/400x400/f0f2f5/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}">
-        </a>
-        <div class="event-card-new-content">
-          <div class="card-categories">${categoriesHtml}</div>
-          <a href="event.html?id=${event.id}" class="event-card-new-title-link">
-            <h3>${sanitizeHTML(event.title)}</h3>
-          </a>
-          <div class="meta">
-              <div class="meta-item"><span>🗓️</span><span>${dateHtml}</span></div>
-              <div class="meta-item"><span>📍</span><span>${sanitizeHTML(event.city) || 'Онлайн'}</span></div>
-          </div>
-        </div>
-        <div class="event-card-new-actions">
-          <button class="card-save-btn active" data-action="remove-from-favorites" title="Удалить из избранного">❤️</button>
-        </div>
-      </div>`;
 }
 
 function updatePagination() {
@@ -140,18 +138,15 @@ function updatePagination() {
     }
 }
 
-// =================================================================
-// ОБРАБОТЧИКИ СОБЫТИЙ
-// =================================================================
-
 function setupFavoritesEventListeners() {
     eventsContainer.addEventListener('click', async (event) => {
-        const button = event.target.closest('[data-action="remove-from-favorites"]');
+        const button = event.target.closest('[data-action="toggle-favorite"]');
         if (!button) return;
 
-        const card = button.closest('.event-card-new');
+        const card = button.closest('.event-card-v3');
         const eventId = card.dataset.eventId;
         
+        // На этой странице клик по кнопке "Избранное" всегда означает удаление
         card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
         card.style.opacity = '0';
         card.style.transform = 'scale(0.95)';
@@ -161,7 +156,6 @@ function setupFavoritesEventListeners() {
         const { error } = await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id });
         if (error) {
             alert('Не удалось удалить событие из избранного.');
-            // Можно добавить логику возвращения карточки, если нужно
         } else {
             totalFavoritesCount--;
             if (totalFavoritesCount === 0) {
