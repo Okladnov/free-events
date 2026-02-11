@@ -215,10 +215,13 @@ async function handleAddComment(eventId, formElement) {
         if (error) throw error;
         
         const commentsList = document.getElementById('comments-list');
-        if (commentsList.querySelector('p')) {
-            commentsList.innerHTML = '';
-        }
-        commentsList.insertAdjacentHTML('beforeend', renderComment(newComment));
+const noCommentsMessage = commentsList.querySelector('p');
+
+if (noCommentsMessage) {
+    noCommentsMessage.remove();
+}
+
+commentsList.insertAdjacentHTML('beforeend', renderComment(newComment));
         input.value = '';
     } catch (error) {
         console.error("Ошибка добавления комментария:", error);
