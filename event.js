@@ -113,7 +113,13 @@ function renderPage(event, comments) {
 
                     <div class="event-description">${DOMPurify.sanitize(event.description || 'Описание отсутствует.')}</div>
                 </div>
-                
+                ${event.link ? `
+    <div class="event-source-link-wrapper">
+        <a href="${event.link}" target="_blank" class="btn btn--primary">
+            Перейти к источнику <span>→</span>
+        </a>
+    </div>
+` : ''}
                 <div class="comments-section">
                     <h3>Комментарии (${comments.length})</h3>
                     <div id="comments-list">
