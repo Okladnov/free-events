@@ -58,8 +58,8 @@ function renderPage(event, comments) {
     document.title = event.title;
 
     const authorName = event.full_name || 'Аноним';
-    const isFavorited = currentUser && event.favorites ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
-
+    const authorAvatar = event.avatar_url || 'https://placehold.co/40x40/f0f2f5/ccc?text=AV';
+    
     const moderationPanelHtml = (isAdmin && !event.is_approved) ? `
         <div class="moderation-panel">
             <div class="moderation-panel-title">⭐ Панель модератора</div>
@@ -79,14 +79,41 @@ function renderPage(event, comments) {
             </div>
             <div class="event-content-column">
                 <div class="event-main-content">
-                    <h1>${sanitizeHTML(event.title)}</h1>
-                    <div class="event-meta">
-                        <div class="meta-item"><strong>Автор:</strong> <span>${sanitizeHTML(authorName)}</span></div>
-                        <div class="meta-item"><strong>Город:</strong> <span>${sanitizeHTML(event.city) || 'Онлайн'}</span></div>
-                        <div class="meta-item"><strong>Дата:</strong> <span>${event.event_date ? new Date(event.event_date).toLocaleDateString('ru-RU', {day: 'numeric', month: 'long'}) : 'Не указана'}</span></div>
+                    
+                    <div class="event-author-info">
+                        <a href="/profile.html?id=${event.created_by}">
+                            <img src="${authorAvatar}" alt="${authorName}" class="author-avatar-large">
+                        </a>
+                        <div class="author-details">
+                            <a href="/profile.html?id=${event.created_by}" class="author-name-link">${sanitizeHTML(authorName)}</a>
+                            <div class="published-date">Опубликовано ${new Date(event.created_at).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: 'numeric'})}</div>
+                        </div>
                     </div>
+
+                    <h1>${sanitizeHTML(event.title)}</h1>
+                    
+                    <div class="event-meta">
+                        <div class="meta-item">
+                            <span>📍</span>
+                            <strong>Город:</strong>
+                            <span>${sanitizeHTML(event.city) || 'Онлайн'}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>🗓️</span>
+                            <strong>Дата:</strong>
+                            <span>${event.event_date ? new Date(event.event_date).toLocaleDateString('ru-RU', {day: 'numeric', month: 'long'}) : 'Не указана'}</span>
+                        </div>
+                        ${event.organization_name ? `
+                        <div class="meta-item">
+                            <span>🏢</span>
+                            <strong>Организатор:</strong>
+                            <a href="/?org=${event.organization_id}">${sanitizeHTML(event.organization_name)}</a>
+                        </div>` : ''}
+                    </div>
+
                     <div class="event-description">${DOMPurify.sanitize(event.description || 'Описание отсутствует.')}</div>
                 </div>
+                
                 <div class="comments-section">
                     <h3>Комментарии (${comments.length})</h3>
                     <div id="comments-list">
