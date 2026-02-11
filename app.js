@@ -1,5 +1,5 @@
 // =================================================================
-// app.js - ФИНАЛЬНАЯ, ИСПРАВЛЕННАЯ ВЕРСИЯ
+// app.js - ФИНАЛЬНАЯ, ИСПРАВЛЕННАЯ ВЕРСИЯ С ПРАВИЛЬНЫМ КЛЮЧОМ
 // =================================================================
 
 // =================================================================
@@ -7,8 +7,8 @@
 // =================================================================
 
 const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
-// ИСПРАВЛЕНО: Возвращен правильный, рабочий API ключ
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqc3BreWdubmpubGhyYmp1c214Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDkyMDI5ODAsImV4cCI6MjAyNDc3ODk4MH0.8Tj9g1iSjZDy3iNQ2a1gW2Sg-CmzQd_3i2p3rUvjC-c";
+// ИСПРАВЛЕНО: Возвращен оригинальный, правильный API ключ
+const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Глобальные переменные
