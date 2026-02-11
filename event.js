@@ -172,22 +172,50 @@ function setupEventListeners() {
     const eventId = urlParams.get('id');
 
     eventDetailContainer.addEventListener('click', async (event) => {
-        const actionElement = event.target.closest('[data-action]');
-        
-        // ИЗМЕНЕНО: Добавляем обработку клика по заголовку комментариев
+        // Логика для спойлера комментариев
         if (event.target.id === 'comments-toggle') {
             const commentsList = document.getElementById('comments-list');
-            const commentForm = document.getElementById('comment-form-wrapper');
-            commentsList.classList.toggle('hidden');
-            if(commentForm) commentForm.classList.toggle('hidden');
+            const commentFormWrapper = document.getElementById('comment-form-wrapper');
+            
+            const isHidden = commentsList.classList.toggle('hidden');
+            event.target.querySelector('span').style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+
+            if(commentFormWrapper) {
+                commentFormWrapper.classList.toggle('hidden');
+            }
             return;
         }
-
+        
+        const actionElement = event.target.closest('[data-action]');
         if (!actionElement) return;
 
         const action = actionElement.dataset.action;
 
-        // ... (остальная логика кликов без изменений)
+        // ИСПРАВЛЕНО: Возвращаем логику для кнопок модерации
+        if (action === 'approve-event') {
+            await handleEventAction('approve', eventId, actionElement);
+            return;
+        } 
+        if (action === 'delete-event') {
+            if (confirm('Вы уверены, что хотите НАВСЕГДА удалить это событие?')) {
+                await handleEventAction('delete', eventId, actionElement);
+            }
+            return;
+        }
+
+        // Проверка авторизации для остальных действий
+        if (!currentUser && (action === 'toggle-favorite' || action === 'vote')) {
+            alert('Пожалуйста, войдите, чтобы выполнить это действие.');
+            return;
+        }
+        
+        // Логика для "Избранного" и "Голосования"
+        if (action === 'toggle-favorite') {
+            handleToggleFavorite(eventId, actionElement);
+        } else if (action === 'vote') {
+            const value = parseInt(actionElement.dataset.value, 10);
+            handleVote(eventId, value);
+        }
     });
 
     eventDetailContainer.addEventListener('submit', (event) => {
