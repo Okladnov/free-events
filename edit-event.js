@@ -1,20 +1,21 @@
 // ===================================================================
-// edit-event.js - ЕДИНАЯ РАБОЧАЯ ВЕРСИЯ С РЕДАКТОРОМ PELL
+// edit-event.js - ВЕРСИЯ С УМНЫМ ПОИСКОМ ОРГАНИЗАЦИЙ
 // ===================================================================
 
-let pellEditor = null; // Делаем редактор глобальным, чтобы к нему можно было обратиться
+let pellEditor = null;
+let selectedFile = null;
+let selectedOrganizationId = null; // Для хранения ID выбранной организации
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await initializeHeader(); // Ждем, пока app.js отработает и определит пользователя
+    await initializeHeader();
 
-    // Если пользователь не авторизован, отправляем на главную
     if (!currentUser) {
         alert("Пожалуйста, войдите, чтобы добавлять или редактировать события.");
         window.location.href = '/';
         return;
     }
 
-    // 1. ИНИЦИАЛИЗИРУЕМ РЕДАКТОР PELL
+    // 1. Инициализируем редактор Pell
     pellEditor = pell.init({
         element: document.getElementById('editor-container'),
         onChange: html => {},
@@ -33,15 +34,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // 2. ЗАГРУЖАЕМ КАТЕГОРИИ
+    // 2. Загружаем категории
     await loadCategories();
+    
+    // 3. Настраиваем поиск организаций
+    setupOrganizationSearch();
+    
+    // 4. Настраиваем загрузчик изображений
+    setupImageUploader();
+    
+    // 5. Проверяем, редактирование ли это, и загружаем данные
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('id');
+    if (eventId) {
+        const formTitle = document.getElementById('form-title');
+        if (formTitle) formTitle.textContent = 'Редактирование события';
+        await loadEventDataForEdit(eventId);
+    }
 
-    // 3. НАСТРАИВАЕМ ЗАГРУЗЧИК ИЗОБРАЖЕНИЙ
+    // 6. Вешаем обработчик на отправку формы
+    const eventForm = document.getElementById('event-form');
+    if (eventForm) {
+        eventForm.addEventListener('submit', (e) => handleFormSubmit(e, eventId, selectedFile));
+    }
+});
+
+// ===================================================================
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ===================================================================
+
+function setupImageUploader() {
     const uploadArea = document.getElementById('upload-area');
     const fileInput = document.getElementById('image-file-input');
     const instructions = document.getElementById('upload-instructions');
     const preview = document.getElementById('image-preview');
-    let selectedFile = null;
     
     if (uploadArea) {
         uploadArea.addEventListener('click', (e) => {
@@ -54,11 +80,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
     if (fileInput) {
         fileInput.addEventListener('change', () => handleFileSelect(fileInput.files[0]));
     }
-    
     if (uploadArea) {
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             uploadArea.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); });
@@ -87,26 +111,60 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         reader.readAsDataURL(file);
     }
-    
-    // 4. ПРОВЕРЯЕМ, РЕДАКТИРОВАНИЕ ЛИ ЭТО, И ЗАГРУЖАЕМ ДАННЫЕ
-    const urlParams = new URLSearchParams(window.location.search);
-    const eventId = urlParams.get('id');
-    if (eventId) {
-        const formTitle = document.getElementById('form-title');
-        if (formTitle) formTitle.textContent = 'Редактирование события';
-        await loadEventDataForEdit(eventId);
-    }
+}
 
-    // 5. ВЕШАЕМ ОБРАБОТЧИК НА ОТПРАВКУ ФОРМЫ
-    const eventForm = document.getElementById('event-form');
-    if (eventForm) {
-        eventForm.addEventListener('submit', (e) => handleFormSubmit(e, eventId, selectedFile));
-    }
-});
+async function setupOrganizationSearch() {
+    const searchInput = document.getElementById('organization-search');
+    const resultsContainer = document.getElementById('organization-results');
+    const organizationIdInput = document.getElementById('organization-id');
 
-// ===================================================================
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-// ===================================================================
+    searchInput.addEventListener('keyup', async (e) => {
+        const searchTerm = e.target.value;
+        if (searchTerm.length < 2) {
+            resultsContainer.classList.add('hidden');
+            return;
+        }
+
+        const { data, error } = await supabaseClient
+            .from('organizations')
+            .select('id, name')
+            .ilike('name', `%${searchTerm}%`)
+            .limit(5);
+
+        resultsContainer.innerHTML = '';
+        if (data && data.length > 0) {
+            data.forEach(org => {
+                const item = document.createElement('div');
+                item.classList.add('search-result-item');
+                item.textContent = org.name;
+                item.dataset.id = org.id;
+                resultsContainer.appendChild(item);
+            });
+            resultsContainer.classList.remove('hidden');
+        } else {
+            resultsContainer.classList.add('hidden');
+        }
+    });
+
+    resultsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('search-result-item')) {
+            const orgId = e.target.dataset.id;
+            const orgName = e.target.textContent;
+            
+            searchInput.value = orgName;
+            organizationIdInput.value = orgId;
+            selectedOrganizationId = orgId;
+            
+            resultsContainer.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.organization-search-wrapper')) {
+            resultsContainer.classList.add('hidden');
+        }
+    });
+}
 
 async function loadCategories() {
     const categorySelect = document.getElementById('event-category');
@@ -122,7 +180,7 @@ async function loadCategories() {
 
 async function loadEventDataForEdit(eventId) {
     try {
-        const { data: event, error } = await supabaseClient.from('events').select('*').eq('id', eventId).single();
+        const { data: event, error } = await supabaseClient.from('events').select('*, organization:organization_id(name)').eq('id', eventId).single();
         if (error || !event) {
             alert("Событие не найдено.");
             window.location.href = '/';
@@ -133,7 +191,6 @@ async function loadEventDataForEdit(eventId) {
              window.location.href = '/';
              return;
         }
-
         document.getElementById('event-title').value = event.title;
         document.getElementById('event-link').value = event.link || '';
         
@@ -141,11 +198,16 @@ async function loadEventDataForEdit(eventId) {
             pellEditor.content.innerHTML = event.description || '';
         }
         
+        if (event.organization) {
+            document.getElementById('organization-search').value = event.organization.name;
+            document.getElementById('organization-id').value = event.organization_id;
+            selectedOrganizationId = event.organization_id;
+        }
+        
         document.getElementById('event-image-url').value = event.image_url || '';
         document.getElementById('event-category').value = event.category_id;
         document.getElementById('event-date').value = event.event_date;
         document.getElementById('event-city').value = event.city || '';
-
         const imagePreview = document.getElementById('image-preview');
         const uploadInstructions = document.getElementById('upload-instructions');
         if (event.image_url && imagePreview && uploadInstructions) {
@@ -182,7 +244,6 @@ async function handleFormSubmit(e, eventId, fileToUpload) {
         }
         
         let imageUrl = document.getElementById('event-image-url').value.trim();
-
         if (fileToUpload) {
             if (formMessage) formMessage.textContent = 'Загружаем изображение...';
             const filePath = `${currentUser.id}/${Date.now()}-${fileToUpload.name}`;
@@ -199,6 +260,7 @@ async function handleFormSubmit(e, eventId, fileToUpload) {
             description: pellEditor ? pellEditor.content.innerHTML : '',
             image_url: imageUrl,
             category_id: document.getElementById('event-category').value,
+            organization_id: selectedOrganizationId,
             event_date: document.getElementById('event-date').value || null,
             city: document.getElementById('event-city').value.trim(),
             link: document.getElementById('event-link').value.trim(),
@@ -217,7 +279,6 @@ async function handleFormSubmit(e, eventId, fileToUpload) {
         }
         
         setTimeout(() => { window.location.href = `/event.html?id=${data.id}`; }, 1500);
-
     } catch (error) {
         console.error("Ошибка сохранения события:", error);
         if (formMessage) {
