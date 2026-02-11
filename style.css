@@ -729,3 +729,6 @@ input:checked + .theme-toggle-slider:before {
     aspect-ratio: 16 / 9;
   }
 }
+.auth-block .btn {
+  text-decoration: none;
+}
