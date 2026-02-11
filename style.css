@@ -745,3 +745,33 @@ input:checked + .theme-toggle-slider {
 .auth-block .btn {
   text-decoration: none;
 }
+/* =========================================
+   17. СТИЛИ ДЛЯ ССЫЛКИ НА ИСТОЧНИК (НОВЫЙ БЛОК)
+   ========================================= */
+
+/* Ссылка на главной странице */
+.event-source-link {
+    display: block;
+    margin-top: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+.event-source-link:hover {
+    text-decoration: underline;
+}
+
+/* Кнопка на странице события */
+.event-source-link-wrapper {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+}
+.event-source-link-wrapper .btn span {
+    transition: transform 0.2s;
+    display: inline-block;
+}
+.event-source-link-wrapper .btn:hover span {
+    transform: translateX(4px);
+}
