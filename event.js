@@ -127,7 +127,7 @@ function renderPage(event, comments) {
     </h3>
     <!-- ИЗМЕНЕНО: Блоки обернуты в контейнеры и скрыты по умолчанию -->
     <div id="comments-list" class="hidden">
-        ${comments.length > 0 ? comments.map(renderComment).join('') : '<p>Комментариев пока нет.</p>'}
+        ${comments.length > 0 ? comments.map(renderComment).join('') : '<p id="no-comments-message">Комментариев пока нет.</p>'}
     </div>
     <div id="comment-form-wrapper" class="hidden">
         ${currentUser ? `
@@ -215,7 +215,7 @@ async function handleAddComment(eventId, formElement) {
         if (error) throw error;
         
         const commentsList = document.getElementById('comments-list');
-const noCommentsMessage = commentsList.querySelector('p');
+const noCommentsMessage = document.getElementById('no-comments-message');
 
 if (noCommentsMessage) {
     noCommentsMessage.remove();
