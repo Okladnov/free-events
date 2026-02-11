@@ -775,3 +775,41 @@ input:checked + .theme-toggle-slider {
 .event-source-link-wrapper .btn:hover span {
     transform: translateX(4px);
 }
+/* =========================================
+   18. СТИЛИ ДЛЯ СПОЙЛЕРА КОММЕНТАРИЕВ (НОВЫЙ БЛОК)
+   ========================================= */
+
+.comments-toggle {
+    cursor: pointer;
+    user-select: none; /* Чтобы текст не выделялся при клике */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comments-toggle span {
+    transition: transform 0.3s ease;
+}
+
+/* Когда спойлер открыт, поворачиваем стрелку */
+.comments-list:not(.hidden) + #comment-form-wrapper + .comments-toggle span,
+#comments-list:not(.hidden) + #comment-form-wrapper ~ .comments-toggle span {
+    transform: rotate(180deg);
+}
+
+/* Плавное появление для списка комментов */
+#comments-list.hidden, #comment-form-wrapper.hidden {
+    display: block;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out, opacity 0.3s ease;
+    opacity: 0;
+    margin-top: 0;
+}
+
+#comments-list:not(.hidden), #comment-form-wrapper:not(.hidden) {
+    max-height: 1000px; /* Достаточно большая высота, чтобы вместить все комменты */
+    opacity: 1;
+    margin-top: 24px;
+    transition: max-height 0.5s ease-in-out, opacity 0.5s ease 0.2s;
+}
