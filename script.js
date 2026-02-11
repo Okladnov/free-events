@@ -194,8 +194,7 @@ async function loadEvents(isNewSearch = false) {
         
         cardClone.querySelector('.card-date').textContent = `Опубликовано ${new Date(event.created_at).toLocaleDateString()}`;
         cardClone.querySelector('.card-title').textContent = event.title;
-        const cleanDescription = (event.description || '').replace(/<[^>]*>?/gm, '');
-        cardClone.querySelector('.card-description').textContent = `${(event.description || '').substring(0, 100)}...`;
+        cardClone.querySelector('.card-description').textContent = `${(event.description || '').replace(/<[^>]*>?/gm, '').substring(0, 100)}...`;
         
         const image = cardClone.querySelector('.card-image');
         if (event.image_url) image.src = event.image_url;
