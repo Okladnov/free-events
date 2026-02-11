@@ -68,7 +68,8 @@
                 <input type="url" id="event-link" placeholder="https://t.me/free_events/123">
             </div>
             <div class="input-group">
-                <label for="event-description">Описание</label>
+                <!-- У editor-container нет id, поэтому label без for -->
+                <label>Описание</label>
                 <div id="editor-container"></div>
             </div>
             
@@ -106,7 +107,7 @@
     </main>
     
     <!-- ======================================================================= -->
-    <!-- МОДАЛЬНОЕ ОКНО                                                          -->
+    <!-- МОДАЛЬНОЕ ОКНО (С ИСПРАВЛЕННЫМИ LABEL)                                 -->
     <!-- ======================================================================= -->
     <div id="login-modal-overlay" class="modal-overlay hidden">
         <div class="login-modal-card">
