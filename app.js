@@ -65,8 +65,13 @@ function setupLoginModal() {
     });
 
     googleLoginBtn.addEventListener('click', async () => {
-        await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
+    await supabaseClient.auth.signInWithOAuth({ 
+        provider: 'google',
+        options: {
+            redirectTo: window.location.origin
+        }
     });
+});
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
