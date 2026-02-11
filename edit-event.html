@@ -67,8 +67,18 @@
                 <label for="event-link">Ссылка на источник/регистрацию</label>
                 <input type="url" id="event-link" placeholder="https://t.me/free_events/123">
             </div>
+            
+            <!-- ИЗМЕНЕНО: Добавлен блок для поиска организации -->
             <div class="input-group">
-                <!-- У editor-container нет id, поэтому label без for -->
+                <label for="organization-search">Организатор</label>
+                <div class="organization-search-wrapper">
+                    <input type="text" id="organization-search" placeholder="Начните вводить название..." autocomplete="off">
+                    <div id="organization-results" class="search-results-list hidden"></div>
+                </div>
+                <input type="hidden" id="organization-id">
+            </div>
+
+            <div class="input-group">
                 <label>Описание</label>
                 <div id="editor-container"></div>
             </div>
@@ -171,7 +181,6 @@
             </div>
         </div>
     </div>
-    <!-- ==================== СКРИПТЫ ==================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
     <script src="https://unpkg.com/pell/dist/pell.min.js"></script>
