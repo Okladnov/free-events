@@ -233,42 +233,56 @@ body {
 }
 .theme-toggle-label {
   position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
+  display: inline-flex; /* Изменено на flex для выравнивания */
+  align-items: center; /* Выравниваем по центру */
+  width: 80px; /* Увеличили ширину для надписей */
+  height: 34px;
+  background-color: var(--input-background); /* Фон для всего переключателя */
+  border-radius: 34px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
+
 .theme-toggle-label input {
   opacity: 0;
   width: 0;
   height: 0;
 }
+
 .theme-toggle-slider {
   position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 24px;
-}
-.theme-toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
+  top: 3px;
   left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .4s;
+  height: 28px;
+  width: 28px;
+  background-color: var(--card-background);
   border-radius: 50%;
+  transition: .4s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
+
+/* ДОБАВЛЕНО: Стили для надписей DAY/NIGHT */
+.theme-toggle-label::before,
+.theme-toggle-label::after {
+    display: block;
+    width: 50%;
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--text-color-subtle);
+    z-index: 1; /* Чтобы текст был поверх слайдера */
+}
+
+.theme-toggle-label::before {
+    content: 'DAY';
+}
+
+.theme-toggle-label::after {
+    content: 'NIGHT';
+}
+
 input:checked + .theme-toggle-slider {
-  background-color: var(--primary-color);
-}
-input:checked + .theme-toggle-slider:before {
-  transform: translateX(20px);
+  transform: translateX(46px); /* Сдвигаем слайдер вправо */
 }
 
 /* =========================================
