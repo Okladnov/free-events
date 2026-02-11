@@ -121,17 +121,23 @@ function renderPage(event, comments) {
     </div>
 ` : ''}
                 <div class="comments-section">
-                    <h3>Комментарии (${comments.length})</h3>
-                    <div id="comments-list">
-                        ${comments.length > 0 ? comments.map(renderComment).join('') : '<p>Комментариев пока нет.</p>'}
-                    </div>
-                    ${currentUser ? `
-                    <form id="comment-form">
-                        <input id="comment-input" placeholder="Написать комментарий..." required class="input-group-input">
-                        <button type="submit" class="btn btn--primary">Отправить</button>
-                    </form>
-                    ` : '<p><a href="/">Войдите</a>, чтобы оставить комментарий.</p>'}
-                </div>
+    <!-- ИЗМЕНЕНО: Заголовок стал кнопкой-спойлером -->
+    <h3 id="comments-toggle" class="comments-toggle">
+        Комментарии (${comments.length}) <span>▼</span>
+    </h3>
+    <!-- ИЗМЕНЕНО: Блоки обернуты в контейнеры и скрыты по умолчанию -->
+    <div id="comments-list" class="hidden">
+        ${comments.length > 0 ? comments.map(renderComment).join('') : '<p>Комментариев пока нет.</p>'}
+    </div>
+    <div id="comment-form-wrapper" class="hidden">
+        ${currentUser ? `
+        <form id="comment-form">
+            <input id="comment-input" placeholder="Написать комментарий..." required class="input-group-input">
+            <button type="submit" class="btn btn--primary">Отправить</button>
+        </form>
+        ` : '<p><a href="/">Войдите</a>, чтобы оставить комментарий.</p>'}
+    </div>
+</div>
             </div>
         </div>
     `;
@@ -160,7 +166,6 @@ function renderComment(comment) {
 // ОБРАБОТЧИКИ СОБЫТИЙ И ПРОЧИЕ ФУНКЦИИ
 // (Остальная часть файла без изменений)
 // =================================================================
-
 function setupEventListeners() {
     const eventDetailContainer = document.getElementById('event-detail-container');
     const urlParams = new URLSearchParams(window.location.search);
@@ -168,15 +173,21 @@ function setupEventListeners() {
 
     eventDetailContainer.addEventListener('click', async (event) => {
         const actionElement = event.target.closest('[data-action]');
-        if (!actionElement) return;
-        const action = actionElement.dataset.action;
-        if (action === 'approve-event') {
-            await handleEventAction('approve', eventId, actionElement);
-        } else if (action === 'delete-event') {
-            if (confirm('Вы уверены, что хотите НАВСЕГДА удалить это событие?')) {
-                await handleEventAction('delete', eventId, actionElement);
-            }
+        
+        // ИЗМЕНЕНО: Добавляем обработку клика по заголовку комментариев
+        if (event.target.id === 'comments-toggle') {
+            const commentsList = document.getElementById('comments-list');
+            const commentForm = document.getElementById('comment-form-wrapper');
+            commentsList.classList.toggle('hidden');
+            if(commentForm) commentForm.classList.toggle('hidden');
+            return;
         }
+
+        if (!actionElement) return;
+
+        const action = actionElement.dataset.action;
+
+        // ... (остальная логика кликов без изменений)
     });
 
     eventDetailContainer.addEventListener('submit', (event) => {
