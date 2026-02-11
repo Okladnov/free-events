@@ -261,24 +261,23 @@ body {
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
-/* ДОБАВЛЕНО: Стили для надписей DAY/NIGHT */
+/* ИЗМЕНЕНО: Стили для смайликов ☀️/🌙 */
 .theme-toggle-label::before,
 .theme-toggle-label::after {
     display: block;
     width: 50%;
     text-align: center;
-    font-size: 11px;
-    font-weight: bold;
-    color: var(--text-color-subtle);
-    z-index: 1; /* Чтобы текст был поверх слайдера */
+    font-size: 18px; /* Увеличим размер для смайликов */
+    z-index: 1;
+    line-height: 34px; /* Выравниваем по вертикали */
 }
 
 .theme-toggle-label::before {
-    content: 'DAY';
+    content: '☀️';
 }
 
 .theme-toggle-label::after {
-    content: 'NIGHT';
+    content: '🌙';
 }
 
 input:checked + .theme-toggle-slider {
