@@ -1,13 +1,9 @@
 // =================================================================
-// app.js - ВЕРСИЯ С ИСПРАВЛЕНИЕМ ПЕРЕКЛЮЧАТЕЛЯ ТЕМЫ
-// =================================================================
-
-// =================================================================
-// ГЛОБАЛЬНОЕ ПОДКЛЮЧЕНИЕ И НАСТРОЙКИ
+// app.js - РАБОЧАЯ ВЕРСИЯ (ВОССТАНОВЛЕННАЯ)
 // =================================================================
 
 const SUPABASE_URL = "https://cjspkygnjnnhgrbjusmx.supabase.co";
-const SUPABASE_KEY = "sb_publishable_mv5fXvDXXOCjFe-DturfeQ_zsUPc77D";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqc3BreWdubmpubGhyYmp1c214Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDkyMDI5ODAsImV4cCI6MjAyNDc3ODk4MH0.8Tj9g1iSjZDy3iNQ2a1gW2Sg-CmzQd_3i2p3rUvjC-c";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Глобальные переменные
@@ -17,7 +13,6 @@ let isAdmin = false;
 // =================================================================
 // ОБЩИЕ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // =================================================================
-
 function sanitizeHTML(text) {
     if (!text) return '';
     try {
@@ -28,38 +23,31 @@ function sanitizeHTML(text) {
 }
 
 // =================================================================
-// ЛОГИКА РАБОТЫ МОДАЛЬНОГО ОКНА (ПОЛНОСТЬЮ НОВАЯ ВЕРСИЯ)
+// ЛОГИКА РАБОТЫ МОДАЛЬНОГО ОКНА
 // =================================================================
-
 function setupLoginModal() {
-    // === Получаем все элементы ===
     const overlay = document.getElementById('login-modal-overlay');
     const openBtn = document.getElementById('loginBtn');
     const closeBtn = document.getElementById('modal-close-btn');
-
-    // Элементы переключения
+    
     const loginView = document.getElementById('login-view');
     const signupView = document.getElementById('signup-view');
     const showSignupBtn = document.getElementById('show-signup-view-btn');
     const showLoginBtn = document.getElementById('show-login-view-btn');
 
-    // Формы
     const loginForm = document.getElementById('login-form');
     const signupForm = document.getElementById('signup-form');
     const googleLoginBtn = document.getElementById('google-login-btn');
     
-    // Сообщения об ошибках
     const loginErrorMsg = document.getElementById('login-error-message');
     const signupErrorMsg = document.getElementById('signup-error-message');
 
-    if (!overlay || !openBtn) return; // Базовая проверка
+    if (!overlay || !openBtn || !closeBtn || !showSignupBtn || !showLoginBtn) return;
 
-    // === Логика открытия/закрытия окна ===
     openBtn.addEventListener('click', () => overlay.classList.remove('hidden'));
     closeBtn.addEventListener('click', () => overlay.classList.add('hidden'));
     overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.add('hidden'); });
 
-    // === Логика переключения между входом и регистрацией ===
     showSignupBtn.addEventListener('click', () => {
         loginView.classList.add('hidden');
         signupView.classList.remove('hidden');
@@ -69,19 +57,15 @@ function setupLoginModal() {
         loginView.classList.remove('hidden');
     });
 
-    // === Обработка форм ===
-
-    // Вход через Google
     googleLoginBtn.addEventListener('click', async () => {
         await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
+    });
 
-    // Вход по Email и Паролю
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = e.target.email.value;
         const password = e.target.password.value;
         loginErrorMsg.style.display = 'none';
-
         try {
             const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) throw error;
@@ -92,7 +76,6 @@ function setupLoginModal() {
         }
     });
 
-    // Регистрация
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = e.target.email.value;
@@ -100,21 +83,18 @@ function setupLoginModal() {
         const password = e.target.password.value;
         const passwordRepeat = e.target['password-repeat'].value;
         signupErrorMsg.style.display = 'none';
-
-        // 1. Проверка, совпадают ли пароли
+        
         if (password !== passwordRepeat) {
             signupErrorMsg.textContent = 'Пароли не совпадают.';
             signupErrorMsg.style.display = 'block';
-            return; // Прерываем выполнение
+            return;
         }
 
         try {
-            // 2. Отправляем запрос на регистрацию в Supabase
             const { data, error } = await supabaseClient.auth.signUp({
                 email: email,
                 password: password,
                 options: {
-                    // Передаем дополнительные данные, которые запишутся в профиль
                     data: { 
                         full_name: name 
                     }
@@ -123,9 +103,7 @@ function setupLoginModal() {
 
             if (error) throw error;
 
-            // 3. Показываем сообщение об успехе
             signupView.innerHTML = `<div class="login-modal-form-side"><p>Отлично! Мы отправили ссылку для подтверждения на <strong>${email}</strong>. Перейдите по ней, чтобы активировать аккаунт.</p></div>`;
-
         } catch (error) {
             signupErrorMsg.textContent = `Ошибка регистрации: ${error.message}`;
             signupErrorMsg.style.display = 'block';
@@ -136,7 +114,6 @@ function setupLoginModal() {
 // =================================================================
 // ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ШАПКИ
 // =================================================================
-
 async function initializeHeader() {
     const themeToggle = document.getElementById('theme-toggle');
     const loginBtn = document.getElementById('loginBtn');
@@ -147,7 +124,6 @@ async function initializeHeader() {
     const logoutBtn = document.getElementById('logoutBtn');
     const profileTrigger = document.getElementById('profile-trigger');
 
-    // 1. Настройка темы
     if (themeToggle) {
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme === 'dark') {
@@ -160,15 +136,13 @@ async function initializeHeader() {
         });
     }
 
-    // 2. Проверка сессии пользователя
     const { data: { session } } = await supabaseClient.auth.getSession();
     currentUser = session ? session.user : null;
 
-    // 3. Настройка UI
     if (currentUser) {
         if (addEventBtn) addEventBtn.classList.remove('hidden');
         if (profileDropdown) profileDropdown.classList.remove('hidden');
-
+        
         const [profileResponse, adminResponse] = await Promise.all([
             supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single(),
             supabaseClient.rpc('is_admin')
@@ -192,23 +166,28 @@ async function initializeHeader() {
         if (loginBtn) loginBtn.classList.remove('hidden');
     }
 
-    // 4. Настройка обработчиков
     if (logoutBtn) logoutBtn.onclick = async () => { await supabaseClient.auth.signOut(); window.location.reload(); };
     if (addEventBtn) addEventBtn.onclick = () => window.location.href = '/edit-event.html';
-    if (profileTrigger) profileTrigger.onclick = (event) => { event.stopPropagation(); profileDropdown.classList.toggle('open'); };
+    
+    if (profileTrigger) {
+      profileTrigger.onclick = (event) => { 
+        event.stopPropagation(); 
+        profileDropdown.classList.toggle('open'); 
+      };
+    }
     
     document.addEventListener('click', (event) => {
-        if (profileDropdown && !profileDropdown.contains(event.target)) profileDropdown.classList.remove('open');
+        if (profileDropdown && !profileDropdown.contains(event.target)) {
+            profileDropdown.classList.remove('open');
+        }
     });
 
-    // 5. Инициализируем логику модального окна
     setupLoginModal();
 }
 
 // =================================================================
-// ТОЧКА ВХОДА ДЛЯ APP.JS (ИСПРАВЛЕНИЕ)
+// ТОЧКА ВХОДА
 // =================================================================
-// Запускаем весь наш код только тогда, когда страница полностью загружена.
 document.addEventListener('DOMContentLoaded', () => {
     initializeHeader();
 });
