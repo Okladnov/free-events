@@ -1,5 +1,5 @@
 // ===================================================================
-// admin.js - ВЕРСИЯ С КАРТОЧКАМИ В СТИЛЕ ГЛАВНОЙ СТРАНИЦЫ
+// admin.js - ИСПРАВЛЕННАЯ ВЕРСИЯ
 // ===================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -26,10 +26,10 @@ async function loadUnapprovedEvents() {
 
     container.innerHTML = '<p>Загрузка списка событий для модерации...</p>';
     
-    // Запрашиваем события вместе с данными автора для карточки
+    // ИЗМЕНЕНО: Обращаемся к новому представлению 'events_with_details'
     const { data: events, error } = await supabaseClient
-        .from('events_with_comment_count') // Используем то же представление, что и на главной
-        .select(`*, profiles(full_name, avatar_url)`)
+        .from('events_with_details') 
+        .select(`*`) // Теперь можно запрашивать всё, так как данные автора уже включены
         .eq('is_approved', false)
         .order('created_at', { ascending: true });
 
@@ -59,7 +59,6 @@ async function loadUnapprovedEvents() {
         const cardRoot = cardClone.querySelector('.event-card-v3');
         const eventUrl = `event.html?id=${event.id}`;
         
-        // Заполняем данные карточки (логика, похожая на script.js)
         cardRoot.dataset.eventId = event.id;
         cardClone.querySelectorAll('[data-action="go-to-event"]').forEach(el => el.href = eventUrl);
         cardClone.querySelector('.card-date').textContent = `Опубликовано ${new Date(event.created_at).toLocaleDateString()}`;
@@ -72,15 +71,14 @@ async function loadUnapprovedEvents() {
         }
         image.alt = event.title;
 
-        const authorName = (event.profiles && event.profiles.full_name) ? event.profiles.full_name : 'Аноним';
+        // ИЗМЕНЕНО: Получаем данные автора напрямую из event
+        const authorName = event.full_name || 'Аноним';
+        const authorAvatar = event.avatar_url || 'https://placehold.co/24x24/f0f2f5/ccc';
         cardClone.querySelector('.card-author-name').textContent = authorName;
-
-        const authorAvatar = (event.profiles && event.profiles.avatar_url) ? event.profiles.avatar_url : 'https://placehold.co/24x24/f0f2f5/ccc';
         cardClone.querySelector('.card-author-avatar').src = authorAvatar;
         
         cardClone.querySelector('.comment-count').textContent = event.comment_count || 0;
 
-        // Важно: полностью удаляем блок с кнопками действий (Избранное, Редактировать и т.д.)
         const cardActions = cardClone.querySelector('.card-actions');
         if (cardActions) {
             cardActions.remove();
