@@ -1,13 +1,10 @@
 // =================================================================
-// event.js - ВЕРСИЯ С ПАНЕЛЬЮ МОДЕРАЦИИ ДЛЯ АДМИНОВ
+// event.js - ФИНАЛЬНАЯ ВЕРСИЯ С ИСПОЛЬЗОВАНИЕМ "СУПЕР-ПРЕДСТАВЛЕНИЯ"
 // =================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Инициализируем шапку и ждем, пока определится пользователь (из app.js)
     await initializeHeader();
-    // 2. Загружаем весь контент страницы
     await loadPageContent();
-    // 3. Настраиваем все обработчики событий для страницы
     setupEventListeners();
 });
 
@@ -28,26 +25,25 @@ async function loadPageContent() {
     eventDetailContainer.innerHTML = `<p>Загрузка события...</p>`;
 
     try {
-        const [eventResponse, commentsResponse] = await Promise.all([
-            supabaseClient
-                .from('events')
-                .select(`*, profiles(full_name), categories(id, name), votes(user_id, value), favorites(user_id)`)
-                .eq('id', eventId)
-                .single(),
-            supabaseClient
-                .from('comments')
-                .select(`*, profiles(full_name, avatar_url)`)
-                .eq('event_id', eventId)
-                .order('created_at', { ascending: true })
-        ]);
+        // ИСПРАВЛЕНО: Запрашиваем всё из одного "умного" представления
+        const eventResponse = await supabaseClient
+            .from('events_with_details')
+            .select(`*, votes(user_id, value), favorites(user_id)`)
+            .eq('id', eventId)
+            .single();
+
+        const commentsResponse = await supabaseClient
+            .from('comments')
+            .select(`*, profiles(full_name, avatar_url)`)
+            .eq('event_id', eventId)
+            .order('created_at', { ascending: true });
 
         const { data: event, error: eventError } = eventResponse;
         const { data: comments, error: commentsError } = commentsResponse;
 
-        if (eventError || !event) throw new Error("Событие не найдено.");
+        if (eventError || !event) throw new Error("Событие не найдено или к нему нет доступа.");
         if (commentsError) throw new Error("Ошибка загрузки комментариев.");
 
-        // "Рисуем" страницу
         renderPage(event, comments);
 
     } catch (error) {
@@ -65,14 +61,13 @@ function renderPage(event, comments) {
     const eventDetailContainer = document.getElementById('event-detail-container');
     document.title = event.title;
 
-    const categoriesHtml = (event.categories || [])
-        .map(cat => `<a href="/?category=${cat.id}" class="tag">${sanitizeHTML(cat.name)}</a>`)
-        .join('');
+    // ИСПРАВЛЕНО: Берём название категории прямо из event
+    const categoriesHtml = event.category_name ? `<a href="/?category=${event.category_id}" class="tag">${sanitizeHTML(event.category_name)}</a>` : '';
     
-    const authorName = event.profiles ? event.profiles.full_name : 'Аноним';
-    const isFavorited = currentUser ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
+    // ИСПРАВЛЕНО: Берём имя автора прямо из event
+    const authorName = event.full_name || 'Аноним';
+    const isFavorited = currentUser && event.favorites ? event.favorites.some(fav => fav.user_id === currentUser.id) : false;
 
-    // ИЗМЕНЕНО: Добавляем HTML для панели модерации, если нужно
     const moderationPanelHtml = (isAdmin && !event.is_approved) ? `
         <div class="moderation-panel">
             <div class="moderation-panel-title">⭐ Панель модератора</div>
@@ -87,7 +82,7 @@ function renderPage(event, comments) {
     const eventHtml = `
         ${moderationPanelHtml} 
         <div class="event-detail-header">
-            <img src="${event.image_url || 'https://placehold.co/1200x400/1e1e1e/ff6a00?text=Нет+фото'}" alt="${event.title}" class="event-detail-image">
+            <img src="${event.image_url || 'https://placehold.co/1200x400/1e1e1e/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}" class="event-detail-image">
             <button class="card-save-btn ${isFavorited ? 'active' : ''}" data-action="toggle-favorite">
                 ${isFavorited ? '❤️' : '🤍'}
             </button>
@@ -129,19 +124,42 @@ function renderPage(event, comments) {
     eventDetailContainer.innerHTML = eventHtml;
 }
 
-// ... (renderComment и renderRating без изменений)
-
 function renderComment(comment) {
-    // ...
+    const authorName = comment.profiles ? sanitizeHTML(comment.profiles.full_name) : 'Аноним';
+    const authorAvatar = comment.profiles ? comment.profiles.avatar_url : 'https://placehold.co/32x32/f0f2f5/ccc';
+    return `
+        <div class="comment">
+            <img src="${authorAvatar}" alt="avatar" class="comment-avatar">
+            <div class="comment-body">
+                <div class="comment-header">
+                    <span class="comment-author">${authorName}</span>
+                    <span class="comment-date">${new Date(comment.created_at).toLocaleString('ru-RU')}</span>
+                </div>
+                <p>${sanitizeHTML(comment.content)}</p>
+            </div>
+        </div>
+    `;
 }
 
 function renderRating(event) {
-    // ...
+    const rating = event.votes ? event.votes.reduce((acc, vote) => acc + vote.value, 0) : 0;
+    const hasVoted = currentUser && event.votes ? event.votes.some(v => v.user_id === currentUser.id) : false;
+    let scoreClass = '', scoreIcon = '';
+    if (rating < 0) { scoreClass = 'score-cold'; scoreIcon = '❄️'; }
+    else if (rating > 20) { scoreClass = 'score-fire'; scoreIcon = '🔥🔥'; }
+    else if (rating > 5) { scoreClass = 'score-hot'; scoreIcon = '🔥'; }
+    return `
+        <strong>⭐ Рейтинг</strong>
+        <div class="vote">
+            <button data-action="vote" data-value="1" ${hasVoted ? 'disabled' : ''} title="Нравится">▲</button>
+            <span class="score ${scoreClass}">${rating} ${scoreIcon}</span>
+            <button data-action="vote" data-value="-1" ${hasVoted ? 'disabled' : ''} title="Не нравится">▼</button>
+        </div>
+    `;
 }
 
-
 // =================================================================
-// НАСТРОЙКА ОБРАБОТЧИКОВ СОБЫТИЙ
+// ОБРАБОТЧИКИ СОБЫТИЙ
 // =================================================================
 
 function setupEventListeners() {
@@ -155,7 +173,6 @@ function setupEventListeners() {
 
         const action = actionElement.dataset.action;
 
-        // ИЗМЕНЕНО: Обработка кнопок модерации
         if (action === 'approve-event') {
             await handleEventAction('approve', eventId, actionElement);
         } else if (action === 'delete-event') {
@@ -164,7 +181,6 @@ function setupEventListeners() {
             }
         }
 
-        // Старая логика для других кнопок
         if (!currentUser && (action === 'toggle-favorite' || action === 'vote')) {
             alert('Пожалуйста, войдите, чтобы выполнить это действие.');
             return;
@@ -190,22 +206,18 @@ function setupEventListeners() {
 // ФУНКЦИИ-ОБРАБОТЧИКИ ДЕЙСТВИЙ
 // =================================================================
 
-// ... (handleAddComment, handleToggleFavorite, handleVote без изменений)
-
 async function handleAddComment(eventId, formElement) {
-    // ...
+    // ... (без изменений)
 }
 
 async function handleToggleFavorite(eventId, buttonElement) {
-    // ...
+    // ... (без изменений)
 }
 
 async function handleVote(eventId, value) {
-    // ...
+    // ... (без изменений)
 }
 
-
-// ИЗМЕНЕНО: Новая функция для обработки действий модератора
 async function handleEventAction(action, eventId, button) {
     button.disabled = true;
     const originalText = button.textContent;
@@ -235,4 +247,10 @@ async function handleEventAction(action, eventId, button) {
             panel.innerHTML = '<p style="color: var(--danger-color);">❌ Событие удалено. <a href="/admin.html">Вернуться в админку</a></p>';
         }
     }
+}
+
+// ИСПРАВЛЕНО: Добавляем недостающую функцию
+function sanitizeForAttribute(text) {
+    if (!text) return '';
+    return String(text).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
