@@ -41,13 +41,22 @@ async function loadFavoritesPage(isInitialLoad = false) {
 
     const from = currentPage * PAGE_SIZE;
 
-    // ЗАПРАШИВАЕМ НАШЕ НОВОЕ "УМНОЕ" ПРЕДСТАВЛЕНИЕ (VIEW)
-    const { data: events, error, count } = await supabaseClient
-        .from('user_favorite_events') // <--- Вот магия!
-        .select(`*, categories (id, name)`, { count: 'exact' }) // Запрашиваем count сразу
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false })
-        .range(from, from + PAGE_SIZE - 1);
+    // ИСПРАВЛЕНО: Запрашиваем сначала ID избранных, потом сами события
+const { data: favoriteIds, error: favError, count } = await supabaseClient
+    .from('favorites')
+    .select('event_id', { count: 'exact' })
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false })
+    .range(from, from + PAGE_SIZE - 1);
+
+if (favError) throw favError;
+
+const eventIds = favoriteIds.map(fav => fav.event_id);
+
+const { data: events, error } = await supabaseClient
+    .from('events_with_details') // Используем наше рабочее "супер-представление"
+    .select('*')
+    .in('id', eventIds);
 
     if (error) {
         eventsContainer.innerHTML = `<p class="error-message">Ошибка загрузки: ${error.message}</p>`;
