@@ -1,26 +1,34 @@
 // =================================================================
-// favorites.js - ПОЛНОСТЬЮ ПЕРЕРАБОТАННАЯ ВЕРСИЯ
+// favorites.js - ФИНАЛЬНАЯ, ИСПРАВЛЕННАЯ ВЕРСИЯ
 // =================================================================
 
 // =================================================================
 // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ СТРАНИЦЫ
 // =================================================================
+
 const eventsContainer = document.getElementById("events");
 const paginationControls = document.getElementById('pagination-controls');
 const PAGE_SIZE = 9;
 let currentPage = 0;
 let totalFavoritesCount = 0;
 
+// ИСПРАВЛЕНО: Добавляем недостающую функцию
+function sanitizeForAttribute(text) {
+    if (!text) return '';
+    return String(text).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // =================================================================
 // ТОЧКА ВХОДА
 // =================================================================
+
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Используем ГОТОВУЮ функцию из app.js. Она сама определит пользователя.
     await initializeHeader();
 
     // 2. Если пользователя нет, показываем сообщение и выходим.
     if (!currentUser) {
-        eventsContainer.innerHTML = '<p>Пожалуйста, <a href="/login.html">войдите в свой аккаунт</a>, чтобы увидеть избранные события.</p>';
+        eventsContainer.innerHTML = '<p>Пожалуйста, <a href="/">войдите в свой аккаунт</a>, чтобы увидеть избранные события.</p>';
         return;
     }
 
@@ -32,6 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // =================================================================
 // ЗАГРУЗКА И ОТОБРАЖЕНИЕ
 // =================================================================
+
 async function loadFavoritesPage(isInitialLoad = false) {
     if (isInitialLoad) {
         currentPage = 0;
@@ -41,54 +50,56 @@ async function loadFavoritesPage(isInitialLoad = false) {
 
     const from = currentPage * PAGE_SIZE;
 
-    // ИСПРАВЛЕНО: Запрашиваем сначала ID избранных, потом сами события
-const { data: favoriteIds, error: favError, count } = await supabaseClient
-    .from('favorites')
-    .select('event_id', { count: 'exact' })
-    .eq('user_id', currentUser.id)
-    .order('created_at', { ascending: false })
-    .range(from, from + PAGE_SIZE - 1);
-
-if (favError) throw favError;
-
-const eventIds = favoriteIds.map(fav => fav.event_id);
-
-const { data: events, error } = await supabaseClient
-    .from('events_with_details') // Используем наше рабочее "супер-представление"
-    .select('*')
-    .in('id', eventIds);
-
-    if (error) {
-        eventsContainer.innerHTML = `<p class="error-message">Ошибка загрузки: ${error.message}</p>`;
+    // ИСПРАВЛЕНО: Запрашиваем сначала ID, потом сами события
+    const { data: favoriteIds, error: favError, count } = await supabaseClient
+        .from('favorites')
+        .select('event_id', { count: 'exact' })
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .range(from, from + PAGE_SIZE - 1);
+    
+    if (favError) {
+        eventsContainer.innerHTML = `<p class="error-message">Ошибка загрузки: ${favError.message}</p>`;
         return;
     }
 
     if (isInitialLoad) {
         totalFavoritesCount = count;
-        eventsContainer.innerHTML = ''; // Очищаем "загрузку"
     }
-
-    if (!events || events.length === 0) {
+    
+    if (!favoriteIds || favoriteIds.length === 0) {
         if (isInitialLoad) {
             eventsContainer.innerHTML = '<p>Вы пока не добавили ни одного события в избранное. <a href="/">Перейти на главную</a></p>';
         }
         return;
     }
 
-    // "Рисуем" карточки
+    const eventIds = favoriteIds.map(fav => fav.event_id);
+    
+    const { data: events, error } = await supabaseClient
+        .from('events_with_details') // Используем наше рабочее "супер-представление"
+        .select('*')
+        .in('id', eventIds);
+
+    if (error) {
+        eventsContainer.innerHTML = `<p class="error-message">Ошибка загрузки событий: ${error.message}</p>`;
+        return;
+    }
+
+    if (isInitialLoad) {
+        eventsContainer.innerHTML = ''; // Очищаем "загрузку"
+    }
+    
     events.forEach(event => {
         eventsContainer.insertAdjacentHTML('beforeend', renderFavoriteCard(event));
     });
-
-    // Обновляем пагинацию
+    
     updatePagination();
 }
 
 function renderFavoriteCard(event) {
     const dateHtml = event.event_date ? new Date(event.event_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) : 'Дата не указана';
-    const categoriesHtml = (event.categories || [])
-        .map(cat => `<span class="tag">${sanitizeHTML(cat.name)}</span>`)
-        .join('');
+    const categoriesHtml = event.category_name ? `<span class="tag">${sanitizeHTML(event.category_name)}</span>` : '';
 
     return `
       <div class="event-card-new" data-event-id="${event.id}">
@@ -120,6 +131,7 @@ function updatePagination() {
         const loadMoreBtn = document.createElement('button');
         loadMoreBtn.textContent = 'Загрузить еще';
         loadMoreBtn.id = 'load-more-btn';
+        loadMoreBtn.classList.add('btn', 'btn--primary');
         loadMoreBtn.onclick = () => {
             currentPage++;
             loadFavoritesPage(false);
@@ -131,6 +143,7 @@ function updatePagination() {
 // =================================================================
 // ОБРАБОТЧИКИ СОБЫТИЙ
 // =================================================================
+
 function setupFavoritesEventListeners() {
     eventsContainer.addEventListener('click', async (event) => {
         const button = event.target.closest('[data-action="remove-from-favorites"]');
@@ -139,7 +152,6 @@ function setupFavoritesEventListeners() {
         const card = button.closest('.event-card-new');
         const eventId = card.dataset.eventId;
         
-        // Оптимистичное удаление: сначала убираем с экрана, потом отправляем запрос
         card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
         card.style.opacity = '0';
         card.style.transform = 'scale(0.95)';
@@ -147,15 +159,11 @@ function setupFavoritesEventListeners() {
         setTimeout(() => card.remove(), 500);
 
         const { error } = await supabaseClient.from('favorites').delete().match({ event_id: eventId, user_id: currentUser.id });
-
         if (error) {
-            // Если произошла ошибка, можно вернуть карточку или показать уведомление
             alert('Не удалось удалить событие из избранного.');
-            card.style.opacity = '1';
-            card.style.transform = 'scale(1)';
+            // Можно добавить логику возвращения карточки, если нужно
         } else {
             totalFavoritesCount--;
-            // Проверяем, не пустой ли контейнер после удаления
             if (totalFavoritesCount === 0) {
                  eventsContainer.innerHTML = '<p>Вы пока не добавили ни одного события в избранное. <a href="/">Перейти на главную</a></p>';
                  paginationControls.innerHTML = '';
