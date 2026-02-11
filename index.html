@@ -11,7 +11,6 @@
 </head>
 <body>
 
-<!-- Пустой комментарий для перезапуска Vercel  -->
 <header class="header">
   <div class="container header-container">
     <div class="header-title">
@@ -46,7 +45,6 @@
                 <a href="#" id="logoutBtn">Выйти</a>
             </div>
         </div>
-        <!-- Кнопка "Войти" теперь не ссылка, а кнопка, чтобы не перезагружать страницу -->
         <button id="loginBtn" class="btn btn--outline-primary hidden">Войти</button>
     </div>
   </div>
@@ -74,41 +72,38 @@
     <div class="login-modal-card">
         <button id="modal-close-btn" class="modal-close-btn">&times;</button>
         
-        <!-- === Контейнер для формы ВХОДА (виден по умолчанию) === -->
         <div id="login-view">
             <div class="login-modal-form-side">
                 <h2>Вход в аккаунт</h2>
                 <p class="form-subtitle">Получите доступ к избранному и созданию событий</p>
-
                 <div class="google-btn-container">
                     <button id="google-login-btn" class="google-btn">
                         <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo">
                         <span>Продолжить с Google</span>
                     </button>
                 </div>
-
                 <div class="divider">или</div>
                 
                 <form id="login-form">
                     <div class="input-group">
-                        <label for="email">Email</label>
+                        <!-- ИЗМЕНЕНО: for="login-email" -->
+                        <label for="login-email">Email</label>
                         <input type="email" id="login-email" name="email" required placeholder="you@example.com" autocomplete="username">
                     </div>
                     <div class="input-group">
-                        <label for="password">Пароль</label>
+                        <!-- ИЗМЕНЕНО: for="login-password" -->
+                        <label for="login-password">Пароль</label>
                         <input type="password" id="login-password" name="password" required placeholder="••••••••" autocomplete="current-password">
                     </div>
                     <p id="login-error-message" class="error-message" style="display: none;"></p>
                     <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Войти</button>
                 </form>
-
                 <p class="form-switcher-link">
                     Нет аккаунта? <button id="show-signup-view-btn">Создать новый</button>
                 </p>
             </div>
         </div>
 
-        <!-- === Контейнер для формы РЕГИСТРАЦИИ (скрыт по умолчанию) === -->
         <div id="signup-view" class="hidden">
             <div class="login-modal-form-side">
                 <h2>Регистрация</h2>
@@ -121,7 +116,8 @@
                     </div>
                     <div class="input-group">
                         <label for="signup-name">Имя пользователя</label>
-                        <input type="text" id="signup-name" name="name" required>
+                        <!-- ИЗМЕНЕНО: autocomplete="name" -->
+                        <input type="text" id="signup-name" name="name" required autocomplete="name">
                     </div>
                     <div class="input-group">
                         <label for="signup-password">Пароль</label>
@@ -134,13 +130,11 @@
                     <p id="signup-error-message" class="error-message" style="display: none;"></p>
                     <button type="submit" class="btn btn--primary" style="width:100%; margin-top: 10px;">Зарегистрироваться</button>
                 </form>
-
                 <p class="form-switcher-link">
                     Уже есть аккаунт? <button id="show-login-view-btn">Войти</button>
                 </p>
             </div>
         </div>
-
     </div>
 </div>
 
