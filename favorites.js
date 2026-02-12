@@ -135,7 +135,7 @@ async function loadFavoritesPage(isInitialLoad = false) {
     const descriptionEl = cardClone.querySelector('.card-description');
     if (event.event_date) {
         const startDate = new Date(event.event_date).toLocaleString('ru-RU', {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'});
-        descriptionEl.innerHTML = `<strong>Начало:</strong> ${startDate}`;
+        descriptionEl.innerHTML = `<strong>Начало события:</strong> ${startDate}`;
     } else {
         descriptionEl.remove();
     }
