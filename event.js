@@ -93,6 +93,7 @@ function renderPage(event, comments) {
             </a>
         </div>
     ` : ''}
+    </div>
             <div class="event-content-column">
                 <div class="event-main-content">
                     
