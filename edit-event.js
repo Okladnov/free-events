@@ -265,8 +265,17 @@ async function handleFormSubmit(e, eventId) {
         
         if (error) throw error;
         
-        alert('✅ Успешно! Ваше событие отправлено на модерацию.');
-        setTimeout(() => { window.location.href = `/event.html?id=${data.id}`; }, 1000);
+        const successModal = document.getElementById('success-modal-overlay');
+        successModal.classList.remove('hidden');
+
+        setTimeout(() => { 
+            // Если ты админ, кидаем в админку, иначе - на главную
+            if (isAdmin) {
+                window.location.href = '/admin.html';
+            } else {
+                window.location.href = '/';
+            }
+        }, 3000); // 3 секунды, как ты и просил
 
     } catch (error) {
         console.error("Ошибка сохранения события:", error);
