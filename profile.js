@@ -1,7 +1,57 @@
 // ===================================================================
 // profile.js - ИСПРАВЛЕННАЯ ВЕРСИЯ
 // ===================================================================
+// Вспомогательная функция для правильных окончаний (1 минута, 2 минуты, 5 минут)
+function getNoun(number, one, two, five) {
+    let n = Math.abs(number);
+    n %= 100;
+    if (n >= 5 && n <= 20) {
+        return five;
+    }
+    n %= 10;
+    if (n === 1) {
+        return one;
+    }
+    if (n >= 2 && n <= 4) {
+        return two;
+    }
+    return five;
+}
 
+// Главная функция для форматирования "Опубликовано ... назад"
+function timeAgo(dateString) {
+    const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
+    
+    if (seconds < 60) {
+        return "Опубликовано только что";
+    }
+    let interval = seconds / 31536000;
+    if (interval > 1) {
+        const years = Math.floor(interval);
+        return `Опубликовано ${years} ${getNoun(years, 'год', 'года', 'лет')} назад`;
+    }
+    interval = seconds / 2592000;
+    if (interval > 1) {
+        const months = Math.floor(interval);
+        return `Опубликовано ${months} ${getNoun(months, 'месяц', 'месяца', 'месяцев')} назад`;
+    }
+    interval = seconds / 86400;
+    if (interval > 1) {
+        const days = Math.floor(interval);
+        return `Опубликовано ${days} ${getNoun(days, 'день', 'дня', 'дней')} назад`;
+    }
+    interval = seconds / 3600;
+    if (interval > 1) {
+        const hours = Math.floor(interval);
+        return `Опубликовано ${hours} ${getNoun(hours, 'час', 'часа', 'часов')} назад`;
+    }
+    interval = seconds / 60;
+    if (interval > 1) {
+        const minutes = Math.floor(interval);
+        return `Опубликовано ${minutes} ${getNoun(minutes, 'минуту', 'минуты', 'минут')} назад`;
+    }
+    return `Опубликовано ${Math.floor(seconds)} ${getNoun(seconds, 'секунду', 'секунды', 'секунд')} назад`;
+}
 document.addEventListener('DOMContentLoaded', async () => {
     await initializeHeader();
 
