@@ -770,3 +770,14 @@ body.dark-theme .new-item-approval {
   .card-body { flex-direction: column; }
   .card-image-link { width: 100%; height: 180px; }
 }
+/* =========================================
+   11. ФУТЕР (ПОДВАЛ)
+   ========================================= */
+.footer {
+  text-align: center;
+  padding: 30px 20px;
+  margin-top: 30px; /* Добавлено, чтобы оторвать от контента */
+  font-size: 14px;
+  color: var(--text-color-subtle);
+  border-top: 1px solid var(--border-color); /* Добавляем линию для красоты */
+}
