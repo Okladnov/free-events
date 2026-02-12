@@ -843,3 +843,40 @@ input:checked + .theme-toggle-slider {
     font-size: 16px;
     color: var(--text-color-secondary);
 }
+/* =========================================
+   16. СТИЛИ ДЛЯ ПАНЕЛИ МОДЕРАЦИИ (НОВЫЙ БЛОК)
+   ========================================= */
+
+.new-item-approval {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: rgba(0,0,0,0.05);
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+body.dark-theme .new-item-approval {
+    background-color: rgba(255,255,255,0.05);
+}
+
+.new-item-approval strong {
+    margin: 0;
+}
+
+.btn--secondary {
+    background-color: var(--card-background);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+.btn--secondary:hover {
+    background-color: var(--input-background);
+}
+
+.btn-small {
+    height: 32px;
+    line-height: 32px;
+    padding: 0 12px;
+    font-size: 14px;
+}
