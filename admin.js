@@ -23,29 +23,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadUnapprovedEvents() {
     const container = document.getElementById('unapproved-events');
     if (!container) return;
-
     container.innerHTML = '<p>Загрузка списка событий для модерации...</p>';
     
-    // ИЗМЕНЕНО: Обращаемся к новому представлению 'events_with_details'
     const { data: events, error } = await supabaseClient
         .from('events_with_details') 
-        .select(`*`) // Теперь можно запрашивать всё, так как данные автора уже включены
+        .select(`*`)
         .eq('is_approved', false)
         .order('created_at', { ascending: true });
-
-    if (error) {
-        container.innerHTML = `<p style="color: red;">Ошибка загрузки: ${error.message}.</p>`;
-        return;
-    }
     
-    if (!events || events.length === 0) {
-        container.innerHTML = '<p>🎉 Все события одобрены! Новых на модерацию нет.</p>';
-        return;
-    }
+    if (error) { /* ... (обработка ошибки) ... */ return; }
+    if (!events || events.length === 0) { /* ... (сообщение, что список пуст) ... */ return; }
     
-    // Очищаем контейнер и получаем шаблон
     container.innerHTML = '';
     const cardTemplate = document.getElementById('event-card-template');
+    if (!cardTemplate) return;
+
+    events.forEach(event => {
+        const cardClone = cardTemplate.content.cloneNode(true);
 
     if (!cardTemplate) {
         console.error("Шаблон #event-card-template не найден на странице admin.html");
@@ -53,7 +47,6 @@ async function loadUnapprovedEvents() {
         return;
     }
 
-    // Создаем карточки для каждого события
     events.forEach(event => {
         const cardClone = cardTemplate.content.cloneNode(true);
         const cardRoot = cardClone.querySelector('.event-card-v3');
@@ -71,7 +64,6 @@ async function loadUnapprovedEvents() {
         }
         image.alt = event.title;
 
-        // ИЗМЕНЕНО: Получаем данные автора напрямую из event
         const authorName = event.full_name || 'Аноним';
         const authorAvatar = event.avatar_url || 'https://placehold.co/24x24/f0f2f5/ccc';
         cardClone.querySelector('.card-author-name').textContent = authorName;
@@ -85,5 +77,16 @@ async function loadUnapprovedEvents() {
         }
         
         container.appendChild(cardClone);
+
+        if (event.new_organization_name || event.new_city_name) {
+            const titleEl = cardClone.querySelector('.card-title');
+            if (titleEl) {
+                titleEl.textContent = '✨ ' + titleEl.textContent;
+            }
+        }
+        
+        container.appendChild(cardClone);
+    });
+}
     });
 }
