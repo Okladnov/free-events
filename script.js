@@ -254,7 +254,13 @@ if (currentOrganizationId) {
 const timeAgoText = timeAgo(event.created_at);
 cardClone.querySelector('.card-date').textContent = timeAgoText;
         cardClone.querySelector('.card-title').textContent = event.title;
-        cardClone.querySelector('.card-description').textContent = `${(event.description || '').replace(/<[^>]*>?/gm, '').substring(0, 100)}...`;
+        const descriptionEl = cardClone.querySelector('.card-description');
+if (event.event_date) {
+    const startDate = new Date(event.event_date).toLocaleString('ru-RU', {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'});
+    descriptionEl.innerHTML = `<strong>Начало:</strong> ${startDate}`; // innerHTML чтобы <strong> сработал
+} else {
+    descriptionEl.remove(); // Если даты нет, просто убираем блок
+}
         
         const image = cardClone.querySelector('.card-image');
         if (event.image_url) image.src = event.image_url;
