@@ -219,10 +219,17 @@ cardClone.querySelector('.card-date').textContent = eventDate;
             if(orgPlaceholder) orgPlaceholder.classList.add('hidden');
         }
 
-        const authorName = event.full_name || 'Аноним';
-        const authorAvatar = event.avatar_url || 'https://placehold.co/24x24/f0f2f5/ccc';
-        cardClone.querySelector('.card-author-name').textContent = authorName;
-        cardClone.querySelector('.card-author-avatar').src = authorAvatar;
+        const authorWrapper = cardClone.querySelector('.card-author');
+const authorLink = document.createElement('a');
+authorLink.href = `/profile.html?id=${event.created_by}`;
+authorLink.classList.add('card-author-link');
+authorLink.innerHTML = `
+    <img src="${event.avatar_url || 'https://placehold.co/24x24/f0f2f5/ccc'}" alt="${event.full_name || 'Аноним'}" class="card-author-avatar">
+    <span class="card-author-name">${event.full_name || 'Аноним'}</span>
+`;
+
+authorWrapper.innerHTML = '';
+authorWrapper.appendChild(authorLink);
         
         cardClone.querySelector('.comment-count').textContent = event.comment_count;
         
