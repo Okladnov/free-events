@@ -3,20 +3,21 @@
 // ===================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Ждем, пока app.js отработает и определит пользователя
     await initializeHeader();
 
-    // Если пользователь не авторизован, отправляем на главную
     if (!currentUser) {
-        alert("Пожалуйста, войдите, чтобы просмотреть свой профиль.");
-        window.location.href = '/';
+        // Имитируем клик по кнопке "Войти" из шапки, чтобы открыть модальное окно
+        document.getElementById('loginBtn').click();
+        
+        // Заменяем контент страницы сообщением
+        const mainContainer = document.querySelector('main.container');
+        if (mainContainer) {
+            mainContainer.innerHTML = '<h2>Для просмотра профиля необходимо войти</h2><p>Пожалуйста, войдите в свой аккаунт, чтобы увидеть эту страницу.</p>';
+        }
         return;
     }
 
-    // Загружаем данные профиля
     await loadProfileData();
-
-    // Загружаем события, созданные пользователем
     await loadUserEvents();
 });
 
