@@ -781,3 +781,19 @@ body.dark-theme .new-item-approval {
   color: var(--text-color-subtle);
   border-top: 1px solid var(--border-color); /* Добавляем линию для красоты */
 }
+/* =========================================
+   18. СТИЛИ ДЛЯ ДОПОЛНИТЕЛЬНЫХ ЭЛЕМЕНТОВ
+   ========================================= */
+.link-button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--primary-color);
+    font-weight: bold;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+}
+.link-button:hover {
+    text-decoration: underline;
+}
