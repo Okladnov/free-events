@@ -813,3 +813,33 @@ input:checked + .theme-toggle-slider {
     margin-top: 24px;
     transition: max-height 0.5s ease-in-out, opacity 0.5s ease 0.2s;
 }
+
+/* =========================================
+   17. СТИЛИ ДЛЯ НОВОГО МОДАЛЬНОГО ОКНА УСПЕХА (НОВЫЙ БЛОК)
+   ========================================= */
+#success-modal-overlay .success-modal-card {
+    background-color: var(--card-background);
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 10px 30px var(--shadow-color-heavy);
+}
+
+#success-modal-overlay .success-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+#success-modal-overlay h2 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    color: var(--text-color);
+}
+
+#success-modal-overlay p {
+    margin: 0;
+    font-size: 16px;
+    color: var(--text-color-secondary);
+}
