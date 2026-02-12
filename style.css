@@ -1,5 +1,5 @@
 /* ===================================================================
-   STYLE.CSS - ФИНАЛЬНАЯ ВЕРСИЯ (С НОВЫМ ДИЗАЙНОМ СОБЫТИЯ)
+   STYLE.CSS - ФИНАЛЬНАЯ, ПРИЧЕСАННАЯ ВЕРСИЯ
    =================================================================== */
 
 /* =========================================
@@ -57,7 +57,7 @@ body {
 }
 
 /* =========================================
-   2. УТИЛИТЫ (Вспомогательные классы)
+   2. УТИЛИТЫ
    ========================================= */
 .hidden {
   display: none !important;
@@ -107,6 +107,23 @@ body {
     background-color: var(--danger-color-hover);
     border-color: var(--danger-color-hover);
 }
+.btn--secondary {
+    background-color: var(--card-background);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+.btn--secondary:hover {
+    background-color: var(--input-background);
+}
+.btn-small {
+    height: 32px;
+    line-height: 32px;
+    padding: 0 12px;
+    font-size: 14px;
+}
+.auth-block .btn {
+  text-decoration: none;
+}
 
 /* =========================================
    4. ШАПКА
@@ -146,7 +163,6 @@ body {
   border-radius: 20px;
   background-color: var(--input-background);
   color: var(--text-color);
-  -webkit-appearance: none;
   transition: background-color 0.3s;
 }
 .search-wrapper input:focus {
@@ -166,10 +182,6 @@ body {
   justify-content: center;
   padding: 0;
   border-radius: 50%;
-}
-.search-button svg path {
-  stroke: var(--icon-color);
-  transition: stroke 0.3s;
 }
 .auth-block {
   display: flex;
@@ -233,22 +245,20 @@ body {
 }
 .theme-toggle-label {
   position: relative;
-  display: inline-flex; /* Изменено на flex для выравнивания */
-  align-items: center; /* Выравниваем по центру */
-  width: 80px; /* Увеличили ширину для надписей */
+  display: inline-flex;
+  align-items: center;
+  width: 80px;
   height: 34px;
-  background-color: var(--input-background); /* Фон для всего переключателя */
+  background-color: var(--input-background);
   border-radius: 34px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
-
 .theme-toggle-label input {
   opacity: 0;
   width: 0;
   height: 0;
 }
-
 .theme-toggle-slider {
   position: absolute;
   top: 3px;
@@ -260,33 +270,25 @@ body {
   transition: .4s;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
-
-/* ИЗМЕНЕНО: Стили для смайликов ☀️/🌙 */
 .theme-toggle-label::before,
 .theme-toggle-label::after {
     display: block;
     width: 50%;
     text-align: center;
-    font-size: 18px; /* Увеличим размер для смайликов */
+    font-size: 18px;
     z-index: 1;
-    line-height: 34px; /* Выравниваем по вертикали */
+    line-height: 34px;
 }
-
-.theme-toggle-label::before {
-    content: '☀️';
-}
-
-.theme-toggle-label::after {
-    content: '🌙';
-}
-
+.theme-toggle-label::before { content: '☀️'; }
+.theme-toggle-label::after { content: '🌙'; }
 input:checked + .theme-toggle-slider {
-  transform: translateX(46px); /* Сдвигаем слайдер вправо */
+  transform: translateX(46px);
 }
 
 /* =========================================
-   5. ГЛАВНАЯ СТРАНИЦА: ФИЛЬТРЫ И КАРТОЧКИ
+   5. СТИЛИ СТРАНИЦ
    ========================================= */
+/* --- Главная страница --- */
 .filters-section { padding: 20px 0 15px 0; margin: 0 20px 20px 20px; border-bottom: 1px solid var(--border-color); }
 .pills-container { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; scrollbar-width: none; }
 .pills-container::-webkit-scrollbar { display: none; }
@@ -314,276 +316,12 @@ input:checked + .theme-toggle-slider {
 .action-btn svg { width: 20px; height: 20px; fill: var(--text-color-subtle); transition: fill 0.2s, transform 0.2s; }
 .action-btn:hover svg { fill: var(--primary-color); }
 .action-btn.active svg { fill: var(--danger-color); transform: scale(1.1); }
-.card-main-link.btn { height: auto; line-height: normal; padding: 8px 16px; font-size: 14px; }
+.event-source-link { display: block; margin-top: 12px; font-size: 14px; font-weight: 600; color: var(--primary-color); text-decoration: none; }
+.event-source-link:hover { text-decoration: underline; }
 #pagination-controls { text-align: center; margin-top: 30px; }
 #load-more-btn.btn { padding: 12px 24px; font-size: 16px; }
-.footer { text-align: center; padding: 30px 20px; font-size: 14px; color: var(--text-color-subtle); }
 
-/* =========================================
-   6. ПРОЧИЕ СТРАНИЦЫ
-   ========================================= */
-.profile-layout-container { display: grid; grid-template-columns: 320px 1fr; gap: 30px; align-items: start; padding-top: 40px; padding-bottom: 40px; }
-.profile-page-card { margin: 0; position: sticky; top: 20px; }
-.profile-activity-card { margin: 0; }
-.form-grid-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 30px;
-  margin-top: 30px;
-  padding-bottom: 50px;
-  background-color: var(--card-background);
-  padding: 32px;
-  border-radius: 16px;
-  border: 1px solid var(--border-color);
-}
-.form-grid-container h4 {
-    margin-top: 24px;
-    font-size: 16px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 12px;
-    margin-bottom: 12px;
-    font-weight: 600;
-}
-.form-grid-container h4:first-of-type {
-    margin-top: 0;
-}
-.form-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
-.input-group { margin-bottom: 24px; }
-.input-group label { display: block; font-size: 14px; margin-bottom: 8px; font-weight: 500; }
-.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--input-background); color: var(--text-color); font-size: 15px; box-sizing: border-box; }
-.input-group input:focus, .input-group select:focus, .input-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px var(--primary-color-light); }
-.form-message { color: var(--text-color-secondary); font-size: 14px; margin-top: 15px; }
-.moderation-panel {
-    background-color: var(--primary-color-light);
-    color: var(--text-color);
-    border: 1px solid var(--primary-color);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 24px;
-}
-.moderation-panel-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin: 0 0 8px;
-}
-.moderation-panel p {
-    margin: 0 0 16px;
-}
-.moderation-panel-actions {
-    display: flex;
-    gap: 12px;
-}
-
-/* =========================================
-   7. ОБЩИЕ СТИЛИ ДЛЯ ФОРМ ВХОДА/РЕГИСТРАЦИИ
-   ========================================= */
-.login-modal-form-side { padding: 40px; }
-.login-modal-form-side h2 { margin-top: 0; font-size: 24px; color: var(--text-color); }
-.login-modal-form-side .form-subtitle { margin-top: -10px; margin-bottom: 30px; color: var(--text-color-subtle); }
-.google-btn-container { margin-bottom: 20px; }
-.google-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px; background-color: #ffffff; color: #333; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background-color 0.2s, box-shadow 0.2s; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); }
-.google-btn:hover { background-color: #f7f7f7; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-.google-btn img { width: 20px; height: 20px; margin-right: 12px; }
-.divider { display: flex; align-items: center; text-align: center; color: var(--text-color-subtle); margin: 20px 0; }
-.divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
-.divider:not(:empty)::before { margin-right: .5em; }
-.divider:not(:empty)::after { margin-left: .5em; }
-
-/* =========================================
-   8. РЕДАКТОР ОПИСАНИЯ (PELL)
-   ========================================= */
-.pell {
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background-color: var(--card-background);
-  color: var(--text-color);
-  margin-top: 8px;
-}
-.pell-content {
-  min-height: 200px;
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 12px;
-  font-size: 15px;
-  line-height: 1.6;
-  border-bottom-left-radius: 7px;
-  border-bottom-right-radius: 7px;
-  background-color: var(--input-background);
-  outline: none;
-  word-wrap: break-word;
-}
-.pell-actionbar {
-  display: flex;
-  flex-wrap: wrap;
-  padding: 8px;
-  border-bottom: 1px solid var(--border-color);
-  background-color: var(--card-background);
-  border-top-left-radius: 7px;
-  border-top-right-radius: 7px;
-}
-.pell-button {
-  background-color: transparent;
-  border: none;
-  color: var(--icon-color);
-  cursor: pointer;
-  font-size: 18px;
-  height: 32px;
-  width: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: background-color 0.2s, color 0.2s;
-}
-.pell-button:hover {
-  background-color: var(--input-background);
-  color: var(--text-color);
-}
-.pell-button.pell-button-selected {
-  background-color: var(--primary-color-light);
-  color: var(--primary-color);
-}
-
-/* =========================================
-   12. МОДАЛЬНОЕ ОКНО
-   ========================================= */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: 20px;
-  box-sizing: border-box;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-}
-.modal-overlay:not(.hidden) { opacity: 1; }
-.modal-overlay .login-modal-card {
-  display: grid;
-  grid-template-columns: 1fr;
-  position: relative;
-  width: 100%;
-  max-width: 480px;
-  background-color: var(--card-background);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px var(--shadow-color-heavy);
-  overflow: hidden;
-  transform: scale(0.9);
-  transition: transform 0.3s ease-in-out;
-}
-.modal-overlay:not(.hidden) .login-modal-card { transform: scale(1); }
-.modal-close-btn {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  background: none;
-  border: none;
-  font-size: 28px;
-  color: var(--text-color-subtle);
-  cursor: pointer;
-  line-height: 1;
-  padding: 5px;
-}
-.modal-close-btn:hover { color: var(--text-color); }
-.form-switcher-link {
-  text-align: center;
-  font-size: 14px;
-  margin-top: 20px;
-  color: var(--text-color-secondary);
-}
-.form-switcher-link button {
-  background: none;
-  border: none;
-  color: var(--primary-color);
-  font-weight: bold;
-  padding: 0;
-  cursor: pointer;
-  font-size: inherit;
-}
-.form-switcher-link button:hover { text-decoration: underline; }
-
-/* =========================================
-   13. АДАПТИВНОСТЬ
-   ========================================= */
-@media (max-width: 900px) {
-  .profile-layout-container { grid-template-columns: 1fr; }
-  .profile-page-card { position: static; }
-}
-@media (max-width: 768px) {
-  .header-container { flex-wrap: wrap; justify-content: space-between; }
-  .search-wrapper { width: 100%; margin-top: 10px; order: 3; }
-  .auth-block { order: 2; }
-  .header-title { order: 1; }
-  .form-row { grid-template-columns: 1fr; }
-}
-@media (max-width: 600px) {
-  .card-body { flex-direction: column; }
-  .card-image-link { width: 100%; height: 180px; }
-}
-
-/* =========================================
-   14. Стили для загрузчика изображений
-   ========================================= */
-.upload-area {
-    border: 2px dashed var(--border-color);
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s;
-    min-height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.upload-area.active {
-    background-color: var(--input-background);
-    border-color: var(--primary-color);
-}
-.upload-instructions {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 10px;
-}
-.upload-instructions .upload-text {
-    font-size: 16px;
-    color: var(--text-color-secondary);
-    font-weight: 500;
-    margin: 0;
-}
-.input-group-input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--input-background);
-    color: var(--text-color);
-    font-size: 15px;
-    box-sizing: border-box;
-    margin-top: 10px;
-}
-.input-group-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px var(--primary-color-light);
-}
-
-/* =========================================
-   15. СТИЛИ ДЛЯ СТРАНИЦЫ СОБЫТИЯ
-   ========================================= */
+/* --- Страница события --- */
 .event-layout {
     display: grid;
     grid-template-columns: 300px 1fr;
@@ -674,6 +412,18 @@ input:checked + .theme-toggle-slider {
 .event-description p:first-child {
     margin-top: 0;
 }
+.event-source-link-wrapper {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+}
+.event-source-link-wrapper .btn span {
+    transition: transform 0.2s;
+    display: inline-block;
+}
+.event-source-link-wrapper .btn:hover span {
+    transform: translateX(4px);
+}
 .comments-section {
     margin-top: 40px;
     padding-top: 30px;
@@ -682,6 +432,30 @@ input:checked + .theme-toggle-slider {
 .comments-section h3 {
     margin-top: 0;
     margin-bottom: 24px;
+}
+.comments-toggle {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.comments-toggle span {
+    transition: transform 0.3s ease;
+}
+#comments-list.hidden, #comment-form-wrapper.hidden {
+    display: block;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out, opacity 0.3s ease;
+    opacity: 0;
+    margin-top: 0;
+}
+#comments-list:not(.hidden), #comment-form-wrapper:not(.hidden) {
+    max-height: 1000px;
+    opacity: 1;
+    margin-top: 24px;
+    transition: max-height 0.5s ease-in-out, opacity 0.5s ease 0.2s;
 }
 #comments-list {
     display: flex;
@@ -700,9 +474,7 @@ input:checked + .theme-toggle-slider {
     object-fit: cover;
     flex-shrink: 0;
 }
-.comment-body {
-    flex-grow: 1;
-}
+.comment-body { flex-grow: 1; }
 .comment-header {
     display: flex;
     align-items: baseline;
@@ -729,124 +501,241 @@ input:checked + .theme-toggle-slider {
     gap: 10px;
     align-items: center;
 }
-#comment-form input {
-    flex-grow: 1;
-}
+#comment-form input { flex-grow: 1; }
 
-@media (max-width: 900px) {
-  .event-layout {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-  .event-image-column .event-detail-image {
-    aspect-ratio: 16 / 9;
-  }
-}
-.auth-block .btn {
-  text-decoration: none;
-}
-/* =========================================
-   17. СТИЛИ ДЛЯ ССЫЛКИ НА ИСТОЧНИК (НОВЫЙ БЛОК)
-   ========================================= */
-
-/* Ссылка на главной странице */
-.event-source-link {
-    display: block;
-    margin-top: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--primary-color);
-    text-decoration: none;
-}
-.event-source-link:hover {
-    text-decoration: underline;
-}
-
-/* Кнопка на странице события */
-.event-source-link-wrapper {
-    margin-top: 24px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border-color);
-}
-.event-source-link-wrapper .btn span {
-    transition: transform 0.2s;
-    display: inline-block;
-}
-.event-source-link-wrapper .btn:hover span {
-    transform: translateX(4px);
-}
-/* =========================================
-   18. СТИЛИ ДЛЯ СПОЙЛЕРА КОММЕНТАРИЕВ (НОВЫЙ БЛОК)
-   ========================================= */
-
-.comments-toggle {
-    cursor: pointer;
-    user-select: none; /* Чтобы текст не выделялся при клике */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.comments-toggle span {
-    transition: transform 0.3s ease;
-}
-
-/* Когда спойлер открыт, поворачиваем стрелку */
-.comments-list:not(.hidden) + #comment-form-wrapper + .comments-toggle span,
-#comments-list:not(.hidden) + #comment-form-wrapper ~ .comments-toggle span {
-    transform: rotate(180deg);
-}
-
-/* Плавное появление для списка комментов */
-#comments-list.hidden, #comment-form-wrapper.hidden {
-    display: block;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.5s ease-in-out, opacity 0.3s ease;
-    opacity: 0;
-    margin-top: 0;
-}
-
-#comments-list:not(.hidden), #comment-form-wrapper:not(.hidden) {
-    max-height: 1000px; /* Достаточно большая высота, чтобы вместить все комменты */
-    opacity: 1;
-    margin-top: 24px;
-    transition: max-height 0.5s ease-in-out, opacity 0.5s ease 0.2s;
-}
 
 /* =========================================
-   17. СТИЛИ ДЛЯ НОВОГО МОДАЛЬНОГО ОКНА УСПЕХА (НОВЫЙ БЛОК)
+   6. ФОРМЫ
    ========================================= */
-#success-modal-overlay .success-modal-card {
-    background-color: var(--card-background);
-    padding: 40px;
-    border-radius: 16px;
-    text-align: center;
-    max-width: 400px;
-    width: 100%;
-    box-shadow: 0 10px 30px var(--shadow-color-heavy);
+.form-grid-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-top: 30px;
+  padding: 32px;
+  background-color: var(--card-background);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
 }
-
-#success-modal-overlay .success-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-}
-
-#success-modal-overlay h2 {
-    margin: 0 0 8px;
-    font-size: 24px;
-    color: var(--text-color);
-}
-
-#success-modal-overlay p {
-    margin: 0;
+.form-grid-container h4 {
+    margin-top: 16px;
+    margin-bottom: 0;
     font-size: 16px;
-    color: var(--text-color-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+    font-weight: 600;
 }
-/* =========================================
-   16. СТИЛИ ДЛЯ ПАНЕЛИ МОДЕРАЦИИ (НОВЫЙ БЛОК)
-   ========================================= */
+.form-grid-container h4:first-of-type { margin-top: 0; }
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+.input-group { margin-bottom: 0; }
+.input-group label { display: block; font-size: 14px; margin-bottom: 8px; font-weight: 500; }
+.input-group input, .input-group select, .input-group textarea, .input-group-input { 
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--input-background);
+    color: var(--text-color);
+    font-size: 15px;
+    box-sizing: border-box;
+}
+.input-group input:focus, .input-group select:focus, .input-group textarea:focus, .input-group-input:focus { 
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-light);
+}
+.form-message { color: var(--text-color-secondary); font-size: 14px; margin-top: 15px; }
 
+/* --- Поиск организации --- */
+.organization-search-wrapper { position: relative; }
+.search-results-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1010;
+}
+.search-result-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 15px;
+}
+.search-result-item:hover { background-color: var(--input-background); }
+.search-result-item:not(:last-child) { border-bottom: 1px solid var(--border-color); }
+
+/* --- Загрузчик изображений --- */
+.upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.upload-area.active {
+    background-color: var(--input-background);
+    border-color: var(--primary-color);
+}
+.upload-instructions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 10px;
+}
+.input-group-input { margin-top: 10px; }
+
+/* =========================================
+   7. МОДАЛЬНЫЕ ОКНА
+   ========================================= */
+.login-modal-form-side { padding: 40px; }
+.login-modal-form-side h2 { margin-top: 0; font-size: 24px; color: var(--text-color); }
+.login-modal-form-side .form-subtitle { margin-top: -10px; margin-bottom: 30px; color: var(--text-color-subtle); }
+.google-btn-container { margin-bottom: 20px; }
+.google-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px; background-color: #ffffff; color: #333; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background-color 0.2s, box-shadow 0.2s; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); }
+.google-btn:hover { background-color: #f7f7f7; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+.google-btn img { width: 20px; height: 20px; margin-right: 12px; }
+.divider { display: flex; align-items: center; text-align: center; color: var(--text-color-subtle); margin: 20px 0; }
+.divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
+.divider:not(:empty)::before { margin-right: .5em; }
+.divider:not(:empty)::after { margin-left: .5em; }
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+.modal-overlay:not(.hidden) { opacity: 1; }
+.modal-overlay .login-modal-card, #success-modal-overlay .success-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--card-background);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px var(--shadow-color-heavy);
+  overflow: hidden;
+  transform: scale(0.9);
+  transition: transform 0.3s ease-in-out;
+}
+.modal-overlay:not(.hidden) .login-modal-card,
+.modal-overlay:not(.hidden) .success-modal-card { transform: scale(1); }
+.modal-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: var(--text-color-subtle);
+  cursor: pointer;
+  line-height: 1;
+  padding: 5px;
+}
+.modal-close-btn:hover { color: var(--text-color); }
+.form-switcher-link {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 20px;
+  color: var(--text-color-secondary);
+}
+.form-switcher-link button {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-weight: bold;
+  padding: 0;
+  cursor: pointer;
+  font-size: inherit;
+}
+.form-switcher-link button:hover { text-decoration: underline; }
+#success-modal-overlay .success-modal-card { padding: 40px; text-align: center; }
+#success-modal-overlay .success-icon { font-size: 48px; margin-bottom: 16px; }
+#success-modal-overlay h2 { margin: 0 0 8px; font-size: 24px; color: var(--text-color); }
+#success-modal-overlay p { margin: 0; font-size: 16px; color: var(--text-color-secondary); }
+
+/* =========================================
+   8. РЕДАКТОР ОПИСАНИЯ (PELL)
+   ========================================= */
+.pell {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--card-background);
+  color: var(--text-color);
+  margin-top: 8px;
+}
+.pell-content {
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 12px;
+  font-size: 15px;
+  line-height: 1.6;
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px;
+  background-color: var(--input-background);
+  outline: none;
+  word-wrap: break-word;
+}
+.pell-actionbar {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 8px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--card-background);
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+}
+.pell-button {
+  background-color: transparent;
+  border: none;
+  color: var(--icon-color);
+  cursor: pointer;
+  font-size: 18px;
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+}
+.pell-button:hover {
+  background-color: var(--input-background);
+  color: var(--text-color);
+}
+.pell-button.pell-button-selected {
+  background-color: var(--primary-color-light);
+  color: var(--primary-color);
+}
+
+/* =========================================
+   9. ПАНЕЛЬ МОДЕРАЦИИ
+   ========================================= */
 .new-item-approval {
     display: flex;
     align-items: center;
@@ -856,27 +745,28 @@ input:checked + .theme-toggle-slider {
     border-radius: 6px;
     margin-bottom: 12px;
 }
-
 body.dark-theme .new-item-approval {
     background-color: rgba(255,255,255,0.05);
 }
+.new-item-approval strong { margin: 0; }
 
-.new-item-approval strong {
-    margin: 0;
+/* =========================================
+   10. АДАПТИВНОСТЬ
+   ========================================= */
+@media (max-width: 900px) {
+  .profile-layout-container { grid-template-columns: 1fr; }
+  .profile-page-card { position: static; }
+  .event-layout { grid-template-columns: 1fr; gap: 24px; }
+  .event-image-column .event-detail-image { aspect-ratio: 16 / 9; }
 }
-
-.btn--secondary {
-    background-color: var(--card-background);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
+@media (max-width: 768px) {
+  .header-container { flex-wrap: wrap; justify-content: space-between; }
+  .search-wrapper { width: 100%; margin-top: 10px; order: 3; }
+  .auth-block { order: 2; }
+  .header-title { order: 1; }
+  .form-row { grid-template-columns: 1fr; }
 }
-.btn--secondary:hover {
-    background-color: var(--input-background);
-}
-
-.btn-small {
-    height: 32px;
-    line-height: 32px;
-    padding: 0 12px;
-    font-size: 14px;
+@media (max-width: 600px) {
+  .card-body { flex-direction: column; }
+  .card-image-link { width: 100%; height: 180px; }
 }
