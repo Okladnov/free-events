@@ -180,103 +180,84 @@ async function loadCategories() {
 
 async function loadEventDataForEdit(eventId) {
     try {
-        const { data: event, error } = await supabaseClient.from('events').select('*, organization:organization_id(name)').eq('id', eventId).single();
-        if (error || !event) {
-            alert("Событие не найдено.");
-            window.location.href = '/';
-            return;
-        }
+        const { data: event, error } = await supabaseClient.from('events_with_details').select('*').eq('id', eventId).single();
+        if (error) throw error;
+
         if (event.created_by !== currentUser.id && !isAdmin) {
              alert("У вас нет прав на редактирование этого события.");
              window.location.href = '/';
              return;
         }
+
         document.getElementById('event-title').value = event.title;
         document.getElementById('event-link').value = event.link || '';
+        if (pellEditor) pellEditor.content.innerHTML = event.description || '';
         
-        if (pellEditor && pellEditor.content) {
-            pellEditor.content.innerHTML = event.description || '';
-        }
-        
-        if (event.organization) {
-            document.getElementById('organization-search').value = event.organization.name;
+        if (event.organization_id) {
+            document.getElementById('organization-search').value = event.organization_name;
             document.getElementById('organization-id').value = event.organization_id;
             selectedOrganizationId = event.organization_id;
+        } else if (event.new_organization_name) {
+            document.getElementById('organization-search').value = event.new_organization_name;
         }
-        
+
         document.getElementById('event-image-url').value = event.image_url || '';
         document.getElementById('event-category').value = event.category_id;
         document.getElementById('event-date').value = event.event_date;
         document.getElementById('event-city').value = event.city || '';
-        const imagePreview = document.getElementById('image-preview');
-        const uploadInstructions = document.getElementById('upload-instructions');
-        if (event.image_url && imagePreview && uploadInstructions) {
-            imagePreview.src = event.image_url;
-            imagePreview.style.display = 'block';
-            uploadInstructions.style.display = 'none';
+
+        if (event.image_url) {
+            document.getElementById('image-preview').src = event.image_url;
+            document.getElementById('image-preview').style.display = 'block';
+            document.getElementById('upload-instructions').style.display = 'none';
         }
     } catch (error) {
         console.error("Ошибка загрузки данных события:", error);
         alert("Произошла ошибка при загрузке данных.");
+        window.location.href = '/';
     }
 }
 
-async function handleFormSubmit(e, eventId, fileToUpload) {
+async function handleFormSubmit(e, eventId) {
     e.preventDefault();
     const form = e.target;
-if (!form.checkValidity() || pellEditor.content.innerText.trim() === '') {
-    alert('Пожалуйста, заполните все обязательные поля (*).');
-    form.reportValidity();
-    return;
-}
-    const formMessage = document.getElementById('form-message');
-    const submitButton = e.target.querySelector('button[type="submit"]');
-    if (submitButton) submitButton.disabled = true;
-    if (formMessage) {
-        formMessage.textContent = 'Сохраняем...';
-        formMessage.style.color = 'var(--text-color)';
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    if (!form.checkValidity() || pellEditor.content.innerText.trim() === '') {
+        alert('Пожалуйста, заполните все обязательные поля (*).');
+        form.reportValidity();
+        return;
     }
 
+    submitButton.disabled = true;
+    
     try {
-        
         let imageUrl = document.getElementById('event-image-url').value.trim();
-        if (fileToUpload) {
-            if (formMessage) formMessage.textContent = 'Загружаем изображение...';
-            const filePath = `${currentUser.id}/${Date.now()}-${fileToUpload.name}`;
-            const { error: uploadError } = await supabaseClient.storage.from('events-images').upload(filePath, fileToUpload, { upsert: true }); 
+        if (selectedFile) {
+            const filePath = `${currentUser.id}/${Date.now()}-${selectedFile.name}`;
+            const { error: uploadError } = await supabaseClient.storage.from('events-images').upload(filePath, selectedFile, { upsert: true }); 
             if (uploadError) throw new Error(`Ошибка загрузки изображения: ${uploadError.message}`);
             const { data: urlData } = supabaseClient.storage.from('events-images').getPublicUrl(filePath);
             imageUrl = urlData.publicUrl;
         }
         
-        if (formMessage) formMessage.textContent = 'Сохраняем событие...';
-        
-        // --- НАЧАЛО ЗАМЕНЫ ---
-const organizationSearchValue = document.getElementById('organization-search').value.trim();
+        const organizationSearchValue = document.getElementById('organization-search').value.trim();
+        const cityValue = document.getElementById('event-city').value.trim();
 
-const eventData = {
-    title: document.getElementById('event-title').value.trim(),
-    description: pellEditor.content.innerHTML,
-    image_url: imageUrl,
-    category_id: document.getElementById('event-category').value,
-    
-    // Если ID выбран, сохраняем его. Если нет, сохраняем введенный текст.
-    organization_id: selectedOrganizationId,
-    new_organization_name: selectedOrganizationId ? null : (organizationSearchValue || null),
-    
-    event_date: document.getElementById('event-date').value || null,
-    
-    // Для города сохраняем текст
-    city: document.getElementById('event-city').value.trim(),
-    // И добавляем новое поле, если город не из списка
-    new_city_name: ['Москва', 'Санкт-Петербург', 'Онлайн'].includes(document.getElementById('event-city').value.trim()) ? null : document.getElementById('event-city').value.trim(),
-    
-    link: document.getElementById('event-link').value.trim(),
-    created_by: currentUser.id,
-    
-    // Новое/отредактированное событие всегда отправляется на модерацию
-    is_approved: false
-};
+        const eventData = {
+            title: document.getElementById('event-title').value.trim(),
+            description: pellEditor.content.innerHTML,
+            image_url: imageUrl,
+            category_id: document.getElementById('event-category').value,
+            organization_id: selectedOrganizationId,
+            new_organization_name: selectedOrganizationId ? null : (organizationSearchValue || null),
+            event_date: document.getElementById('event-date').value || null,
+            city: cityValue,
+            new_city_name: ['Москва', 'Санкт-Петербург', 'Онлайн'].includes(cityValue) ? null : cityValue,
+            link: document.getElementById('event-link').value.trim(),
+            created_by: currentUser.id,
+            is_approved: false,
+        };
 
         const { data, error } = eventId
             ? await supabaseClient.from('events').update(eventData).eq('id', eventId).select().single()
@@ -284,18 +265,12 @@ const eventData = {
         
         if (error) throw error;
         
-        if (formMessage) {
-            alert('✅ Успешно! Ваше событие отправлено на модерацию.');
-            setTimeout(() => { window.location.href = `/event.html?id=${data.id}`; }, 1000);
-        }
-        
-        setTimeout(() => { window.location.href = `/event.html?id=${data.id}`; }, 1500);
+        alert('✅ Успешно! Ваше событие отправлено на модерацию.');
+        setTimeout(() => { window.location.href = `/event.html?id=${data.id}`; }, 1000);
+
     } catch (error) {
         console.error("Ошибка сохранения события:", error);
-        if (formMessage) {
-            formMessage.textContent = `Ошибка: ${error.message}`;
-            formMessage.style.color = 'var(--danger-color)';
-        }
-        if (submitButton) submitButton.disabled = false;
+        alert(`Ошибка: ${error.message}`);
+        submitButton.disabled = false;
     }
 }
