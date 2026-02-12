@@ -168,11 +168,6 @@ async function loadFavoritesPage(isInitialLoad = false) {
             favoriteButton.classList.add('active');
         }
         
-        if (currentUser.id === event.created_by || isAdmin) {
-            cardClone.querySelector('[data-action="edit"]').classList.remove('hidden');
-            cardClone.querySelector('[data-action="delete"]').classList.remove('hidden');
-        }
-        
         eventsContainer.appendChild(cardClone);
     });
 
