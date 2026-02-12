@@ -251,7 +251,8 @@ if (currentOrganizationId) {
         const eventDate = event.event_date 
     ? `Событие: ${new Date(event.event_date).toLocaleString('ru-RU', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'})}`
     : `Опубликовано: ${new Date(event.created_at).toLocaleDateString()}`;
-cardClone.querySelector('.card-date').textContent = eventDate;
+const timeAgoText = timeAgo(event.created_at);
+cardClone.querySelector('.card-date').textContent = timeAgoText;
         cardClone.querySelector('.card-title').textContent = event.title;
         cardClone.querySelector('.card-description').textContent = `${(event.description || '').replace(/<[^>]*>?/gm, '').substring(0, 100)}...`;
         
