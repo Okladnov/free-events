@@ -85,8 +85,14 @@ function renderPage(event, comments) {
         ${moderationPanelHtml}
         <div class="event-layout">
             <div class="event-image-column">
-                 <img src="${event.image_url || 'https://placehold.co/300x300/f0f2f5/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}" class="event-detail-image">
-            </div>
+    <img src="${event.image_url || 'https://placehold.co/300x300/f0f2f5/ff6a00?text=Нет+фото'}" alt="${sanitizeForAttribute(event.title)}" class="event-detail-image">
+    ${event.link ? `
+        <div class="image-button-wrapper">
+            <a href="${event.link}" target="_blank" class="btn btn--primary">
+                К источнику <span>→</span>
+            </a>
+        </div>
+    ` : ''}
             <div class="event-content-column">
                 <div class="event-main-content">
                     
@@ -123,13 +129,7 @@ function renderPage(event, comments) {
 
                     <div class="event-description">${DOMPurify.sanitize(event.description || 'Описание отсутствует.')}</div>
                 </div>
-                ${event.link ? `
-    <div class="event-source-link-wrapper">
-        <a href="${event.link}" target="_blank" class="btn btn--primary">
-            Перейти к источнику <span>→</span>
-        </a>
-    </div>
-` : ''}
+            
                 <div class="comments-section">
     <h3 id="comments-toggle" class="comments-toggle">
         Комментарии (${comments.length}) <span>▼</span>
