@@ -75,7 +75,7 @@ async function deleteEventHandler(eventId, cardElement) {
 
 async function toggleFavoriteHandler(eventId, buttonElement) {
     if (!currentUser) {
-        alert('Пожалуйста, войдите, чтобы добавлять в избранное.');
+        document.getElementById('loginBtn').click();
         return;
     }
     buttonElement.disabled = true;
