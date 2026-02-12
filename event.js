@@ -60,16 +60,26 @@ function renderPage(event, comments) {
     const authorName = event.full_name || 'Аноним';
     const authorAvatar = event.avatar_url || 'https://placehold.co/40x40/f0f2f5/ccc?text=AV';
     
-    const moderationPanelHtml = (isAdmin && !event.is_approved) ? `
-        <div class="moderation-panel">
-            <div class="moderation-panel-title">⭐ Панель модератора</div>
-            <p>Это событие ожидает вашего одобрения.</p>
-            <div class="moderation-panel-actions">
-                <button class="btn btn--primary" data-action="approve-event">Одобрить</button>
-                <button class="btn btn--danger" data-action="delete-event">Удалить</button>
-            </div>
-        </div>
-    ` : '';
+    let moderationPanelHtml = '';
+    if (isAdmin) {
+        const needsApproval = !event.is_approved;
+        const newOrg = event.new_organization_name;
+        const newCity = event.new_city_name;
+
+        if (needsApproval || newOrg || newCity) {
+            moderationPanelHtml = `
+            <div class="moderation-panel">
+                <div class="moderation-panel-title">⭐ Панель модератора</div>
+                ${needsApproval ? '<p>Это событие ожидает вашего одобрения.</p>' : ''}
+                ${newOrg ? `<div class="new-item-approval">Новый организатор: <strong>${sanitizeHTML(newOrg)}</strong> <button class="btn btn--secondary btn-small" data-action="add-organization" data-name="${sanitizeForAttribute(newOrg)}">Добавить</button></div>` : ''}
+                ${newCity ? `<div class="new-item-approval">Новый город: <strong>${sanitizeHTML(newCity)}</strong> <button class="btn btn--secondary btn-small" data-action="add-city" data-name="${sanitizeForAttribute(newCity)}">Добавить</button></div>` : ''}
+                <div class="moderation-panel-actions">
+                    ${needsApproval ? '<button class="btn btn--primary" data-action="approve-event">Одобрить событие</button>' : ''}
+                    <button class="btn btn--danger" data-action="delete-event">Удалить событие</button>
+                </div>
+            </div>`;
+        }
+    }
 
     const eventHtml = `
         ${moderationPanelHtml}
@@ -172,14 +182,12 @@ function setupEventListeners() {
     const eventId = urlParams.get('id');
 
     eventDetailContainer.addEventListener('click', async (event) => {
-        // Логика для спойлера комментариев
+        // Спойлер комментариев
         if (event.target.id === 'comments-toggle') {
             const commentsList = document.getElementById('comments-list');
             const commentFormWrapper = document.getElementById('comment-form-wrapper');
-            
             const isHidden = commentsList.classList.toggle('hidden');
             event.target.querySelector('span').style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
-
             if(commentFormWrapper) {
                 commentFormWrapper.classList.toggle('hidden');
             }
@@ -191,16 +199,10 @@ function setupEventListeners() {
 
         const action = actionElement.dataset.action;
 
-        // ИСПРАВЛЕНО: Возвращаем логику для кнопок модерации
-        if (action === 'approve-event') {
-            await handleEventAction('approve', eventId, actionElement);
-            return;
-        } 
-        if (action === 'delete-event') {
-            if (confirm('Вы уверены, что хотите НАВСЕГДА удалить это событие?')) {
-                await handleEventAction('delete', eventId, actionElement);
-            }
-            return;
+        // --- ИЗМЕНЕНО: Обработка всех кнопок модерации ---
+        if (['approve-event', 'delete-event', 'add-organization', 'add-city'].includes(action)) {
+            await handleModeration(action, eventId, actionElement);
+            return; // Важно, чтобы не сработала другая логика
         }
 
         // Проверка авторизации для остальных действий
@@ -211,10 +213,9 @@ function setupEventListeners() {
         
         // Логика для "Избранного" и "Голосования"
         if (action === 'toggle-favorite') {
-            handleToggleFavorite(eventId, actionElement);
+            // handleToggleFavorite(eventId, actionElement); // Эта функция у тебя отсутствует
         } else if (action === 'vote') {
-            const value = parseInt(actionElement.dataset.value, 10);
-            handleVote(eventId, value);
+            // handleVote(eventId, value); // И этой тоже нет, пока оставляем так
         }
     });
 
@@ -260,32 +261,55 @@ commentsList.insertAdjacentHTML('beforeend', renderComment(newComment));
     }
 }
 
-async function handleEventAction(action, eventId, button) {
+async function handleModeration(action, eventId, button) {
     button.disabled = true;
     const originalText = button.textContent;
     button.textContent = 'Выполняем...';
-    let error;
 
-    if (action === 'approve') {
-        const { error: approveError } = await supabaseClient.from('events').update({ is_approved: true }).eq('id', eventId);
-        error = approveError;
-    } else if (action === 'delete') {
-        const { error: deleteError } = await supabaseClient.from('events').delete().eq('id', eventId);
-        error = deleteError;
-    }
+    try {
+        let error, successMessage;
 
-    if (error) {
-        alert(`Ошибка: ${error.message}`);
+        if (action === 'approve-event') {
+            ({ error } = await supabaseClient.from('events').update({ is_approved: true }).eq('id', eventId));
+            successMessage = 'Событие одобрено!';
+        } else if (action === 'delete-event') {
+            if (!confirm('Вы уверены, что хотите НАВСЕГДА удалить это событие?')) {
+                button.disabled = false;
+                button.textContent = originalText;
+                return;
+            }
+            ({ error } = await supabaseClient.from('events').delete().eq('id', eventId));
+            successMessage = 'Событие удалено.';
+        } else if (action === 'add-organization') {
+            const name = button.dataset.name;
+            const { data: newOrg, error: insertError } = await supabaseClient.from('organizations').insert({ name }).select().single();
+            if (insertError) throw insertError;
+            
+            ({ error } = await supabaseClient.from('events').update({ organization_id: newOrg.id, new_organization_name: null }).eq('id', eventId));
+            successMessage = `Организатор "${name}" добавлен и привязан к событию.`;
+        }
+        else if (action === 'add-city') {
+             // Пока просто заглушка, так как таблицы cities нет
+             alert('Функционал для добавления городов будет реализован позже.');
+             button.disabled = false;
+             button.textContent = originalText;
+             return;
+        }
+
+        if (error) throw error;
+        
+        alert(`✅ ${successMessage}`);
+        
+        if (action === 'delete-event') {
+            window.location.href = '/admin.html';
+        } else {
+            window.location.reload();
+        }
+
+    } catch (error) {
+        alert(`❌ Ошибка: ${error.message}`);
         button.disabled = false;
         button.textContent = originalText;
-    } else {
-        const panel = document.querySelector('.moderation-panel');
-        if (action === 'approve') {
-            panel.innerHTML = '<p style="color: var(--success-color);">✅ Событие успешно одобрено!</p>';
-        } else if (action === 'delete') {
-            document.querySelector('.event-layout').remove();
-            panel.innerHTML = '<p style="color: var(--danger-color);">❌ Событие удалено. <a href="/admin.html">Вернуться в админку</a></p>';
-        }
     }
 }
 
