@@ -51,7 +51,6 @@ function timeAgo(dateString) {
 }
 // --- КОНЕЦ БЛОКА С НОВЫМИ ФУНКЦИЯМИ ---
 
-
 const eventsContainer = document.getElementById("events");
 const paginationControls = document.getElementById('pagination-controls');
 const PAGE_SIZE = 9;
@@ -144,6 +143,7 @@ async function loadFavoritesPage(isInitialLoad = false) {
         image.alt = event.title;
         
         const orgLink = cardClone.querySelector('.card-organization');
+        const orgPlaceholder = cardClone.querySelector('.card-organization-placeholder');
         if (event.organization_name) {
             orgLink.textContent = event.organization_name;
             orgLink.href = `/?org=${event.organization_id}`;
