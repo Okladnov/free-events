@@ -88,5 +88,3 @@ async function loadUnapprovedEvents() {
         container.appendChild(cardClone);
     });
 }
-    });
-}
