@@ -7,6 +7,7 @@ const paginationControls = document.getElementById('pagination-controls');
 const PAGE_SIZE = 9;
 let currentPage = 0;
 let currentCategoryId = null;
+let currentOrganizationId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     loadEvents(true);
@@ -14,7 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAndDisplayCategories();
     setupCategoryListeners();
 });
-
+const urlParams = new URLSearchParams(window.location.search);
+    const orgIdFromUrl = urlParams.get('org');
+    if (orgIdFromUrl) {
+        currentOrganizationId = orgIdFromUrl;
+    }
 function setupIndexPageListeners() {
     const searchInput = document.getElementById('search-input');
     const searchButton = document.querySelector('.search-button');
@@ -161,7 +166,9 @@ async function loadEvents(isNewSearch = false) {
     if (currentCategoryId) {
         query = query.eq('category_id', currentCategoryId);
     }
-
+if (currentOrganizationId) {
+        query = query.eq('organization_id', currentOrganizationId);
+    }
     const { data: events, error, count } = await query
         .order('created_at', { ascending: false })
         .range(from, to - 1);
