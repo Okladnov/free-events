@@ -40,15 +40,6 @@ async function loadUnapprovedEvents() {
 
     events.forEach(event => {
         const cardClone = cardTemplate.content.cloneNode(true);
-
-    if (!cardTemplate) {
-        console.error("Шаблон #event-card-template не найден на странице admin.html");
-        container.innerHTML = '<p>Ошибка: не найден шаблон для отображения событий.</p>';
-        return;
-    }
-
-    events.forEach(event => {
-        const cardClone = cardTemplate.content.cloneNode(true);
         const cardRoot = cardClone.querySelector('.event-card-v3');
         const eventUrl = `event.html?id=${event.id}`;
         
@@ -76,8 +67,6 @@ async function loadUnapprovedEvents() {
             cardActions.remove();
         }
         
-        container.appendChild(cardClone);
-
         if (event.new_organization_name || event.new_city_name) {
             const titleEl = cardClone.querySelector('.card-title');
             if (titleEl) {
@@ -86,5 +75,5 @@ async function loadUnapprovedEvents() {
         }
         
         container.appendChild(cardClone);
-    });
+    }); // <-- конец forEach
 }
