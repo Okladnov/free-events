@@ -257,7 +257,7 @@ cardClone.querySelector('.card-date').textContent = timeAgoText;
         const descriptionEl = cardClone.querySelector('.card-description');
 if (event.event_date) {
     const startDate = new Date(event.event_date).toLocaleString('ru-RU', {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'});
-    descriptionEl.innerHTML = `<strong>Начало:</strong> ${startDate}`; // innerHTML чтобы <strong> сработал
+    descriptionEl.innerHTML = `<strong>Начало события:</strong> ${startDate}`; // innerHTML чтобы <strong> сработал
 } else {
     descriptionEl.remove(); // Если даты нет, просто убираем блок
 }
