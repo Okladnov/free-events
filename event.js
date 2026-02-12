@@ -131,7 +131,6 @@ function renderPage(event, comments) {
     </div>
 ` : ''}
                 <div class="comments-section">
-    <!-- ИЗМЕНЕНО: Заголовок стал кнопкой-спойлером -->
     <h3 id="comments-toggle" class="comments-toggle">
         Комментарии (${comments.length}) <span>▼</span>
     </h3>
@@ -142,10 +141,10 @@ function renderPage(event, comments) {
     <div id="comment-form-wrapper" class="hidden">
         ${currentUser ? `
         <form id="comment-form">
-            <input id="comment-input" placeholder="Написать комментарий..." required class="input-group-input">
-            <button type="submit" class="btn btn--primary">Отправить</button>
-        </form>
-        ` : '<p><a href="/">Войдите</a>, чтобы оставить комментарий.</p>'}
+        <input id="comment-input" placeholder="Написать комментарий..." required class="input-group-input">
+        <button type="submit" class="btn btn--primary">Отправить</button>
+    </form>
+` : '<p><button class="link-button" id="login-trigger-btn">Войдите</button>, чтобы оставить комментарий.</p>'}
     </div>
 </div>
             </div>
@@ -178,6 +177,12 @@ function renderComment(comment) {
 // =================================================================
 function setupEventListeners() {
     const eventDetailContainer = document.getElementById('event-detail-container');
+    const loginTrigger = eventDetailContainer.querySelector('#login-trigger-btn');
+    if (loginTrigger) {
+        loginTrigger.addEventListener('click', () => {
+            document.getElementById('loginBtn').click();
+        });
+    }
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('id');
 
