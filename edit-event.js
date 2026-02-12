@@ -223,7 +223,12 @@ async function loadEventDataForEdit(eventId) {
 
 async function handleFormSubmit(e, eventId, fileToUpload) {
     e.preventDefault();
-    
+    const form = e.target;
+if (!form.checkValidity() || pellEditor.content.innerText.trim() === '') {
+    alert('Пожалуйста, заполните все обязательные поля (*).');
+    form.reportValidity();
+    return;
+}
     const formMessage = document.getElementById('form-message');
     const submitButton = e.target.querySelector('button[type="submit"]');
     if (submitButton) submitButton.disabled = true;
@@ -233,15 +238,6 @@ async function handleFormSubmit(e, eventId, fileToUpload) {
     }
 
     try {
-        const title = document.getElementById('event-title').value.trim();
-        if (!title) {
-            if (formMessage) {
-                formMessage.textContent = 'Ошибка: Заголовок не может быть пустым.';
-                formMessage.style.color = 'var(--danger-color)';
-            }
-            if (submitButton) submitButton.disabled = false;
-            return;
-        }
         
         let imageUrl = document.getElementById('event-image-url').value.trim();
         if (fileToUpload) {
@@ -255,17 +251,32 @@ async function handleFormSubmit(e, eventId, fileToUpload) {
         
         if (formMessage) formMessage.textContent = 'Сохраняем событие...';
         
-        const eventData = {
-            title: document.getElementById('event-title').value.trim(),
-            description: pellEditor ? pellEditor.content.innerHTML : '',
-            image_url: imageUrl,
-            category_id: document.getElementById('event-category').value,
-            organization_id: selectedOrganizationId,
-            event_date: document.getElementById('event-date').value || null,
-            city: document.getElementById('event-city').value.trim(),
-            link: document.getElementById('event-link').value.trim(),
-            created_by: currentUser.id,
-        };
+        // --- НАЧАЛО ЗАМЕНЫ ---
+const organizationSearchValue = document.getElementById('organization-search').value.trim();
+
+const eventData = {
+    title: document.getElementById('event-title').value.trim(),
+    description: pellEditor.content.innerHTML,
+    image_url: imageUrl,
+    category_id: document.getElementById('event-category').value,
+    
+    // Если ID выбран, сохраняем его. Если нет, сохраняем введенный текст.
+    organization_id: selectedOrganizationId,
+    new_organization_name: selectedOrganizationId ? null : (organizationSearchValue || null),
+    
+    event_date: document.getElementById('event-date').value || null,
+    
+    // Для города сохраняем текст
+    city: document.getElementById('event-city').value.trim(),
+    // И добавляем новое поле, если город не из списка
+    new_city_name: ['Москва', 'Санкт-Петербург', 'Онлайн'].includes(document.getElementById('event-city').value.trim()) ? null : document.getElementById('event-city').value.trim(),
+    
+    link: document.getElementById('event-link').value.trim(),
+    created_by: currentUser.id,
+    
+    // Новое/отредактированное событие всегда отправляется на модерацию
+    is_approved: false
+};
 
         const { data, error } = eventId
             ? await supabaseClient.from('events').update(eventData).eq('id', eventId).select().single()
@@ -274,8 +285,8 @@ async function handleFormSubmit(e, eventId, fileToUpload) {
         if (error) throw error;
         
         if (formMessage) {
-            formMessage.textContent = '✅ Успешно! Перенаправляем...';
-            formMessage.style.color = 'var(--success-color)';
+            alert('✅ Успешно! Ваше событие отправлено на модерацию.');
+            setTimeout(() => { window.location.href = `/event.html?id=${data.id}`; }, 1000);
         }
         
         setTimeout(() => { window.location.href = `/event.html?id=${data.id}`; }, 1500);
