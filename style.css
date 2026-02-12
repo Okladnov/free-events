@@ -412,16 +412,16 @@ input:checked + .theme-toggle-slider {
 .event-description p:first-child {
     margin-top: 0;
 }
-.event-source-link-wrapper {
-    margin-top: 24px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border-color);
+.image-button-wrapper {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
 }
-.event-source-link-wrapper .btn span {
+.image-button-wrapper .btn span {
     transition: transform 0.2s;
     display: inline-block;
 }
-.event-source-link-wrapper .btn:hover span {
+.image-button-wrapper .btn:hover span {
     transform: translateX(4px);
 }
 .comments-section {
