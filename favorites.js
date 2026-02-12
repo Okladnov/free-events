@@ -75,47 +75,64 @@ async function loadFavoritesPage(isInitialLoad = false) {
     }
 
     events.forEach(event => {
-        const cardClone = cardTemplate.content.cloneNode(true);
-        const cardRoot = cardClone.querySelector('.event-card-v3');
-        cardRoot.dataset.eventId = event.id;
-        const eventUrl = `event.html?id=${event.id}`;
-        cardClone.querySelectorAll('[data-action="go-to-event"]').forEach(el => el.href = eventUrl);
-        
-        cardClone.querySelector('.card-date').textContent = `Опубликовано ${new Date(event.created_at).toLocaleDateString()}`;
-        cardClone.querySelector('.card-title').textContent = event.title;
-        cardClone.querySelector('.card-description').textContent = `${(event.description || '').substring(0, 100)}...`;
-        
-        const image = cardClone.querySelector('.card-image');
-        if (event.image_url) image.src = event.image_url;
-        image.alt = event.title;
-        
-        const orgLink = cardClone.querySelector('.card-organization');
-        if (event.organization_name) {
-            orgLink.textContent = event.organization_name;
-            orgLink.href = `/?org=${event.organization_id}`;
-            orgLink.classList.remove('hidden');
-        }
+    const cardClone = cardTemplate.content.cloneNode(true);
+    const cardRoot = cardClone.querySelector('.event-card-v3');
+    cardRoot.dataset.eventId = event.id;
+    const eventUrl = `event.html?id=${event.id}`;
+    cardClone.querySelectorAll('[data-action="go-to-event"]').forEach(el => el.href = eventUrl);
+    
+    // БЛОК 1: Время "назад"
+    const timeAgoText = timeAgo(event.created_at);
+    cardClone.querySelector('.card-date').textContent = timeAgoText;
+    
+    cardClone.querySelector('.card-title').textContent = event.title;
+    
+    // БЛОК 2: Описание заменяем на дату начала
+    const descriptionEl = cardClone.querySelector('.card-description');
+    if (event.event_date) {
+        const startDate = new Date(event.event_date).toLocaleString('ru-RU', {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'});
+        descriptionEl.innerHTML = `<strong>Начало:</strong> ${startDate}`;
+    } else {
+        descriptionEl.remove();
+    }
 
-        const authorName = event.full_name || 'Аноним';
-        const authorAvatar = event.avatar_url || 'https://placehold.co/24x24/f0f2f5/ccc';
-        cardClone.querySelector('.card-author-name').textContent = authorName;
-        cardClone.querySelector('.card-author-avatar').src = authorAvatar;
-        
-        cardClone.querySelector('.comment-count').textContent = event.comment_count;
-        
-        // Все события на этой странице - избранные, поэтому кнопка всегда активна
-        const favoriteButton = cardClone.querySelector('[data-action="toggle-favorite"]');
-        if (favoriteButton) {
-            favoriteButton.classList.add('active');
-        }
-        
-        if (currentUser.id === event.created_by || isAdmin) {
-            cardClone.querySelector('[data-action="edit"]').classList.remove('hidden');
-            cardClone.querySelector('[data-action="delete"]').classList.remove('hidden');
-        }
-        
-        eventsContainer.appendChild(cardClone);
-    });
+    const image = cardClone.querySelector('.card-image');
+    if (event.image_url) image.src = event.image_url;
+    image.alt = event.title;
+    
+    const orgLink = cardClone.querySelector('.card-organization');
+    if (event.organization_name) {
+        orgLink.textContent = event.organization_name;
+        orgLink.href = `/?org=${event.organization_id}`;
+        orgLink.classList.remove('hidden');
+    }
+
+    // БЛОК 3: Автор как ссылка
+    const authorWrapper = cardClone.querySelector('.card-author');
+    const authorLink = document.createElement('a');
+    authorLink.href = `/profile.html?id=${event.created_by}`;
+    authorLink.classList.add('card-author-link');
+    authorLink.innerHTML = `
+        <img src="${event.avatar_url || 'https://placehold.co/24x24/f0f2f5/ccc'}" alt="${event.full_name || 'Аноним'}" class="card-author-avatar">
+        <span class="card-author-name">${event.full_name || 'Аноним'}</span>
+    `;
+    authorWrapper.innerHTML = '';
+    authorWrapper.appendChild(authorLink);
+    
+    cardClone.querySelector('.comment-count').textContent = event.comment_count;
+    
+    const favoriteButton = cardClone.querySelector('[data-action="toggle-favorite"]');
+    if (favoriteButton) {
+        favoriteButton.classList.add('active');
+    }
+    
+    if (currentUser.id === event.created_by || isAdmin) {
+        cardClone.querySelector('[data-action="edit"]').classList.remove('hidden');
+        cardClone.querySelector('[data-action="delete"]').classList.remove('hidden');
+    }
+    
+    eventsContainer.appendChild(cardClone);
+});
 
     updatePagination();
 }
