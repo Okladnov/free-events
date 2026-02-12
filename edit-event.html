@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Редактирование события</title>
     
-    <!-- Стили -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/pell/dist/pell.min.css">
-    
-    <!-- Иконки -->
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -60,19 +57,18 @@
         <form id="event-form" class="form-grid-container">
             <h2 id="form-title">Добавление нового события</h2>
             <div class="input-group">
-                <label for="event-title">Название *</label>
-                <input type="text" id="event-title" required placeholder="Например, Бесплатный вебинар по Python">
+                <label for="event-title">Название события</label>
+                <input type="text" id="event-title" required placeholder="Например, Бесплатный вход в музей котов">
             </div>
             <div class="input-group">
                 <label for="event-link">Ссылка на источник/регистрацию</label>
-                <input type="url" id="event-link" placeholder="https://t.me/free_events/123">
+                <input type="url" id="event-link" required placeholder="https://t.me/free_events/123">
             </div>
             
-            <!-- ИЗМЕНЕНО: Добавлен блок для поиска организации -->
             <div class="input-group">
                 <label for="organization-search">Организатор</label>
                 <div class="organization-search-wrapper">
-                    <input type="text" id="organization-search" placeholder="Начните вводить название..." autocomplete="off">
+                    <input type="text" id="organization-search" required placeholder="Начните вводить название..." autocomplete="off">
                     <div id="organization-results" class="search-results-list hidden"></div>
                 </div>
                 <input type="hidden" id="organization-id">
@@ -86,12 +82,12 @@
             <h4>Параметры</h4>
             <div class="form-row">
                 <div class="input-group">
-    <label for="event-date">Дата и время</label>
-    <input type="datetime-local" id="event-date">
-</div>
+                    <label for="event-date">Дата и время *</label>
+                    <input type="datetime-local" id="event-date" required>
+                </div>
                 <div class="input-group">
-                    <label for="event-city">Город</label>
-                    <input type="text" id="event-city" placeholder="Онлайн">
+                    <label for="event-city">Город *</label>
+                    <input type="text" id="event-city" placeholder="Онлайн" required>
                 </div>
                 <div class="input-group">
                     <label for="event-category">Категория *</label>
@@ -111,6 +107,7 @@
                 </div>
                 <input type="text" id="event-image-url" placeholder="Или вставьте URL" class="input-group-input event-image-url-input">
             </div>
+
             <p id="form-message" class="form-message"></p>
             <button type="submit" class="btn btn--primary" style="width: 100%;">Опубликовать</button>
         </form>
