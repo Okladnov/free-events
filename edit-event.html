@@ -82,15 +82,20 @@
             <h4>Параметры</h4>
             <div class="form-row">
                 <div class="input-group">
-                    <label for="event-date">Дата и время *</label>
+                    <label for="event-date">Дата и время</label>
                     <input type="datetime-local" id="event-date" required>
                 </div>
                 <div class="input-group">
-                    <label for="event-city">Город *</label>
-                    <input type="text" id="event-city" placeholder="Онлайн" required>
-                </div>
+    <label for="event-city">Город *</label>
+    <input type="text" id="event-city" list="cities" required placeholder="Например, Москва" autocomplete="off">
+    <datalist id="cities">
+        <option value="Москва">
+        <option value="Санкт-Петербург">
+        <option value="Онлайн">
+    </datalist>
+</div>
                 <div class="input-group">
-                    <label for="event-category">Категория *</label>
+                    <label for="event-category">Категория</label>
                     <select id="event-category" required></select>
                 </div>
             </div>
